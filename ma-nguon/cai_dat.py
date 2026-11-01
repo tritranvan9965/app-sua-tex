@@ -20,6 +20,7 @@ UNINSTALL = rf"Software\Microsoft\Windows\CurrentVersion\Uninstall\{MA}"
 LOP = r"Software\Classes"
 LOAI = {".tex": ("Tài liệu LaTeX", f"{MA}.tex"), ".pdf": ("Tài liệu PDF", f"{MA}.pdf")}
 MENU_FILE = [rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}" for d in LOAI]
+MENU_GOP = rf"{LOP}\*\shell\{MA}.Gop"
 MENU_THU_MUC = rf"{LOP}\Directory\shell\{MA}"
 
 
@@ -92,6 +93,9 @@ def dang_ky() -> None:
         k = rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.ChuyenPdf"
         ghi(k, {"": "Chuyển thành PDF", "Icon": f"{EXE},0"})
         ghi(rf"{k}\command", {"": f'"{EXE}" --chuyen-pdf "%1"'})
+    # Một khoá cho mọi loại file để chọn lẫn PDF với ảnh vẫn hiện mục này.
+    ghi(MENU_GOP, {"": "Gộp thành PDF", "Icon": f"{EXE},0", "AppliesTo": " OR ".join(f"System.FileExtension:={d}" for d in [".pdf", *chuyen_pdf.DUOI])})
+    ghi(rf"{MENU_GOP}\command", {"": f'"{EXE}" --gop "%1"'})
     ghi(MENU_THU_MUC, {"": f"Mở thư mục bằng {TEN}", "Icon": f"{EXE},0"})
     ghi(rf"{MENU_THU_MUC}\command", {"": mo})
     # Khai với Windows để app hiện trong Cài đặt > Ứng dụng mặc định.
@@ -124,7 +128,7 @@ def bo_dang_ky() -> None:
     import chuyen_pdf
     for d in chuyen_pdf.DUOI:
         xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.ChuyenPdf")
-    for k in [*MENU_FILE, MENU_THU_MUC, rf"{LOP}\Applications\{MA}.exe", rf"Software\{MA}", UNINSTALL]:
+    for k in [*MENU_FILE, MENU_GOP, MENU_THU_MUC, rf"{LOP}\Applications\{MA}.exe", rf"Software\{MA}", UNINSTALL]:
         xoa_cay(k)
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\RegisteredApplications", 0, winreg.KEY_SET_VALUE) as k:

@@ -80,11 +80,12 @@ def tu_office(nguon: Path, dich: Path) -> None:
         raise RuntimeError(f"Cần cài {ung_dung} để chuyển file {nguon.suffix}.")
 
 
-def chuyen(nguon: Path) -> Path:
+def chuyen(nguon: Path, dich: Path = None) -> Path:
+    """dich để trống thì ghi cạnh file gốc."""
     duoi = nguon.suffix.lower()
     if duoi not in DUOI:
         raise RuntimeError(f"Chưa chuyển được file {duoi or nguon.name} thành PDF.")
-    dich = dich_moi(nguon)
+    dich = dich or dich_moi(nguon)
     try:
         if duoi in ANH:
             tu_anh(nguon, dich)

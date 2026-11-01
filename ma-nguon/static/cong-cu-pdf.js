@@ -62,6 +62,13 @@ async function moFilePdf(duong) {
   } catch (e) { bao(e.message, true); }
 }
 
+// Chọn nhiều file trong Explorer rồi bấm Gộp thành PDF: mở thành một thẻ để sắp xếp và gộp.
+async function moGop(ds) {
+  try {
+    await moThePdf((await goi("/api/pdf-chon", {duong: ds})).tep);
+  } catch (e) { bao(e.message, true); }
+}
+
 // PDF biên dịch mở thành thẻ riêng để tách, gộp. Lưu ở thẻ này vẫn ghi vào vị trí đã định của file .tex.
 async function sapTrangTuBienDich() {
   if (!tt.tep?.la_tex) return bao("Mở một file .tex hoặc một file PDF trước.", true);

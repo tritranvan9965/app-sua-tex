@@ -213,7 +213,8 @@ async function doiDuAn(duong) {
 
 async function napDuAn() {
   const da = await napCauHinh();
-  if (da.pdf_dau) moFilePdf(da.pdf_dau);
+  if (da.gop_dau) moGop(da.gop_dau);
+  else if (da.pdf_dau) moFilePdf(da.pdf_dau);
   else if (da.tep_dau) moTep(da.tep_dau);
 }
 
