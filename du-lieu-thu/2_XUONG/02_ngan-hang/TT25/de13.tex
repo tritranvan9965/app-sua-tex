@@ -1,0 +1,31 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.13.003 | trang=2 | so=2.1 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0
+\begin{bt}
+Cho hai biểu thức $A=\dfrac{\sqrt{x}+2}{\sqrt{x}}$ và $B=\dfrac{x}{x-4}+\dfrac{1}{\sqrt{x}-2}+\dfrac{1}{\sqrt{x}+2}$ với $x>0$, $x\ne4$.
+\begin{cacy}(1)
+\item Tính giá trị của biểu thức $A$ với $x=36$.
+\item Rút gọn biểu thức $B$.
+\item Cho $P=\dfrac{A}{B}$. Tìm $x$ thỏa mãn: $x\cdot P\le10\sqrt{x}-29-\sqrt{x-25}$.
+\end{cacy}
+\loigiai{
+Thay $x=36$ (thỏa mãn điều kiện), ta có $A=\dfrac{6+2}{6}=\dfrac{8}{6}=\dfrac{4}{3}$. Vậy $A=\dfrac{4}{3}$.
+
+Với $x>0$, $x\ne4$:
+\begin{align*}
+B&=\dfrac{x}{x-4}+\dfrac{1}{\sqrt{x}-2}+\dfrac{1}{\sqrt{x}+2}\\
+&=\dfrac{x}{(\sqrt{x}-2)(\sqrt{x}+2)}+\dfrac{1}{\sqrt{x}-2}+\dfrac{1}{\sqrt{x}+2}\\
+&=\dfrac{x+\sqrt{x}+2+\sqrt{x}-2}{(\sqrt{x}-2)(\sqrt{x}+2)}\\
+&=\dfrac{x+2\sqrt{x}}{(\sqrt{x}-2)(\sqrt{x}+2)}
+=\dfrac{\sqrt{x}(\sqrt{x}+2)}{(\sqrt{x}-2)(\sqrt{x}+2)}
+=\dfrac{\sqrt{x}}{\sqrt{x}-2}.
+\end{align*}
+
+Ta có $P=\dfrac{A}{B}=\dfrac{\sqrt{x}+2}{\sqrt{x}}:\dfrac{\sqrt{x}}{\sqrt{x}-2}=\dfrac{x-4}{x}$.
+
+Điều kiện: $x\ge25$. Biến đổi bất đẳng thức được $(\sqrt{x}-5)^2+\sqrt{x-25}\le0$.
+
+Vì $(\sqrt{x}-5)^2\ge0$ và $\sqrt{x-25}\ge0$, nên để tổng không dương thì
+$\heva{&(\sqrt{x}-5)^2=0\\&\sqrt{x-25}=0}$, suy ra $x=25$ (thỏa mãn). Kết luận: $x=25$.
+}
+\end{bt}

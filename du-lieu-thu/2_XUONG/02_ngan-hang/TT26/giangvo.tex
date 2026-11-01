@@ -1,0 +1,32 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT26.giangvo.003 | trang=1 | so=2 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0
+\begin{bt}
+Cho hai biểu thức $A = \dfrac{\sqrt{x} - 2}{\sqrt{x} + 1}$; $B = \dfrac{\sqrt{x} - 2}{\sqrt{x}} + \dfrac{1}{\sqrt{x} - 1} - \dfrac{2}{x - \sqrt{x}}$, với $x > 0, x \ne 1$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x = 9$.
+\item Chứng minh $B = \dfrac{\sqrt{x} - 2}{\sqrt{x} - 1}$.
+\item Đặt biểu thức $P = \dfrac{A}{B}$. Tìm tất cả các giá trị của $x$ để $P < \dfrac{1}{2}$.
+\end{cacy}
+\loigiai{
+1) Thay $x = 9$ (thỏa mãn điều kiện) vào biểu thức $A$, ta được:
+\[ A = \dfrac{\sqrt{9}-2}{\sqrt{9}+1} = \dfrac{1}{4}. \]
+2) Với $x > 0, x \ne 1$, ta có:
+\begin{align*}
+B &= \dfrac{\sqrt{x}-2}{\sqrt{x}} + \dfrac{1}{\sqrt{x}-1} - \dfrac{2}{x-\sqrt{x}} \\
+&= \dfrac{\sqrt{x}-2}{\sqrt{x}} + \dfrac{1}{\sqrt{x}-1} - \dfrac{2}{\sqrt{x}\left(\sqrt{x}-1\right)} \\
+&= \dfrac{\left(\sqrt{x}-2\right)\left(\sqrt{x}-1\right)}{\sqrt{x}\left(\sqrt{x}-1\right)} + \dfrac{\sqrt{x}}{\sqrt{x}\left(\sqrt{x}-1\right)} - \dfrac{2}{\sqrt{x}\left(\sqrt{x}-1\right)} \\
+&= \dfrac{\left(\sqrt{x}-2\right)\left(\sqrt{x}-1\right) + \sqrt{x} - 2}{\sqrt{x}\left(\sqrt{x}-1\right)} \\
+&= \dfrac{x - 2\sqrt{x}}{\sqrt{x}\left(\sqrt{x}-1\right)} \\
+&= \dfrac{\sqrt{x}\left(\sqrt{x}-2\right)}{\sqrt{x}\left(\sqrt{x}-1\right)} = \dfrac{\sqrt{x}-2}{\sqrt{x}-1}.
+\end{align*}
+3) Ta có:
+\[ P = \dfrac{A}{B} = \dfrac{\dfrac{\sqrt{x}-2}{\sqrt{x}+1}}{\dfrac{\sqrt{x}-2}{\sqrt{x}-1}} = \dfrac{\sqrt{x}-1}{\sqrt{x}+1}, \]
+điều kiện xác định $x > 0, x \ne 1, x \ne 4$.
+Khi đó:
+\[ P < \dfrac{1}{2} \Rightarrow \dfrac{\sqrt{x}-1}{\sqrt{x}+1} < \dfrac{1}{2} \Leftrightarrow \dfrac{\sqrt{x}-1}{\sqrt{x}+1} - \dfrac{1}{2} < 0 \Leftrightarrow \dfrac{\sqrt{x}-3}{2\left(\sqrt{x}+1\right)} < 0. \]
+Ta có $2\left(\sqrt{x}+1\right) > 0$ với mọi $x$ thỏa mãn điều kiện xác định, nên suy ra:
+\[ \sqrt{x}-3 < 0 \Leftrightarrow x < 9. \]
+Kết hợp với điều kiện xác định ta được $0 < x < 9, x \ne 1, x \ne 4$.
+}
+\end{bt}

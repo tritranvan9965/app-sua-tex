@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sửa TeX</title>
+<link rel="stylesheet" href="/static/vendor/cm/codemirror.css">
+<link rel="stylesheet" href="/static/vendor/katex/katex.min.css">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header id="ribbon">
+  <div id="ribbon-hang">
+    <div id="ribbon-tab"></div>
+    <div class="ribbon-phai">
+      <button type="button" id="nut-phim" data-ic="hoi" data-ten="Phím tắt" aria-label="Phím tắt"></button>
+      <button type="button" id="nut-gon" data-ic="tro-len" data-ten="Thu gọn ribbon" data-phim="Ctrl+F1" aria-label="Thu gọn ribbon"></button>
+    </div>
+  </div>
+  <div id="ribbon-than"></div>
+  <input id="tim" class="o-rong" type="search" placeholder="Tìm chữ trong file" aria-label="Tìm chữ trong file">
+  <input id="khoang-trang" class="o-rong" placeholder="1-3, 5" title="Gõ số trang rồi nhấn Enter" aria-label="Chọn trang theo số thứ tự">
+</header>
+<button type="button" id="mui-ben" data-ic="tro-trai" data-ten="Ẩn thanh file" data-phim="Ctrl+B" aria-label="Ẩn thanh file"></button>
+<div id="the-tep" role="tablist" aria-label="Các file đang mở" hidden></div>
+<aside class="ban" aria-label="Tệp trong dự án">
+  <nav id="cay"></nav>
+</aside>
+
+<nav class="le" aria-label="Mục lục của file"><ol id="ds-bai"></ol></nav>
+
+<main class="soan">
+  <header class="thanh">
+    <div class="ten-tep"><strong id="ten-tep">Chưa mở file</strong><button type="button" id="luu-tep" class="nut-dau" data-ic="luu" data-ten="Lưu" data-phim="Ctrl+S" aria-label="Lưu"></button></div>
+    <div class="nhom-nut">
+      <div id="chon-ban" role="group" aria-label="Chọn bản PDF" hidden></div>
+      <div class="chon-ban" id="cd-nhom" role="group" aria-label="Cách hiển thị" hidden>
+        <button type="button" id="cd-dong" aria-pressed="true" data-ic="theo-dong" data-ten="Theo dòng" aria-label="Theo dòng"></button>
+        <button type="button" id="cd-code" aria-pressed="false" data-ic="code" data-ten="Toàn bộ code" aria-label="Toàn bộ code"></button>
+      </div>
+    </div>
+  </header>
+  <div id="vung-dong" hidden></div>
+  <div id="vung-soan"><textarea id="o-soan"></textarea></div>
+  <div id="vung-trang">
+    <div id="dau-day">
+      <label><input type="checkbox" id="chon-tat-ca"> Chọn tất cả</label>
+      <button type="button" id="an-day" class="nut-dau" data-ic="vung-soan" data-ten="Ẩn dải trang" aria-label="Ẩn dải trang"></button>
+    </div>
+    <div id="ds-trang"></div>
+  </div>
+  <div id="mo-dau">Chọn một file ở cột trái, hoặc bấm Mở file để bắt đầu.</div>
+</main>
+
+<section class="xem" aria-label="Xem kết quả">
+  <header class="thanh">
+    <button type="button" id="nut-trai" class="nut-dau" data-ic="vung-soan" data-ten="Ẩn, hiện vùng bên trái" aria-label="Ẩn, hiện vùng bên trái" hidden></button>
+    <div class="ten-tep" id="dau-pdf" hidden><strong id="ten-pdf"></strong><button type="button" id="luu-pdf" class="nut-dau" data-ic="luu" data-ten="Lưu PDF" aria-label="Lưu PDF"></button></div>
+  </header>
+  <div id="xem-pdf" class="o-xem"></div>
+  <div id="khung-xem">
+    <div id="xem-trang"></div>
+  </div>
+</section>
+
+<footer id="thanh-duoi">
+  <span id="viec" role="status"></span>
+  <span id="vi-tri-bai"></span>
+  <span id="so-chon"></span>
+  <div id="nav-pdf" hidden>
+  <div class="dieu-khien" id="dieu-trang" hidden>
+    <button type="button" id="ve-dau" data-ic="ve-dau" data-ten="Trang đầu" aria-label="Trang đầu"></button>
+    <button type="button" id="trang-truoc" data-ic="tro-trai" data-ten="Trang trước" aria-label="Trang trước"></button>
+    <input id="o-trang" inputmode="numeric" aria-label="Số trang">
+    <span id="tong-trang"></span>
+    <button type="button" id="trang-sau" data-ic="tro-phai" data-ten="Trang sau" aria-label="Trang sau"></button>
+    <button type="button" id="ve-cuoi" data-ic="ve-cuoi" data-ten="Trang cuối" aria-label="Trang cuối"></button>
+  </div>
+  <div class="dieu-khien" id="dieu-zoom" hidden>
+    <button type="button" id="nav-chu" data-ic="chon-chu" data-ten="Chọn chữ" data-phim="Alt+1" aria-label="Chọn chữ"></button>
+    <button type="button" id="nav-vung" data-ic="chon-vung" data-ten="Chọn vùng" data-phim="Alt+2" aria-label="Chọn vùng"></button>
+    <i></i>
+    <button type="button" id="nav-mot" data-ic="xem-mot" data-ten="Xem từng trang" aria-label="Xem từng trang"></button>
+    <button type="button" id="nav-rong" data-ic="vua-rong" data-ten="Vừa chiều rộng" aria-label="Vừa chiều rộng"></button>
+    <button type="button" id="nav-trang" data-ic="vua-trang" data-ten="Vừa cả trang" aria-label="Vừa cả trang"></button>
+    <i></i>
+    <button type="button" id="zoom-nho" data-ic="tru" data-ten="Thu nhỏ" aria-label="Thu nhỏ"></button>
+    <input id="o-zoom" aria-label="Mức zoom">
+    <button type="button" id="zoom-to" data-ic="cong" data-ten="Phóng to" aria-label="Phóng to"></button>
+  </div>
+  </div>
+</footer>
+
+<dialog id="hop-tb">
+  <form method="dialog">
+    <h2>Trình bày trang</h2>
+    <p class="ghi-mau">Áp cho mọi trang của PDF đang xem. Để trống mục nào thì bỏ mục đó.</p>
+    <label class="dong-tb">Đầu trang <input id="tb-dau"></label>
+    <label class="dong-tb">Chân trang <input id="tb-chan"></label>
+    <label class="dong-tb">Số trang
+      <select id="tb-so">
+        <option value="">Không đánh số</option>
+        <option value="left">Bên trái</option>
+        <option value="center">Ở giữa</option>
+        <option value="right">Bên phải</option>
+      </select>
+    </label>
+    <label class="dong-tb">Dấu mờ <input id="tb-mo"></label>
+    <div class="nut-hop">
+      <button value="huy">Hủy</button>
+      <button value="ap" class="chinh">Áp dụng</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="hop-phong">
+  <form method="dialog">
+    <h2>Phông chữ và cỡ chữ</h2>
+    <p class="ghi-mau">Đổi đến đâu áp dụng ngay đến đó. Cỡ chữ code cũng là cỡ chữ của chế độ Theo dòng.</p>
+    <div class="dong-phong">
+      <span>Code</span>
+      <select id="ph-code" aria-label="Phông chữ của code"></select>
+      <input id="co-code" type="number" min="11" max="24" aria-label="Cỡ chữ của code">
+    </div>
+    <div class="dong-phong">
+      <span>Thanh file</span>
+      <select id="ph-ban" aria-label="Phông chữ của thanh file"></select>
+      <input id="co-ban" type="number" min="9" max="18" aria-label="Cỡ chữ của thanh file">
+    </div>
+    <div class="nut-hop">
+      <button type="button" id="dat-lai-phong">Đặt lại</button>
+      <button value="dong" class="chinh">Đóng</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="hop-luu">
+  <form method="dialog">
+    <h2>Lưu thay đổi</h2>
+    <div id="noi-dung-luu"></div>
+    <div class="nut-hop">
+      <button value="huy">Quay lại sửa</button>
+      <button value="luu" class="chinh">Lưu</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="vung-in"></div>
+
+<dialog id="hop-phim">
+  <form method="dialog">
+    <h2>Phím tắt</h2>
+    <ul id="ds-phim"></ul>
+    <div class="nut-hop"><button value="dong" class="chinh">Đóng</button></div>
+  </form>
+</dialog>
+
+<dialog id="hop-mau">
+  <form method="dialog">
+    <h2>Thư viện mẫu</h2>
+    <p class="ghi-mau">File .tex dùng mẫu nào thì app tự lấy mẫu đó ở đây khi biên dịch. Thêm lại mẫu trùng tên là cập nhật mẫu đó.</p>
+    <ul id="ds-mau"></ul>
+    <div class="nut-hop">
+      <button type="button" id="mo-thu-vien">Mở thư mục</button>
+      <button type="button" id="them-mau">Thêm mẫu</button>
+      <button value="dong" class="chinh">Đóng</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="bao" role="status" aria-live="polite" hidden></div>
+<div id="goi-y" role="tooltip" hidden></div>
+<input id="o-mau" type="color" value="#c0262d" aria-label="Màu chú thích" hidden>
+
+<script src="/static/vendor/cm/codemirror.js"></script>
+<script src="/static/vendor/cm/stex.js"></script>
+<script src="/static/vendor/katex/katex.min.js"></script>
+<script src="/static/vendor/pdfjs/pdf.min.js"></script>
+<script src="/static/bieu-tuong.js"></script>
+<script src="/static/app.js"></script>
+<script src="/static/theo-dong.js"></script>
+<script src="/static/chu-thich.js"></script>
+<script src="/static/xem-pdf.js"></script>
+<script src="/static/cong-cu-pdf.js"></script>
+<script src="/static/the-tep.js"></script>
+<script src="/static/ribbon.js"></script>
+<script src="/static/bo-cuc.js"></script>
+<script src="/static/menu-phai.js"></script>
+</body>
+</html>

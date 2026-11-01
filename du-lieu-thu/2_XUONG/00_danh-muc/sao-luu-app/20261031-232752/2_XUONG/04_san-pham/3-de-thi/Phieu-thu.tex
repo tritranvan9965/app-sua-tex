@@ -1,0 +1,99 @@
+% Phieu thu, dung chung 6 cau voi CD2
+\documentclass[12pt]{article}
+\usepackage{toan9}
+\loai{3}\de{01}
+\begin{document}
+\tieude{\tentailieu}{}
+
+%@ id=13CD.06.007 | trang=220 | so=7 | vitri=C3.9.3,CD2.1 | muc=8 | tt=0 | gl=1
+\begin{bt}
+Thu gọn các biểu thức sau: $A = \dfrac{5 + \sqrt{5}}{\sqrt{5} + 2} + \dfrac{\sqrt{5}}{\sqrt{5} - 1} - \dfrac{3\sqrt{5}}{3 + \sqrt{5}}$
+\loigiai{
+$A = \dfrac{5 + \sqrt{5}}{\sqrt{5} + 2} + \dfrac{\sqrt{5}}{\sqrt{5} - 1} - \dfrac{3\sqrt{5}}{3 + \sqrt{5}}$\\
+$= \dfrac{(5 + \sqrt{5})(\sqrt{5} - 2)}{(\sqrt{5} + 2)(\sqrt{5} - 2)} + \dfrac{\sqrt{5}(\sqrt{5} + 1)}{(\sqrt{5} - 1)(\sqrt{5} + 1)} - \dfrac{3\sqrt{5}(3 - \sqrt{5})}{(3 + \sqrt{5})(3 - \sqrt{5})}$\\
+$= 3\sqrt{5} - 5 + \dfrac{5 + \sqrt{5}}{4} - \dfrac{9\sqrt{5} - 15}{4} = 3\sqrt{5} - 5 + \dfrac{5 + \sqrt{5} - 9\sqrt{5} + 15}{4}$\\
+$= 3\sqrt{5} - 5 + 5 - 2\sqrt{5} = \sqrt{5}$
+}
+\end{bt}
+
+%@ id=13CD.06.013 | trang=222 | so=1 | vitri=C3.9.4,CD2.1 | muc=8 | tt=0 | gl=1 | soat=ok
+\begin{bt}
+
+
+%@ id=13CD.06.014 | trang=223 | so=2 | vitri=C3.9.4,CD2.1 | muc=8 | tt=0 | gl=1
+\begin{bt}
+Rút gọn biểu thức $P = \dfrac{x\sqrt{2}}{2\sqrt{x} + x\sqrt{2}} + \dfrac{\sqrt{2x} - 2}{x - 2}$, với $x > 0, x \ne 2$.
+\loigiai{
+Với điều kiện đã cho thì:\\
+$P = \dfrac{x\sqrt{2}}{\sqrt{2x}(\sqrt{2} + \sqrt{x})} + \dfrac{\sqrt{2}(\sqrt{x} - \sqrt{2})}{(\sqrt{x} - \sqrt{2})(\sqrt{x} + \sqrt{2})} = \dfrac{\sqrt{x}}{\sqrt{2} + \sqrt{x}} + \dfrac{\sqrt{2}}{\sqrt{x} + \sqrt{2}} = 1$.
+}
+\end{bt}
+
+%@ id=13CD.06.023 | trang=226 | so=11 | vitri=C3.9.3,CD2.1 | muc=8 | tt=0 | gl=1
+\begin{bt}
+Cho biểu thức $P = \dfrac{x^3+y^3}{x^2-xy+y^2} \cdot \dfrac{x+y}{x^2-y^2}$, $x \neq \pm y$.
+\begin{cacy}
+\item Rút gọn biểu thức $P$.
+\item Tính giá trị của $P$ khi $x = \sqrt{7-4\sqrt{3}}$ và $y = \sqrt{4-2\sqrt{3}}$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item $P = \dfrac{x^3+y^3}{x^2-xy+y^2} \cdot \dfrac{x+y}{x^2-y^2} = \dfrac{(x+y)(x^2-xy+y^2)}{x^2-xy+y^2} \cdot \dfrac{x+y}{(x-y)(x+y)} = \dfrac{x+y}{x-y}$.
+\item Với $x = \sqrt{7-4\sqrt{3}} = 2-\sqrt{3}$ và $y = \sqrt{4-2\sqrt{3}} = \sqrt{3}-1$.
+
+Thay vào $P$ ta được: $P = \dfrac{2-\sqrt{3} + \sqrt{3}-1}{(2-\sqrt{3}) - (\sqrt{3}-1)} = \dfrac{1}{3-2\sqrt{3}} = \dfrac{3+2\sqrt{3}}{-3}$.
+\end{cacy}
+}
+\end{bt}
+
+%@ id=13CD.06.025 | trang=227 | so=13 | vitri=C3.9.5,CD2.1 | muc=8 | tt=0 | gl=1
+\begin{bt}
+Cho biểu thức $C = \dfrac{a}{a-16} - \dfrac{2}{\sqrt{a}-4} - \dfrac{2}{\sqrt{a}+4}$.
+\begin{cacy}
+\item Tìm điều kiện của $a$ để biểu thức $C$ có nghĩa và rút gọn $C$.
+\item Tính giá trị của biểu thức $C$ khi $a = 9-4\sqrt{5}$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Biểu thức $C$ có nghĩa khi:
+$\heva{&a \ge 0 \\ &a-16 \neq 0 \\ &\sqrt{a}-4 \neq 0 \\ &\sqrt{a}+4 \neq 0} \Leftrightarrow \heva{&a \ge 0 \\ &a \neq 16 \\ &a \neq 16 \\ &\forall a \ge 0} \Rightarrow a \ge 0, a \neq 16$.
+
+Rút gọn $C = \dfrac{a}{a-16} - \dfrac{2}{\sqrt{a}-4} - \dfrac{2}{\sqrt{a}+4} = \dfrac{a}{\left(\sqrt{a}-4\right)\left(\sqrt{a}+4\right)} - \dfrac{2}{\sqrt{a}-4} - \dfrac{2}{\sqrt{a}+4}$
+\[
+\begin{aligned}
+&= \dfrac{a - 2\left(\sqrt{a}+4\right) - 2\left(\sqrt{a}-4\right)}{\left(\sqrt{a}+4\right)\left(\sqrt{a}-4\right)} = \dfrac{a - 2\sqrt{a} - 8 - 2\sqrt{a} + 8}{\left(\sqrt{a}+4\right)\left(\sqrt{a}-4\right)} \\
+&= \dfrac{a-4\sqrt{a}}{\left(\sqrt{a}+4\right)\left(\sqrt{a}-4\right)} = \dfrac{\sqrt{a}\left(\sqrt{a}-4\right)}{\left(\sqrt{a}-4\right)\left(\sqrt{a}+4\right)} = \dfrac{\sqrt{a}}{\sqrt{a}+4}.
+\end{aligned}
+\]
+
+\item Giá trị của $C$ khi $a = 9-4\sqrt{5}$.
+Ta có: $a = 9-4\sqrt{5} = 4 - 4\sqrt{5} + 5 = \left(2-\sqrt{5}\right)^2 \Rightarrow \sqrt{a} = \sqrt{\left(2-\sqrt{5}\right)^2} = \sqrt{5}-2$.
+
+Vậy $C = \dfrac{\sqrt{a}}{\sqrt{a}+4} = \dfrac{\sqrt{5}-2}{\sqrt{5}-2+4} = \dfrac{\sqrt{5}-2}{\sqrt{5}+2} = 9-4\sqrt{5}$.
+\end{cacy}
+}
+\end{bt}
+
+%@ id=13CD.06.028 | trang=229 | so=16 | vitri=C3.9.4,CD2.1 | muc=8 | tt=0 | ghichu=đề và đáp số đã đối chiếu trang gốc 229 (dấu nhân) | gl=1 | soat=sua
+\begin{bt}
+Cho biểu thức $P = \dfrac{\left(\sqrt{a}-\sqrt{b}\right)^2 + 4\sqrt{ab}}{\sqrt{a}+\sqrt{b}} \cdot \dfrac{a\sqrt{b}-b\sqrt{a}}{\sqrt{ab}}$.
+\begin{cacy}
+\item Tìm điều kiện để $P$ có nghĩa
+\item Rút gọn $P$
+\item Tính giá trị của $P$ khi $a = 2\sqrt{3}; b = \sqrt{3}$
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Để $P$ có nghĩa thì $\heva{&a \ge 0 \\ &b \ge 0 \\ &ab \ge 0 \\ &\sqrt{a}+\sqrt{b} \neq 0 \\ &\sqrt{ab} \neq 0} \Leftrightarrow \heva{&a > 0 \\ &b > 0}$.
+Vậy $P$ có nghĩa khi $a > 0$ và $b > 0$.
+
+\item Với $a > 0$ và $b > 0$ ta có: $P = \dfrac{\left(\sqrt{a}-\sqrt{b}\right)^2 + 4\sqrt{ab}}{\sqrt{a}+\sqrt{b}} \cdot \dfrac{a\sqrt{b}-b\sqrt{a}}{\sqrt{ab}} = a - b$.
+Vậy $P = a - b$ ($a > 0; b > 0$).
+
+\item Ta có $\heva{&a = 2\sqrt{3} \\ &b = \sqrt{3}}$ (thỏa mãn điều kiện) thay vào biểu thức $P$ ta được $P = 2\sqrt{3} - \sqrt{3} = \sqrt{3}$.
+Vậy $P = \sqrt{3}$ khi $a = 2\sqrt{3}; b = \sqrt{3}$.
+\end{cacy}
+}
+\end{bt}
+
+\end{document}

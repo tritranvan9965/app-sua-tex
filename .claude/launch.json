@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "app-sua-tex",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-I",
+        "ma-nguon/app.py",
+        "--khong-mo"
+      ],
+      "port": 8765
+    }
+  ]
+}

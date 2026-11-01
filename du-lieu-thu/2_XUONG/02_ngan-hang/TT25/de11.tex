@@ -1,0 +1,31 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.11.003 | trang=1 | so=2.1 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0 | soat=sua
+\begin{bt}
+Cho hai biểu thức $M=\dfrac{\sqrt{x}-2}{\sqrt{x}+1}$ và $N=\dfrac{\sqrt{x}}{\sqrt{x}+1}-\dfrac{\sqrt{x}-4}{1-x}$ với $x\ge 0$, $x\ne 1$.
+\begin{cacy}(1)
+\item Tính giá trị của biểu thức $M$ khi $x=8+2\sqrt{7}$.
+\item Biết $P=\dfrac{M}{N}$. Chứng minh: $P=\dfrac{\sqrt{x}-1}{\sqrt{x}+2}$.
+\item Đặt $P=\dfrac{M}{N}$. Tìm giá trị $x$ là số nguyên tố thỏa mãn $P\le \dfrac12$.
+\end{cacy}
+\loigiai{
+\begin{cacy}(1)
+\item Ta có: $x=8+2\sqrt{7}=(1+\sqrt{7})^2$ (thỏa mãn điều kiện).
+Thay $x=(1+\sqrt{7})^2$ vào $M$. Tính được
+\[M=\dfrac{1+\sqrt{7}-2}{1+\sqrt{7}+1}=\dfrac{\sqrt{7}-1}{\sqrt{7}+2}=\dfrac{(\sqrt{7}-1)(\sqrt{7}-2)}{(\sqrt{7}+2)(\sqrt{7}-2)}=3-\sqrt{7}.\]
+\item Rút gọn
+\[N=\dfrac{\sqrt{x}}{\sqrt{x}+1}-\dfrac{\sqrt{x}-4}{1-x}\]
+\[N=\dfrac{\sqrt{x}(\sqrt{x}-1)}{x-1}+\dfrac{\sqrt{x}-4}{x-1}\]
+\[N=\dfrac{x-\sqrt{x}+\sqrt{x}-4}{x-1}=\dfrac{x-4}{x-1}.\]
+Suy ra
+\[P=\dfrac{M}{N}=\dfrac{\sqrt{x}-2}{\sqrt{x}+1}:\dfrac{x-4}{x-1}=\dfrac{\sqrt{x}-1}{\sqrt{x}+2}.\]
+Điều kiện xác định: $x\ge 0$, $x\ne 1$, $x\ne 4$.
+\item Để $P\le\dfrac12$ thì $\dfrac{\sqrt{x}-1}{\sqrt{x}+2}\le\dfrac12$.
+\[\dfrac{\sqrt{x}-1}{\sqrt{x}+2}-\dfrac12\le 0\]
+\[\dfrac{\sqrt{x}-4}{\sqrt{x}+2}\le 0\]
+$\sqrt{x}-4\le 0$ (vì $\sqrt{x}+2>0$ với mọi $x$ thuộc điều kiện xác định).
+\[0\le x\le 16\]
+Kết hợp điều kiện xác định, có: $0\le x\le 16$, $x\ne 1$, $x\ne 4$, mà $x$ là số nguyên tố nên suy ra $x\in\{2;3;5;7;11;13\}$.
+\end{cacy}
+}
+\end{bt}

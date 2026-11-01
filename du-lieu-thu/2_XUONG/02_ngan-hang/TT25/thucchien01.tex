@@ -1,0 +1,33 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.thucchien01.003 | trang=1 | so=II | de=II | vitri=CD2.5,C3.9.6 | muc=9 | tt=0
+\begin{bt}
+Cho hai biểu thức: $A = \dfrac{\sqrt{x}+2}{\sqrt{x}-3}$ và $B = \dfrac{\sqrt{x}-2}{\sqrt{x}-3} - \dfrac{3}{\sqrt{x}} + \dfrac{x+4\sqrt{x}-9}{x-3\sqrt{x}}$ (với $x > 0; x \ne 9$).
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x = 169$.
+\item Chứng minh $B = \dfrac{2\sqrt{x}-1}{\sqrt{x}-3}$.
+\item Tìm giá trị nguyên của $x$ để biểu thức $P = B : A$ đạt giá trị nhỏ nhất.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x = 169$ (thoả mãn ĐKXĐ) vào biểu thức $A$ ta được:
+\[ A = \dfrac{15}{10} = \dfrac{3}{2}. \]
+Kết luận.
+\item Ta có:
+\[ B = \dfrac{\sqrt{x}-2}{\sqrt{x}-3} - \dfrac{3}{\sqrt{x}} + \dfrac{x+4\sqrt{x}-9}{\sqrt{x}(\sqrt{x}-3)} \]
+\[ B = \dfrac{x-2\sqrt{x}-3\sqrt{x}+9+x+4\sqrt{x}-9}{\sqrt{x}(\sqrt{x}-3)} \]
+\[ B = \dfrac{2x-\sqrt{x}}{\sqrt{x}(\sqrt{x}-3)} = \dfrac{\sqrt{x}(2\sqrt{x}-1)}{\sqrt{x}(\sqrt{x}-3)} \]
+\[ B = \dfrac{2\sqrt{x}-1}{\sqrt{x}-3}. \]
+Vậy với $x > 0; x \ne 9$ thì $B = \dfrac{2\sqrt{x}-1}{\sqrt{x}-3}$.
+\item Với $x > 0; x \ne 9$ ta có:
+\[ P = B : A = \dfrac{2\sqrt{x}-1}{\sqrt{x}-3} \cdot \dfrac{\sqrt{x}-3}{\sqrt{x}+2} = \dfrac{2\sqrt{x}-1}{\sqrt{x}+2} = 2 - \dfrac{5}{\sqrt{x}+2}. \]
+Vì $x > 0; x \ne 9$ và $x$ nguyên nên $x \ge 1$. Suy ra $\sqrt{x}+2 \ge 3$.
+
+Lập luận: $P \ge 2 - \dfrac{5}{3} = \dfrac{1}{3}$.
+
+Dấu “=” xảy ra khi $x = 1$ (TMĐK).
+
+Vậy $\min P = \dfrac{1}{3}$ tại $x = 1$.
+\end{cacy}
+}
+\end{bt}

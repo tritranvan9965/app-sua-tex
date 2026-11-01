@@ -1,0 +1,38 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT26.socsontrunggia.003 | trang=1 | so=II | de=II | vitri=CD2.3,C3.9.6 | muc=9 | tt=0
+\begin{bt}
+Cho hai biểu thức $A = \dfrac{x-27}{x+3\sqrt{x}}$ và $B = \dfrac{x+3}{x-9} + \dfrac{2}{3-\sqrt{x}} - \dfrac{1}{\sqrt{x}+3}$ với $x > 0; x \neq 9$.
+1) Tính giá trị của $A$ khi $x = 36$.
+2) Chứng minh rằng $B = \dfrac{\sqrt{x}}{\sqrt{x}+3}$.
+3) Đặt $P = A + 2B$. Tìm các giá trị nguyên của $x$ để $P$ nhận giá trị nguyên.
+\loigiai{
+1) Tính giá trị của $A$ khi $x = 36$.
+Thay $x = 36$ (TMĐK) vào biểu thức $A$ ta được:
+\[ A = \dfrac{36-27}{36+3\sqrt{36}} = \dfrac{9}{54} = \dfrac{1}{6}. \]
+2) Chứng minh rằng $B = \dfrac{\sqrt{x}}{\sqrt{x}+3}$.
+Ta có:
+\[ B = \dfrac{x+3}{x-9} + \dfrac{2}{3-\sqrt{x}} - \dfrac{1}{\sqrt{x}+3} = \dfrac{x+3}{x-9} - \dfrac{2}{\sqrt{x}-3} - \dfrac{1}{\sqrt{x}+3} \]
+\[ = \dfrac{x+3 - 2(\sqrt{x}+3) - (\sqrt{x}-3)}{(\sqrt{x}-3)(\sqrt{x}+3)} \]
+\[ = \dfrac{x+3 - 2\sqrt{x} - 6 - \sqrt{x} + 3}{(\sqrt{x}-3)(\sqrt{x}+3)} \]
+\[ = \dfrac{x-3\sqrt{x}}{(\sqrt{x}-3)(\sqrt{x}+3)} \]
+\[ = \dfrac{\sqrt{x}(\sqrt{x}-3)}{(\sqrt{x}-3)(\sqrt{x}+3)} \]
+\[ = \dfrac{\sqrt{x}}{\sqrt{x}+3}\text{ (đpcm)}. \]
+3) Đặt $P = A + 2B$. Tìm các giá trị nguyên của $x$ để $P$ nhận giá trị nguyên.
+Ta có:
+\[ P = A + 2B = \dfrac{x-27}{\sqrt{x}(\sqrt{x}+3)} + 2 \cdot \dfrac{\sqrt{x}}{\sqrt{x}+3} \]
+\[ = \dfrac{x-27+2x}{\sqrt{x}(\sqrt{x}+3)} = \dfrac{3x-27}{\sqrt{x}(\sqrt{x}+3)} = \dfrac{3(x-9)}{\sqrt{x}(\sqrt{x}+3)} \]
+\[ = \dfrac{3(\sqrt{x}-3)(\sqrt{x}+3)}{\sqrt{x}(\sqrt{x}+3)} = \dfrac{3(\sqrt{x}-3)}{\sqrt{x}} = \dfrac{3\sqrt{x}-9}{\sqrt{x}} \]
+\[ = 3 - \dfrac{9}{\sqrt{x}}. \]
+Để $P$ nhận giá trị nguyên với $x$ là số nguyên dương, thì $\dfrac{9}{\sqrt{x}}$ phải là số nguyên. Suy ra $\sqrt{x}$ phải là ước dương của 9.
+Các ước dương của 9 là: $\{1; 3; 9\}$.
+Ta có bảng giá trị sau:
+\begin{tabular}{|c|c|c|c|}
+\hline
+$\sqrt{x}$ & 1 & 3 & 9 \\ \hline
+$x$ & 1 & 9 & 81 \\ \hline
+Đối chiếu điều kiện & TMĐK & Loại vì $x > 0; x \neq 9$ & TMĐK \\ \hline
+\end{tabular}
+Vậy các giá trị nguyên của $x$ để biểu thức $P$ nhận giá trị nguyên là $x \in \{1; 81\}$.
+}
+\end{bt}

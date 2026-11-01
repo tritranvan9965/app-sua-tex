@@ -1,0 +1,41 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.02.003 | trang=1 | so=2 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0
+\begin{bt}
+Cho hai biểu thức $A=\dfrac{2}{\sqrt{x}-1}$ và $B=\dfrac{\sqrt{x}}{\sqrt{x}+1}+\dfrac{4}{x-1}$ với $x\ge0$, $x\ne1$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x=4$.
+\item Rút gọn biểu thức $P=B-A$.
+\item Tìm giá trị nhỏ nhất của biểu thức $P$.
+\item Tìm $x$ để $\sqrt{P}<\dfrac12$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x=4$ (TMĐK) vào biểu thức $A$. Tính được $A=\dfrac{2}{\sqrt4-1}=2$.
+\item Ta có:
+\[
+P=B-A=\dfrac{\sqrt{x}}{\sqrt{x}+1}+\dfrac{4}{x-1}-\dfrac{2}{\sqrt{x}-1}
+=\dfrac{\sqrt{x}(\sqrt{x}-1)+4-2(\sqrt{x}+1)}{(\sqrt{x}-1)(\sqrt{x}+1)}
+\]
+\[
+=\dfrac{x-3\sqrt{x}+2}{(\sqrt{x}-1)(\sqrt{x}+1)}
+=\dfrac{(\sqrt{x}-1)(\sqrt{x}-2)}{(\sqrt{x}-1)(\sqrt{x}+1)}
+=\dfrac{\sqrt{x}-2}{\sqrt{x}+1}.
+\]
+\item ĐK: $x\ge0$, $x\ne1$. Có $P=\dfrac{\sqrt{x}-2}{\sqrt{x}+1}=1-\dfrac{3}{\sqrt{x}+1}$. Vì $\sqrt{x}+1\ge1$ với mọi $x$ (TMĐK) nên $\dfrac{3}{\sqrt{x}+1}\le3$, suy ra $P\ge-2$. Dấu bằng xảy ra khi và chỉ khi $x=0$ (TMĐK). Vậy giá trị nhỏ nhất của biểu thức $P=-2$ khi $x=0$.
+\item Điều kiện: $x\ge0$. Để $\sqrt{P}$ xác định ta cần có $P\ge0$, suy ra $\dfrac{\sqrt{x}-2}{\sqrt{x}+1}\ge0$. Nên $\sqrt{x}-2\ge0$ (do $\sqrt{x}+1>0$), suy ra $x\ge4$ (thỏa mãn điều kiện).
+
+Khi đó, $\sqrt{P}<\dfrac12$ thì $P<\dfrac14$, suy ra
+\[
+\dfrac{\sqrt{x}-2}{\sqrt{x}+1}-\dfrac14<0
+\]
+\[
+\dfrac{4(\sqrt{x}-2)}{4(\sqrt{x}+1)}-\dfrac{1(\sqrt{x}+1)}{4(\sqrt{x}+1)}<0
+\]
+\[
+\dfrac{3\sqrt{x}-9}{4(\sqrt{x}+1)}<0\quad(\text{do }\sqrt{x}+1>0),\qquad 3\sqrt{x}-9<0,
+\]
+nên $\sqrt{x}<3$, hay $0\le x<9$. Kết hợp điều kiện $x\ge4$, ta được $4\le x<9$.
+\end{cacy}
+}
+\end{bt}

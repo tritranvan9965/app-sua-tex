@@ -1,0 +1,76 @@
+{
+  "ten": "Dữ liệu thử",
+  "goc": ".",
+  "cay": [
+    {
+      "ten": "Chuyên đề ôn thi",
+      "thu_muc": "2_XUONG/04_san-pham/2-chuyen-de",
+      "vai_tro": "san-pham"
+    },
+    {
+      "ten": "Tài liệu theo bài",
+      "thu_muc": "2_XUONG/04_san-pham/1-theo-bai",
+      "vai_tro": "san-pham"
+    },
+    {
+      "ten": "Đề thi",
+      "thu_muc": "2_XUONG/04_san-pham/3-de-thi",
+      "vai_tro": "san-pham"
+    },
+    {
+      "ten": "Thành phẩm",
+      "thu_muc": "3_THANH-PHAM"
+    },
+    {
+      "ten": "Ngân hàng",
+      "thu_muc": "2_XUONG/02_ngan-hang",
+      "vai_tro": "ngan-hang"
+    },
+    {
+      "ten": "Mẫu toan9.sty",
+      "tep": "2_XUONG/03_mau/toan9.sty"
+    },
+    {
+      "ten": "Danh mục chuẩn",
+      "tep": "2_XUONG/03_mau/danhmuc.tex"
+    }
+  ],
+  "cau": {
+    "moi_truong": "bt",
+    "nhan": "%@ id=",
+    "loi_giai": "loigiai"
+  },
+  "duong": {
+    "sao_luu": "2_XUONG/00_danh-muc/sao-luu-app",
+    "so_sua_rieng": "2_XUONG/00_danh-muc/sua-rieng"
+  },
+  "xuat": {
+    "mo_dau_manh": "\\documentclass[12pt]{article}\\usepackage{toan9}\\begin{document}",
+    "ban": {
+      "GV": "",
+      "HS": "\\def\\BANHS{1}"
+    },
+    "nhan_ban": {
+      "GV": "Có đáp án",
+      "HS": "Ẩn đáp án"
+    },
+    "chep_them": ["2_XUONG/03_mau"],
+    "hinh": {
+      "lenh": "hinhgoc",
+      "goc": "2_XUONG/02_ngan-hang"
+    }
+  },
+  "xem_nhanh": {
+    "macro": {
+      "\\heva": "\\left\\{\\begin{aligned}#1\\end{aligned}\\right.",
+      "\\hoac": "\\left[\\begin{aligned}#1\\end{aligned}\\right."
+    },
+    "lenh": [
+      {"ten": ["paaa", "paa", "pa"], "so_doi": 4, "ra": "\\\\A. #1\\\\B. #2\\\\C. #3\\\\D. #4\\\\"},
+      {"ten": "dung", "so_doi": 1, "ra": "#1"},
+      {"ten": "chuaro", "so_doi": 1, "ra": "#1"},
+      {"ten": "dapso", "so_doi": 1, "ra": "\\\\Đáp số: #1"},
+      {"ten": "hinhgoc", "so_doi": 2, "ra": "\\includegraphics{#1}"}
+    ]
+  }
+}

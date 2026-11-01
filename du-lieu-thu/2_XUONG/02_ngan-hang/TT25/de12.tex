@@ -1,0 +1,53 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.12.003 | trang=1 | so=2 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0
+\begin{bt}
+Cho hai biểu thức: $A=\dfrac{\sqrt{x}+1}{\sqrt{x}-2}$ và $B=\dfrac{\sqrt{x}+2}{\sqrt{x}-3}+\dfrac{\sqrt{x}-8}{(\sqrt{x}-2)(\sqrt{x}-3)}$ với $x\ge 0;\ x\ne 4;\ x\ne 9$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x=25$.
+\item Rút gọn biểu thức $B$.
+\item Tìm tất cả các giá trị nguyên của $x$ để $B<A$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x=25$ (TMĐK) vào $A$, ta có:
+\[
+A=\dfrac{\sqrt{25}+1}{\sqrt{25}-2}=\dfrac{6}{3}=2.
+\]
+Vậy $x=25$ thì $A=2$.
+
+\item Ta có:
+\[
+B=\dfrac{(\sqrt{x}+2)(\sqrt{x}-2)+\sqrt{x}-8}{(\sqrt{x}-2)(\sqrt{x}-3)}
+=\dfrac{x-4+\sqrt{x}-8}{(\sqrt{x}-2)(\sqrt{x}-3)}
+=\dfrac{x+4\sqrt{x}-3\sqrt{x}-12}{(\sqrt{x}-2)(\sqrt{x}-3)}
+=\dfrac{(\sqrt{x}+4)(\sqrt{x}-3)}{(\sqrt{x}-2)(\sqrt{x}-3)}
+=\dfrac{\sqrt{x}+4}{\sqrt{x}-2}.
+\]
+Vậy, $x\ge 0;\ x\ne 4;\ x\ne 9$ thì $B=\dfrac{\sqrt{x}+4}{\sqrt{x}-2}$.
+
+\item Ta có:
+\[
+B<A
+\]
+\[
+\dfrac{\sqrt{x}+4}{\sqrt{x}-2}<\dfrac{\sqrt{x}+1}{\sqrt{x}-2}
+\]
+\[
+\dfrac{\sqrt{x}+4}{\sqrt{x}-2}-\dfrac{\sqrt{x}+1}{\sqrt{x}-2}<0
+\]
+\[
+\dfrac{3}{\sqrt{x}-2}<0
+\]
+\[
+\sqrt{x}<2
+\]
+\[
+x<4.
+\]
+Kết hợp điều kiện, suy ra $0\le x<4$. Mà $x\in\mathbb{Z}$ nên $x\in\{0;1;2;3\}$.
+
+Vậy $x\in\{0;1;2;3\}$ thì $B<A$.
+\end{cacy}
+}
+\end{bt}

@@ -1,0 +1,41 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.14.003 | trang=1 | so=2 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0 | soat=ok
+\begin{bt}
+Với $x > 0$, cho hai biểu thức $A = \dfrac{x + 2\sqrt{x}}{x}$ và $B = \dfrac{\sqrt{x}-1}{\sqrt{x}} + \dfrac{2\sqrt{x}+1}{x+\sqrt{x}}$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x = 4$.
+\item Chứng minh $B = \dfrac{\sqrt{x}+2}{\sqrt{x}+1}$.
+\item Tìm số nguyên $x$ nhỏ nhất để $\dfrac{A}{B} < \dfrac{7}{4}$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x = 4$ (thỏa mãn điều kiện) vào biểu thức $A$, ta được:
+
+Ta có $A = \dfrac{4 + 2\sqrt{4}}{4} = 2$.
+
+Vậy $A = 2$ khi $x = 4$.
+
+\item Ta có:
+\[
+B = \dfrac{\sqrt{x}-1}{\sqrt{x}} + \dfrac{2\sqrt{x}+1}{x+\sqrt{x}} = \dfrac{(\sqrt{x}-1)(\sqrt{x}+1) + 2\sqrt{x}+1}{\sqrt{x}(\sqrt{x}+1)} = \dfrac{x+2\sqrt{x}}{\sqrt{x}(\sqrt{x}+1)} = \dfrac{\sqrt{x}+2}{\sqrt{x}+1}.
+\]
+Vậy với $x > 0$ thì $B = \dfrac{\sqrt{x}+2}{\sqrt{x}+1}$.
+
+\item Với $x > 0$,
+\[
+\dfrac{A}{B} = \dfrac{x+2\sqrt{x}}{x} : \dfrac{\sqrt{x}+2}{\sqrt{x}+1} = \dfrac{\sqrt{x}(\sqrt{x}+2)}{x} \cdot \dfrac{\sqrt{x}+1}{\sqrt{x}+2} = \dfrac{\sqrt{x}(\sqrt{x}+1)}{x} = \dfrac{x+\sqrt{x}}{x}.
+\]
+Ta có:
+\[ \dfrac{A}{B} < \dfrac{7}{4} \]
+\[ \dfrac{x+\sqrt{x}}{x} < \dfrac{7}{4} \]
+\[ 1 + \dfrac{1}{\sqrt{x}} < \dfrac{7}{4} \]
+\[ \dfrac{1}{\sqrt{x}} < \dfrac{3}{4} \]
+\[ \sqrt{x} > \dfrac{4}{3} \]
+\[ x > \dfrac{16}{9}. \]
+Kết hợp điều kiện $x > 0$ và $x$ là số nguyên nhỏ nhất nên $x = 2$.
+
+Vậy $x = 2$.
+\end{cacy}
+}
+\end{bt}

@@ -1,0 +1,28 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT26.cumconglap.003 | trang=1 | so=2.1 | de=II | vitri=CD2.5,C3.9.6 | muc=9 | tt=0 | ghichu=lời giải gốc chưa so sánh trường hợp x<9 với x>9 | soat=sua
+\begin{bt}
+Cho các biểu thức $A=\dfrac{\sqrt{x}+2}{\sqrt{x}}$; $B=\dfrac{\sqrt{x}+1}{\sqrt{x}+3}-\dfrac{\sqrt{x}}{3-\sqrt{x}}+\dfrac{x+8\sqrt{x}+3}{x-9}$ với $x>0; x\ne9$.
+\begin{cacy}(1)
+\item Tính giá trị của $A$ khi $x=25$.
+\item Rút gọn biểu thức $B$.
+\item Tìm $x$ là số nguyên để biểu thức $P=AB$ đạt giá trị lớn nhất.
+\end{cacy}
+\loigiai{
+Thay $x=25$ (thỏa mãn điều kiện) vào biểu thức $A$, ta được:
+\[A=\dfrac{\sqrt{25}+2}{\sqrt{25}}=\dfrac{7}{5}.\]
+Vậy $A=\dfrac{7}{5}$ khi $x=25$.
+
+\begin{align*}
+B&=\dfrac{\sqrt{x}+1}{\sqrt{x}+3}-\dfrac{\sqrt{x}}{\sqrt{x}-3}+\dfrac{x+8\sqrt{x}+3}{(\sqrt{x}-3)(\sqrt{x}+3)}\\
+&=\dfrac{(\sqrt{x}+1)(\sqrt{x}-3)-\sqrt{x}(\sqrt{x}+3)+x+8\sqrt{x}+3}{(\sqrt{x}-3)(\sqrt{x}+3)}\\
+&=\dfrac{x-2\sqrt{x}-3-x-3\sqrt{x}+x+8\sqrt{x}+3}{(\sqrt{x}-3)(\sqrt{x}+3)}\\
+&=\dfrac{x+3\sqrt{x}}{(\sqrt{x}-3)(\sqrt{x}+3)}=\dfrac{\sqrt{x}(\sqrt{x}+3)}{(\sqrt{x}-3)(\sqrt{x}+3)}=\dfrac{\sqrt{x}}{\sqrt{x}-3}.
+\end{align*}
+Vậy $B=\dfrac{\sqrt{x}}{\sqrt{x}-3}$ với $x>0; x\ne9$.
+
+$P=AB=\dfrac{\sqrt{x}+2}{\sqrt{x}-3}=1+\dfrac{5}{\sqrt{x}-3}$.
+Để $P$ đạt GTLN thì $\dfrac{5}{\sqrt{x}-3}$ đạt GTLN, suy ra $\sqrt{x}-3>0$ và $\sqrt{x}-3$ nhỏ nhất.
+Nếu $0<x<9$ thì $\sqrt{x}-3<0$ nên $P<1$. Nếu $x>9$ thì $P>1$ và $P$ lớn nhất khi $\sqrt{x}-3>0$ nhỏ nhất. Vì $x$ nguyên, $x>9$ nên $x\ge10$, suy ra GTLN của $P$ là $\dfrac{\sqrt{10}+2}{\sqrt{10}-3}=16+5\sqrt{10}$, đạt được khi $x=10$.
+}
+\end{bt}

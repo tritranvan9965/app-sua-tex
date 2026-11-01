@@ -1,0 +1,28 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.04.003 | trang=5 | so=2 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0
+\begin{bt}
+Cho hai biểu thức $A = \dfrac{x+2\sqrt{x}}{x-1}$ và $B = \dfrac{2}{x} - \dfrac{2-x}{x(\sqrt{x}+1)}$ với $x > 0; x \ne 1$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x = 25$.
+\item Chứng minh: $B = \dfrac{\sqrt{x}+2}{\sqrt{x}(\sqrt{x}+1)}$.
+\item Tìm $x$ để biểu thức $\dfrac{A}{B} > 1$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x = 25$ (thỏa mãn ĐK) vào biểu thức $A$ ta được
+\[ A = \dfrac{25+2\sqrt{25}}{25-1} = \dfrac{25+2 \cdot 5}{24} = \dfrac{35}{24} \]
+Vậy khi $x = 25$ thì $A = \dfrac{35}{24}$.
+\item Điều kiện: $x > 0; x \ne 1$.
+\[ B = \dfrac{2}{x} - \dfrac{2-x}{x(\sqrt{x}+1)} = \dfrac{2\sqrt{x}+2-2+x}{x(\sqrt{x}+1)} \]
+\[ B = \dfrac{x+2\sqrt{x}}{x(\sqrt{x}+1)} = \dfrac{\sqrt{x}(\sqrt{x}+2)}{x(\sqrt{x}+1)} = \dfrac{\sqrt{x}+2}{\sqrt{x}(\sqrt{x}+1)} \]
+\item Ta có $\dfrac{A}{B} > 1 \Rightarrow \dfrac{x+2\sqrt{x}}{x-1} : \dfrac{\sqrt{x}+2}{\sqrt{x}(\sqrt{x}+1)} > 1 \Rightarrow \dfrac{\sqrt{x}(\sqrt{x}+2)}{x-1} \cdot \dfrac{\sqrt{x}(\sqrt{x}+1)}{\sqrt{x}+2} > 1$
+\[ \Rightarrow \dfrac{x}{\sqrt{x}-1} > 1 \Rightarrow \dfrac{x-\sqrt{x}+1}{\sqrt{x}-1} > 0 \quad (*) \]
+Xét $x - \sqrt{x} + 1 = \left(\sqrt{x}-\dfrac{1}{2}\right)^2 + \dfrac{3}{4} > 0$ với mọi $x > 0; x \ne 1$.
+
+Do đó $(*) \Rightarrow \sqrt{x}-1 > 0 \Rightarrow x > 1$.
+
+Kết hợp điều kiện, ta có $x > 1$ thỏa mãn yêu cầu bài toán.
+\end{cacy}
+}
+\end{bt}

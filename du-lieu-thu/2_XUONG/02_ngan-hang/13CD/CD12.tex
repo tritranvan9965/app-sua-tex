@@ -1,0 +1,17 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=13CD.12.007 | trang=606 | so=3 | vitri=C3.7.5,CD2.5 | muc=9 | tt=0 | gl=1
+\begin{bt}
+Tìm giá trị nhỏ nhất của biểu thức $A = \dfrac{\sqrt{x+6\sqrt{x-9}} + \sqrt{x-6\sqrt{x-9}}}{\sqrt{\dfrac{81}{x^2} - \dfrac{18}{x} + 1}}$, với $x > 9$.
+\loigiai{
+Ta có $\sqrt{x+6\sqrt{x-9}} = \sqrt{x-9} + 3$; $\sqrt{x-6\sqrt{x-9}} = \left|\sqrt{x-9} - 3\right|$
+
+Và $\sqrt{\dfrac{81}{x^2} - \dfrac{18}{x} + 1} = \left|\dfrac{9}{x} - 1\right| = \dfrac{x-9}{x} \Rightarrow A = x \cdot \dfrac{\sqrt{x-9}+3 + \left|\sqrt{x-9}-3\right|}{x-9}$
+
+Khi $x \ge 18$ thì $A = \dfrac{2x}{\sqrt{x-9}} = 2\sqrt{x-9} + \dfrac{18}{\sqrt{x-9}} \ge 12$, dấu bằng xảy ra khi $x = 18$ (1).
+
+Khi $9 < x < 18$ thì $A = \dfrac{6x}{x-9} = 6 + \dfrac{54}{x-9} > 6 + \dfrac{54}{9} = 12$ (2)
+
+Suy ra $\min A = 12$.
+}
+\end{bt}

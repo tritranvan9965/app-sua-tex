@@ -1,0 +1,48 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.10.003 | trang=1 | so=2 | de=II | vitri=CD2.5,C3.9.6 | muc=9 | tt=0
+\begin{bt}
+Cho biểu thức $A = \dfrac{3x+12}{\sqrt{x}+3}$ và $B = \dfrac{\sqrt{x}+1}{\sqrt{x}-3} + \dfrac{2\sqrt{x}}{\sqrt{x}+3} - \dfrac{7\sqrt{x}+3}{x-9}$ (với $x > 0; x \ne 9$).
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x = 36$.
+\item Chứng minh $B = \dfrac{3\sqrt{x}}{\sqrt{x}+3}$.
+\item Tìm giá trị nhỏ nhất của biểu thức $P = \dfrac{A}{B}$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x = 36$ (TMĐK) vào biểu thức $A$ có:
+\[
+A = \dfrac{3 \cdot 36 + 12}{\sqrt{36}+3} = \dfrac{108+12}{6+3} = \dfrac{120}{9} = \dfrac{40}{3}.
+\]
+Vậy $A = \dfrac{40}{3}$ khi $x = 36$.
+\item Ta có:
+\begin{align*}
+B &= \dfrac{\sqrt{x}+1}{\sqrt{x}-3} + \dfrac{2\sqrt{x}}{\sqrt{x}+3} - \dfrac{7\sqrt{x}+3}{x-9} \\
+&= \dfrac{\sqrt{x}+1}{\sqrt{x}-3} + \dfrac{2\sqrt{x}}{\sqrt{x}+3} - \dfrac{7\sqrt{x}+3}{\left(\sqrt{x}-3\right)\left(\sqrt{x}+3\right)} \\
+&= \dfrac{\left(\sqrt{x}+1\right)\left(\sqrt{x}+3\right) + 2\sqrt{x}\left(\sqrt{x}-3\right) - \left(7\sqrt{x}+3\right)}{\left(\sqrt{x}-3\right)\left(\sqrt{x}+3\right)} \\
+&= \dfrac{x+3\sqrt{x}+\sqrt{x}+3+2x-6\sqrt{x}-7\sqrt{x}-3}{\left(\sqrt{x}-3\right)\left(\sqrt{x}+3\right)} \\
+&= \dfrac{3x-9\sqrt{x}}{\left(\sqrt{x}-3\right)\left(\sqrt{x}+3\right)} \\
+&= \dfrac{3\sqrt{x}\left(\sqrt{x}-3\right)}{\left(\sqrt{x}-3\right)\left(\sqrt{x}+3\right)} \\
+&= \dfrac{3\sqrt{x}}{\sqrt{x}+3}.
+\end{align*}
+Vậy $B = \dfrac{3\sqrt{x}}{\sqrt{x}+3}$ với $x > 0; x \ne 9$.
+\item Ta có:
+\[
+P = \dfrac{A}{B} = \dfrac{3x+12}{\sqrt{x}+3} \cdot \dfrac{\sqrt{x}+3}{3\sqrt{x}} = \dfrac{x+4}{\sqrt{x}} = \sqrt{x} + \dfrac{4}{\sqrt{x}}.
+\]
+Với hai số thực không âm $a, b$ ta có: $a+b \ge 2\sqrt{ab}$. Dấu ``$=$'' xảy ra khi và chỉ khi $a=b$.
+
+Thật vậy: $(a-b)^2 \ge 0 \Rightarrow (a+b)^2 \ge 4ab \Rightarrow a+b \ge 2\sqrt{ab}$.
+
+Dấu ``$=$'' xảy ra khi và chỉ khi $a=b$.
+
+Vì $x \ge 0 \Rightarrow \sqrt{x} \ge 0; \dfrac{4}{\sqrt{x}} > 0$ nên áp dụng bất đẳng thức trên ta có:
+\[
+P = \sqrt{x} + \dfrac{4}{\sqrt{x}} \ge 2\sqrt{\sqrt{x} \cdot \dfrac{4}{\sqrt{x}}} = 4.
+\]
+Dấu ``$=$'' xảy ra khi và chỉ khi: $\sqrt{x} = \dfrac{4}{\sqrt{x}} \Leftrightarrow x = 4$ (thỏa mãn).
+
+Vậy $\min P = 4$ khi và chỉ khi $x = 4$.
+\end{cacy}
+}
+\end{bt}

@@ -1,0 +1,27 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.01.003 | trang=1 | so=2 | de=II | vitri=CD2.2,C3.9.5 | muc=8 | tt=0
+\begin{bt}
+Cho biểu thức $A=\dfrac{2\sqrt{x}}{\sqrt{x}+3}+\dfrac{\sqrt{x}+1}{\sqrt{x}-3}+\dfrac{3-11\sqrt{x}}{9-x}$ và $B=\dfrac{\sqrt{x}-3}{\sqrt{x}+1}$ với $x\ge 0$, $x\ne 9$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $B$ tại $x=36$.
+\item Rút gọn $A$.
+\item Biết $P=A\cdot B$. Tìm $x$ để $P=\dfrac{1}{2}$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x=36$ (thỏa mãn điều kiện) vào biểu thức $B$, ta được
+\[B=\dfrac{\sqrt{36}-3}{\sqrt{36}+1}=\dfrac{3}{7}.\]
+\item Ta có
+\begin{align*}
+A&=\dfrac{2\sqrt{x}(\sqrt{x}-3)+(\sqrt{x}+1)(\sqrt{x}+3)+11\sqrt{x}-3}{(\sqrt{x}-3)(\sqrt{x}+3)}\\
+&=\dfrac{3x+9\sqrt{x}}{(\sqrt{x}-3)(\sqrt{x}+3)}=\dfrac{3\sqrt{x}}{\sqrt{x}-3}.
+\end{align*}
+\item Ta có
+\[P=A\cdot B=\dfrac{3\sqrt{x}}{\sqrt{x}-3}\cdot\dfrac{\sqrt{x}-3}{\sqrt{x}+1}=\dfrac{3\sqrt{x}}{\sqrt{x}+1}.\]
+Để $P=\dfrac{1}{2}$:
+\[\dfrac{3\sqrt{x}}{\sqrt{x}+1}=\dfrac{1}{2}\Leftrightarrow 6\sqrt{x}=\sqrt{x}+1\Leftrightarrow 5\sqrt{x}=1\Leftrightarrow \sqrt{x}=\dfrac{1}{5}\Leftrightarrow x=\dfrac{1}{25}\ (\text{TM}).\]
+Vậy $x=\dfrac{1}{25}$ thì $P=\dfrac{1}{2}$.
+\end{cacy}
+}
+\end{bt}

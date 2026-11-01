@@ -1,0 +1,39 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT26.caugiay-l3.003 | trang=1 | so=2 | de=II | vitri=CD2.5,C3.9.6 | muc=9 | tt=0 | soat=ok
+\begin{bt}
+Cho hai biểu thức: $A = \dfrac{\sqrt{x}+1}{x+\sqrt{x}+1}$ và $B = \dfrac{\sqrt{x}+1}{x-1} - \dfrac{x+2}{x\sqrt{x}-1}$ ($x > 0; x \ne 1$).
+\begin{cacy}
+\item Tính giá trị của $A$ khi $x = 9$.
+\item Rút gọn biểu thức $P = B - A$.
+\item Tìm giá trị lớn nhất của biểu thức: $Q = \dfrac{2}{P} + \sqrt{x}$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x = 9$ (tmđk) vào $A$ ta có
+\[ A = \dfrac{\sqrt{x}+1}{x+\sqrt{x}+1} = \dfrac{3+1}{9+3+1} = \dfrac{4}{13}. \]
+\item Ta có:
+\[ P = B - A = \dfrac{\sqrt{x}+1}{x-1} - \dfrac{x+2}{x\sqrt{x}-1} - \dfrac{\sqrt{x}+1}{x+\sqrt{x}+1} \]
+\[ P = \dfrac{\sqrt{x}+1}{(\sqrt{x}+1)(\sqrt{x}-1)} - \dfrac{x+2}{\sqrt{x}^3-1} - \dfrac{\sqrt{x}+1}{x+\sqrt{x}+1} \]
+\[ P = \dfrac{1}{\sqrt{x}-1} - \dfrac{x+2}{(\sqrt{x}-1)(x+\sqrt{x}+1)} - \dfrac{\sqrt{x}+1}{x+\sqrt{x}+1} \]
+\[ P = \dfrac{x+\sqrt{x}+1}{(\sqrt{x}-1)(x+\sqrt{x}+1)} - \dfrac{x+2}{(\sqrt{x}-1)(x+\sqrt{x}+1)} - \dfrac{(\sqrt{x}+1)(\sqrt{x}-1)}{(\sqrt{x}-1)(x+\sqrt{x}+1)} \]
+\[ P = \dfrac{x+\sqrt{x}+1-x-2-x+1}{(\sqrt{x}-1)(x+\sqrt{x}+1)} \]
+\[ P = \dfrac{\sqrt{x}-x}{(\sqrt{x}-1)(x+\sqrt{x}+1)} \]
+\[ P = \dfrac{-\sqrt{x}(\sqrt{x}-1)}{(\sqrt{x}-1)(x+\sqrt{x}+1)} \]
+\[ P = \dfrac{-\sqrt{x}}{x+\sqrt{x}+1}. \]
+\item Ta có:
+\[ Q = \dfrac{2}{P} + \sqrt{x} = 2 : P + \sqrt{x} = 2 : \dfrac{-\sqrt{x}}{x+\sqrt{x}+1} + \sqrt{x} \]
+\[ Q = \sqrt{x} - \dfrac{2(x+\sqrt{x}+1)}{\sqrt{x}} \]
+\[ Q = \dfrac{x-2(x+\sqrt{x}+1)}{\sqrt{x}} = \dfrac{x-2x-2\sqrt{x}-2}{\sqrt{x}} \]
+\[ = \dfrac{-x-2\sqrt{x}-2}{\sqrt{x}} = -\left(\sqrt{x} + \dfrac{2}{\sqrt{x}} + 2\right). \]
+Vì $\sqrt{x} > 0 \Rightarrow \dfrac{2}{\sqrt{x}} \ge 0$, chứng minh được bđt: $a+b \ge 2\sqrt{ab}$ nên theo bất đẳng thức trên, ta có:
+\[ \sqrt{x} + \dfrac{2}{\sqrt{x}} \ge 2\sqrt{\sqrt{x} \cdot \dfrac{2}{\sqrt{x}}} = 2\sqrt{2} \]
+\[ \sqrt{x} + \dfrac{2}{\sqrt{x}} + 2 \ge 2\sqrt{2} + 2 \]
+\[ -\left(\sqrt{x} + \dfrac{2}{\sqrt{x}} + 2\right) \le -2\sqrt{2} - 2 \]
+\[ Q \le -2\sqrt{2} - 2. \]
+Dấu bằng xảy ra khi:
+\[ \sqrt{x} = \dfrac{2}{\sqrt{x}} \Leftrightarrow x = 2. \]
+Vậy $Q_{\max} = -2\sqrt{2}-2$ khi và chỉ khi $x = 2$.
+\end{cacy}
+}
+\end{bt}

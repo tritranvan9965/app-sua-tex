@@ -1,0 +1,28 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT26.caugiay-l1.003 | trang=1 | so=3 | de=II | vitri=CD2.6,C3.9.6 | muc=9 | tt=0 | soat=sua
+\begin{bt}
+
+Cho hai biểu thức $A = \dfrac{\sqrt{x}+5}{\sqrt{x}}$ và $B = \left(\dfrac{8-\sqrt{x}}{x-9} + \dfrac{2}{\sqrt{x}+3}\right) \cdot \dfrac{x-3\sqrt{x}}{\sqrt{x}+2}$ với $x > 0; x \ne 9$.
+1. Tính giá trị của biểu thức A tại $x = 4$.
+2. Chứng minh $B = \dfrac{\sqrt{x}}{\sqrt{x}+3}$.
+3. Cho $P = A \cdot B$. Tìm các giá trị của $x$ để biểu thức $P$ nhận giá trị là số nguyên.
+\loigiai{
+1. Với $x = 4$ (thỏa mãn điều kiện $x > 0; x \ne 9$), ta có:
+$A = \dfrac{\sqrt{4}+5}{\sqrt{4}} = \dfrac{2+5}{2} = \dfrac{7}{2}$.
+
+2. Ta có:
+$B = \left(\dfrac{8-\sqrt{x}}{x-9} + \dfrac{2}{\sqrt{x}+3}\right) \cdot \dfrac{x-3\sqrt{x}}{\sqrt{x}+2}$
+$B = \left(\dfrac{8-\sqrt{x}}{(\sqrt{x}-3)(\sqrt{x}+3)} + \dfrac{2(\sqrt{x}-3)}{(\sqrt{x}-3)(\sqrt{x}+3)}\right) \cdot \dfrac{\sqrt{x}(\sqrt{x}-3)}{\sqrt{x}+2}$
+$B = \dfrac{8-\sqrt{x} + 2\sqrt{x}-6}{(\sqrt{x}-3)(\sqrt{x}+3)} \cdot \dfrac{\sqrt{x}(\sqrt{x}-3)}{\sqrt{x}+2}$
+$B = \dfrac{\sqrt{x}+2}{(\sqrt{x}-3)(\sqrt{x}+3)} \cdot \dfrac{\sqrt{x}(\sqrt{x}-3)}{\sqrt{x}+2}$
+$B = \dfrac{\sqrt{x}}{\sqrt{x}+3}$ (đpcm).
+
+3. Ta có $P = A \cdot B = \dfrac{\sqrt{x}+5}{\sqrt{x}} \cdot \dfrac{\sqrt{x}}{\sqrt{x}+3} = \dfrac{\sqrt{x}+5}{\sqrt{x}+3}$.
+$P = \dfrac{\sqrt{x}+3+2}{\sqrt{x}+3} = 1 + \dfrac{2}{\sqrt{x}+3}$.
+Để $P$ nhận giá trị là số nguyên thì $\dfrac{2}{\sqrt{x}+3}$ phải là số nguyên.
+Vì $x > 0$ nên $\sqrt{x} > 0 \Rightarrow \sqrt{x}+3 > 3$.
+Do đó $0 < \dfrac{2}{\sqrt{x}+3} < \dfrac{2}{3}$.
+Vì $0 < \dfrac{2}{\sqrt{x}+3} < \dfrac{2}{3}$ và $\dfrac{2}{\sqrt{x}+3}$ là số nguyên nên không có giá trị $x$ nào thỏa mãn.
+}
+\end{bt}

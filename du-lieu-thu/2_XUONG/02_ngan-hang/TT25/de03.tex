@@ -1,0 +1,35 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.03.003 | trang=1 | so=2 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0
+\begin{bt}
+Cho hai biểu thức $A = 1 + \dfrac{\sqrt{x}}{x+1}$ và $B = \dfrac{2\sqrt{x}}{x\sqrt{x}+\sqrt{x}-x-1} - \dfrac{1}{\sqrt{x}-1}$ với $x \ge 0, x \ne \pm 1$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x = 4$.
+\item Chứng minh $B = \dfrac{1-\sqrt{x}}{x+1}$.
+\item Xét biểu thức $P = B : A$. Tìm $x$ để $P \le 0$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Khi $x = 4$ (thoả mãn điều kiện), thay vào biểu thức $A$ ta có:
+\[ A = 1 + \dfrac{\sqrt{4}}{4+1} = 1 + \dfrac{2}{5} = \dfrac{7}{5}. \]
+Vậy khi $x = 4$ thì $A = \dfrac{7}{5}$.
+
+\item Với $x \ge 0, x \ne \pm 1$, ta có:
+\begin{align*}
+B &= \dfrac{2\sqrt{x}}{x\sqrt{x}+\sqrt{x}-x-1} - \dfrac{1}{\sqrt{x}-1} \\
+&= \dfrac{2\sqrt{x}}{\sqrt{x}(x+1)-(x+1)} - \dfrac{1}{\sqrt{x}-1} \\
+&= \dfrac{2\sqrt{x}}{(x+1)(\sqrt{x}-1)} - \dfrac{1}{\sqrt{x}-1} \\
+&= \dfrac{2\sqrt{x} - (x+1)}{(x+1)(\sqrt{x}-1)} \\
+&= \dfrac{-(x - 2\sqrt{x} + 1)}{(x+1)(\sqrt{x}-1)} \\
+&= \dfrac{-(\sqrt{x}-1)^2}{(x+1)(\sqrt{x}-1)} = \dfrac{1-\sqrt{x}}{x+1}.
+\end{align*}
+
+\item Ta có:
+\[ P = B : A = \dfrac{1-\sqrt{x}}{x+1} : \left(1 + \dfrac{\sqrt{x}}{x+1}\right) = \dfrac{1-\sqrt{x}}{x+1} : \dfrac{x+\sqrt{x}+1}{x+1} = \dfrac{1-\sqrt{x}}{x+\sqrt{x}+1}. \]
+Vì $x \ge 0$ nên $x + \sqrt{x} + 1 > 0$.
+Do đó:
+\[ P \le 0 \Leftrightarrow 1 - \sqrt{x} \le 0 \Leftrightarrow \sqrt{x} \ge 1 \Leftrightarrow x \ge 1. \]
+Kết hợp với điều kiện $x \ge 0, x \ne \pm 1$, ta tìm được $x > 1$.
+\end{cacy}
+}
+\end{bt}

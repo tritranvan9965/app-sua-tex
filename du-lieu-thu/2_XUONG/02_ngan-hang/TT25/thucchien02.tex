@@ -1,0 +1,39 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.thucchien02.003 | trang=1 | so=2 | de=II | vitri=CD2.6,C3.9.6 | muc=9 | tt=0 | soat=ok
+\begin{bt}
+Cho hai biểu thức $P = \dfrac{5}{\sqrt{x}-2}$ và $Q = \dfrac{\sqrt{x}}{\sqrt{x}+2} - \dfrac{2}{\sqrt{x}-2} + \dfrac{8}{x-4}$ với $x \ge 0, x \ne 4$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $P$ khi $x = 25$.
+\item Chứng minh $Q = \dfrac{\sqrt{x}-2}{\sqrt{x}+2}$.
+\item Đặt $M = P \cdot Q$. Tìm $x$ để $M$ có giá trị là số nguyên tố.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x = 25$ (TMĐK) vào biểu thức $P$, ta có
+\[ P = \dfrac{5}{\sqrt{25}-2} = \dfrac{5}{5-2} = \dfrac{5}{3}. \]
+Vậy $P = \dfrac{5}{3}$ khi $x = 25$.
+\item Ta có:
+\[ Q = \dfrac{\sqrt{x}}{\sqrt{x}+2} - \dfrac{2}{\sqrt{x}-2} + \dfrac{8}{x-4} \]
+\[ Q = \dfrac{\sqrt{x}}{\sqrt{x}+2} - \dfrac{2}{\sqrt{x}-2} + \dfrac{8}{(\sqrt{x}-2)(\sqrt{x}+2)} \]
+\[ Q = \dfrac{x - 2\sqrt{x} - 2\sqrt{x} - 4 + 8}{(\sqrt{x}-2)(\sqrt{x}+2)} \]
+\[ Q = \dfrac{x - 4\sqrt{x} + 4}{(\sqrt{x}-2)(\sqrt{x}+2)} \]
+\[ Q = \dfrac{(\sqrt{x}-2)^2}{(\sqrt{x}-2)(\sqrt{x}+2)} \]
+\[ Q = \dfrac{\sqrt{x}-2}{\sqrt{x}+2}. \]
+Vậy $Q = \dfrac{\sqrt{x}-2}{\sqrt{x}+2}$.
+\item Ta có:
+\[ M = P \cdot Q = \dfrac{5}{\sqrt{x}-2} \cdot \dfrac{\sqrt{x}-2}{\sqrt{x}+2} = \dfrac{5}{\sqrt{x}+2} \]
+Vì $x \ge 0 \Rightarrow \sqrt{x} \ge 0 \Rightarrow \sqrt{x} + 2 \ge 2$.
+
+Do đó: $0 < M \le \dfrac{5}{2}$ hay $0 < M \le 2,5$.
+
+Vì $M$ là số nguyên tố nên $M = 2$.
+
+Suy ra $\dfrac{5}{\sqrt{x}+2} = 2$.
+
+Tìm được $x = \dfrac{1}{4}$ (TMĐK).
+
+Vậy với $x = \dfrac{1}{4}$ thì $M$ là số nguyên tố.
+\end{cacy}
+}
+\end{bt}

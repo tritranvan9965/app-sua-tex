@@ -1,0 +1,43 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.05.003 | trang=1 | so=2 | de=II | vitri=CD2.3,C3.9.6 | muc=9 | tt=0
+\begin{bt}
+Cho hai biểu thức $A=\dfrac{1}{\sqrt{x}-1}$ và $B=\left(\dfrac{-3\sqrt{x}}{x\sqrt{x}-1}-\dfrac{1}{1-\sqrt{x}}\right):\left(1-\dfrac{x+2}{1+\sqrt{x}+x}\right)$ với $x\ge0,\ x\ne1$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ khi $x=(1-\sqrt{3})^2$.
+\item Chứng minh giá trị của $B$ không phụ thuộc vào giá trị của $x$.
+\item Tìm tất cả các giá trị nguyên của $x$ để $\dfrac{2A}{B}$ nhận giá trị nguyên.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Ta có $x=(1-\sqrt{3})^2$ thỏa mãn điều kiện, khi đó $\sqrt{x}=\sqrt{(1-\sqrt{3})^2}=|1-\sqrt{3}|=\sqrt{3}-1$.
+
+Thay vào biểu thức $A$ ta có: $A=\dfrac{1}{\sqrt{3}-1-1}=\dfrac{1}{\sqrt{3}-2}=-2-\sqrt{3}$.
+\item Với $x\ge0,\ x\ne1$ ta có:
+\[
+\begin{aligned}
+B&=\left(\dfrac{-3\sqrt{x}}{x\sqrt{x}-1}-\dfrac{1}{1-\sqrt{x}}\right):\left(1-\dfrac{x+2}{1+\sqrt{x}+x}\right)\\
+&=\left(\dfrac{-3\sqrt{x}}{(\sqrt{x}-1)(x+\sqrt{x}+1)}+\dfrac{1}{\sqrt{x}-1}\right):\dfrac{(1+\sqrt{x}+x)-(x+2)}{1+\sqrt{x}+x}\\
+&=\dfrac{-3\sqrt{x}+x+\sqrt{x}+1}{(\sqrt{x}-1)(x+\sqrt{x}+1)}\cdot\dfrac{x+\sqrt{x}+1}{\sqrt{x}-1}\\
+&=\dfrac{x-2\sqrt{x}+1}{(\sqrt{x}-1)^2}=\dfrac{(\sqrt{x}-1)^2}{(\sqrt{x}-1)^2}=1.
+\end{aligned}
+\]
+Vậy giá trị của $B$ không phụ thuộc vào giá trị của $x$.
+\item Ta có $\dfrac{2A}{B}=\dfrac{2}{\sqrt{x}-1}$.
+
+Để $\dfrac{2A}{B}$ nhận giá trị nguyên thì $\sqrt{x}-1$ là ước của 2.
+
+Suy ra $\sqrt{x}-1\in\{-2;-1;1;2\}$.
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$\sqrt{x}-1$ & $-2$ & $-1$ & $1$ & $2$ \\
+\hline
+$x$ & Loại & $0$ & $4$ & $9$ \\
+\hline
+\end{tabular}
+\end{center}
+Vậy $x\in\{0;4;9\}$ thì $\dfrac{2A}{B}$ nhận giá trị nguyên.
+\end{cacy}
+}
+\end{bt}

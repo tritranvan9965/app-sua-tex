@@ -1,0 +1,42 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT26.tulap.003 | trang=1 | so=2.1 | de=II | vitri=CD2.4,C3.9.6 | muc=8 | tt=0
+\begin{bt}
+Cho biểu thức: $A = \dfrac{\sqrt{x}-3}{\sqrt{x}+3}$ và $B = \dfrac{\sqrt{x}+3}{\sqrt{x}-3} - \dfrac{5}{\sqrt{x}+3} - \dfrac{30}{x-9}$ với $x \ge 0, x \ne 9$.
+\begin{cacy}
+\item Tính giá trị biểu thức $A$ tại $x = 36$.
+\item Rút gọn biểu thức $B$.
+\item Với $P = A \cdot B$, tìm giá trị nguyên lớn nhất của $x$ để $|P| > P$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Thay $x = 36$ (TMĐK) vào biểu thức $A$, ta được:
+\[ A = \dfrac{\sqrt{36}-3}{\sqrt{36}+3} = \dfrac{6-3}{6+3} = \dfrac{3}{9} = \dfrac{1}{3}. \]
+\item Với $x \ge 0, x \ne 9$ ta có:
+\[
+\begin{aligned}
+B &= \dfrac{\sqrt{x}+3}{\sqrt{x}-3} - \dfrac{5}{\sqrt{x}+3} - \dfrac{30}{x-9} \\
+&= \dfrac{(\sqrt{x}+3)^2}{(\sqrt{x}-3)(\sqrt{x}+3)} - \dfrac{5(\sqrt{x}-3)}{(\sqrt{x}-3)(\sqrt{x}+3)} - \dfrac{30}{(\sqrt{x}-3)(\sqrt{x}+3)} \\
+&= \dfrac{x+6\sqrt{x}+9-5\sqrt{x}+15-30}{(\sqrt{x}-3)(\sqrt{x}+3)} \\
+&= \dfrac{x+\sqrt{x}-6}{(\sqrt{x}-3)(\sqrt{x}+3)} \\
+&= \dfrac{x+3\sqrt{x}-2\sqrt{x}-6}{(\sqrt{x}-3)(\sqrt{x}+3)} \\
+&= \dfrac{\sqrt{x}(\sqrt{x}+3)-2(\sqrt{x}+3)}{(\sqrt{x}-3)(\sqrt{x}+3)} \\
+&= \dfrac{(\sqrt{x}-2)(\sqrt{x}+3)}{(\sqrt{x}-3)(\sqrt{x}+3)} \\
+&= \dfrac{\sqrt{x}-2}{\sqrt{x}-3}.
+\end{aligned}
+\]
+Vậy $B = \dfrac{\sqrt{x}-2}{\sqrt{x}-3}$ với $x \ge 0, x \ne 9$.
+\item Với $x \ge 0, x \ne 9$ ta có:
+\[ P = A \cdot B = \dfrac{\sqrt{x}-3}{\sqrt{x}+3} \cdot \dfrac{\sqrt{x}-2}{\sqrt{x}-3} = \dfrac{\sqrt{x}-2}{\sqrt{x}+3}. \]
+Để $|P| > P$ hay $\left| \dfrac{\sqrt{x}-2}{\sqrt{x}+3} \right| > \dfrac{\sqrt{x}-2}{\sqrt{x}+3}$ khi và chỉ khi $\dfrac{\sqrt{x}-2}{\sqrt{x}+3} < 0$.
+
+Mà $\sqrt{x}+3 \ge 3 > 0$ với mọi $x \ge 0, x \ne 9$ nên $\sqrt{x}-2 < 0$ hay $x < 4$.
+
+Kết hợp với điều kiện $x \ge 0, x \ne 9$ ta có $0 \le x < 4$ thỏa mãn $|P| > P$.
+
+Khi đó giá trị nguyên lớn nhất của $x$ để $|P| > P$ là $x = 3$.
+
+Vậy $x = 3$ là giá trị nguyên lớn nhất của $x$ để $|P| > P$.
+\end{cacy}
+}
+\end{bt}

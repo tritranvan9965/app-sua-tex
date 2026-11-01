@@ -1,0 +1,26 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=13CD.03.008 | trang=82 | so=8 | vitri=C6.20.5,CD2.5 | muc=10 | tt=0 | gl=1
+\begin{bt}
+Cho phương trình $x^2+2mx-2m-1=0$. Tìm $m$ để phương trình có hai nghiệm phân biệt $x_1, x_2$ sao cho $P=\dfrac{2x_1x_2+1}{x_1^2-2mx_2+1-2m}$ đạt giá trị nhỏ nhất.
+\loigiai{
+Có $\Delta'=m^2-1.(-2m-1)=m^2+2m+1=(m+1)^2$.
+
+Phương trình có hai nghiệm phân biệt khi $\Delta'>0 \Leftrightarrow (m+1)^2>0 \Leftrightarrow m\ne -1$
+
+Do $x_1$ là nghiệm của phương trình $x^2+2mx-2m-1=0$ nên
+\[ x_1^2+2mx_1-2m-1=0 \Rightarrow x_1^2=-2mx_1+2m+1. \]
+Thay vào $P$, ta được $P=\dfrac{2x_1x_2+1}{-2mx_1+2m+1-2mx_2+1-2m}=\dfrac{2x_1x_2+1}{-2m(x_1+x_2)+2}$
+
+Theo định lý Viet, ta có $x_1+x_2=-\dfrac{b}{a}=-2m$, $x_1x_2=\dfrac{c}{a}=-2m-1$ nên ta được
+\begin{align*}
+&P=\dfrac{2.(-2m-1)+1}{-2m.(-2m)+2}=\dfrac{-4m-1}{4m^2+2}\\
+&\Rightarrow P(4m^2+2)=-4m-1 \Leftrightarrow 4P.m^2+4m+2P+1=0
+\end{align*}
+* $P=0 \Rightarrow m=-\dfrac{1}{4}$.
+
+* $P\ne 0 \Rightarrow \Delta_M'=4-4P(2P+1)\ge 0 \Rightarrow 2P^2+P-1\le 0 \Rightarrow -1\le P\le \dfrac{1}{2}$.
+
+Vậy $\operatorname{Min} P=-1$ khi $-4m^2+4M-1=0 \Rightarrow M=\dfrac{1}{2}$ (thỏa mãn).
+}
+\end{bt}

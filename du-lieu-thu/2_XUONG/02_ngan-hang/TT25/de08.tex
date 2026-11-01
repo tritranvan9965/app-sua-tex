@@ -1,0 +1,33 @@
+% Ban thu: chi giu cac cau co trong CD2
+
+%@ id=TT25.08.003 | trang=1 | so=2 | de=II | vitri=CD2.4,C3.9.5 | muc=8 | tt=0 | soat=ok
+\begin{bt}
+Cho hai biểu thức $A=\dfrac{\sqrt{x}-2}{\sqrt{x}-1}$ và $B=\dfrac{x-5}{x-1}-\dfrac{2}{\sqrt{x}+1}+\dfrac{4}{\sqrt{x}-1}$ với $x\ge0; x\ne1$.
+\begin{cacy}
+\item Tính giá trị của biểu thức $A$ tại $x=25$.
+\item Rút gọn biểu thức $B$.
+\item Đặt $P=\dfrac{A}{B}$. Tìm các giá trị $x$ nguyên để $\sqrt{P}<\dfrac12$.
+\end{cacy}
+\loigiai{
+\begin{cacy}
+\item Với $x=25$ (thỏa mãn điều kiện $x\ge0; x\ne1$), thay vào $A$:
+\[A=\dfrac{\sqrt{25}-2}{\sqrt{25}-1}=\dfrac{5-2}{5-1}=\dfrac34.\]
+Vậy với $x=25$ thì giá trị của biểu thức $A=\dfrac34$.
+\item Với $x\ge0; x\ne1$, ta có
+\begin{align*}
+B&=\dfrac{x-5}{x-1}-\dfrac{2}{\sqrt{x}+1}+\dfrac{4}{\sqrt{x}-1}\\
+&=\dfrac{x-5-2(\sqrt{x}-1)+4(\sqrt{x}+1)}{x-1}\\
+&=\dfrac{x+2\sqrt{x}+1}{x-1}
+=\dfrac{(\sqrt{x}+1)^2}{(\sqrt{x}-1)(\sqrt{x}+1)}
+=\dfrac{\sqrt{x}+1}{\sqrt{x}-1}.
+\end{align*}
+Vậy $B=\dfrac{\sqrt{x}+1}{\sqrt{x}-1}$.
+\item Ta có
+\[P=\dfrac{A}{B}=\dfrac{\sqrt{x}-2}{\sqrt{x}-1}:\dfrac{\sqrt{x}+1}{\sqrt{x}-1}=\dfrac{\sqrt{x}-2}{\sqrt{x}+1}.\]
+Để $\sqrt P$ tồn tại thì $P\ge0$. Vì $x\ge0$ nên $\sqrt{x}+1>0$, do đó $\sqrt{x}-2\ge0$, hay $x\ge4$.
+Để $\sqrt P<\dfrac12$ thì $P<\dfrac14$, nên
+\[\dfrac{\sqrt{x}-2}{\sqrt{x}+1}<\dfrac14\iff\dfrac{3\sqrt{x}-9}{4(\sqrt{x}+1)}<0\iff x<9.\]
+Kết hợp điều kiện $x\ge0; x\ne1; x\ge4$, suy ra $4\le x<9$. Vậy $x\in\{4;5;6;7;8\}$.
+\end{cacy}
+}
+\end{bt}
