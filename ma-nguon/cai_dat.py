@@ -87,6 +87,11 @@ def dang_ky() -> None:
     for k in MENU_FILE:
         ghi(k, {"": f"Mở bằng {TEN}", "Icon": f"{EXE},0"})
         ghi(rf"{k}\command", {"": mo})
+    import chuyen_pdf
+    for d in chuyen_pdf.DUOI:
+        k = rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.ChuyenPdf"
+        ghi(k, {"": "Chuyển thành PDF", "Icon": f"{EXE},0"})
+        ghi(rf"{k}\command", {"": f'"{EXE}" --chuyen-pdf "%1"'})
     ghi(MENU_THU_MUC, {"": f"Mở thư mục bằng {TEN}", "Icon": f"{EXE},0"})
     ghi(rf"{MENU_THU_MUC}\command", {"": mo})
     # Khai với Windows để app hiện trong Cài đặt > Ứng dụng mặc định.
@@ -116,6 +121,9 @@ def bo_dang_ky() -> None:
         if doc(rf"{LOP}\{d}") == lop:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, rf"{LOP}\{d}", 0, winreg.KEY_SET_VALUE) as k:
                 winreg.DeleteValue(k, "")
+    import chuyen_pdf
+    for d in chuyen_pdf.DUOI:
+        xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.ChuyenPdf")
     for k in [*MENU_FILE, MENU_THU_MUC, rf"{LOP}\Applications\{MA}.exe", rf"Software\{MA}", UNINSTALL]:
         xoa_cay(k)
     try:

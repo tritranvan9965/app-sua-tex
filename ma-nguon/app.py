@@ -723,8 +723,22 @@ def mo_luc_dau(duong) -> None:
     loi.dat_du_an(DA)
 
 
+def chuyen_thanh_pdf(ds: list) -> None:
+    """Gọi từ menu chuột phải của Explorer: chuyển xong thì mở thư mục và chọn sẵn file PDF mới. Không mở cửa sổ app."""
+    import chuyen_pdf
+    for x in ds:
+        try:
+            dich = chuyen_pdf.chuyen(Path(x))
+        except Exception as e:
+            ctypes.windll.user32.MessageBoxW(0, f"{Path(x).name}\n\n{e}", "Sửa TeX - Chuyển thành PDF", 0x10)
+        else:
+            subprocess.Popen(["explorer", f"/select,{dich}"])
+
+
 def main():
     global CONG
+    if "--chuyen-pdf" in sys.argv:
+        return chuyen_thanh_pdf(sys.argv[sys.argv.index("--chuyen-pdf") + 1:])
     if "--go-cai-dat" in sys.argv:
         import cai_dat
         return cai_dat.go("--im" in sys.argv)
