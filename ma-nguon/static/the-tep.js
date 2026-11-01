@@ -113,8 +113,32 @@ async function chonThe(t) {
   capNhatRibbon();
 }
 
+// Màn hình bắt đầu: file và thư mục mở gần đây, bấm để mở lại.
+async function veGanDay() {
+  let ds;
+  try { ds = (await goi("/api/gan-day")).ds; } catch { return; }
+  $("gan-day").hidden = !ds.length;
+  $("ds-gan-day").replaceChildren(...ds.map(x => {
+    const li = document.createElement("li"), b = document.createElement("button"), ten = document.createElement("span"), duong = document.createElement("span");
+    b.type = "button";
+    ten.className = "ten";
+    ten.textContent = x.ten;
+    duong.className = "duong";
+    duong.textContent = x.thu_muc;
+    duong.title = x.duong;
+    b.title = x.duong;
+    b.insertAdjacentHTML("afterbegin", x.loai === "thu_muc" ? bieuTuong("thu-muc") : "");
+    if (x.loai !== "thu_muc") b.prepend(nhanLoaiTep(x.duong));
+    b.append(ten, duong);
+    b.onclick = () => moTuNgoai(x.duong);
+    li.append(b);
+    return li;
+  }));
+}
+
 // Không còn thẻ nào thì trở về màn hình trống.
 function xoaManHinh() {
+  veGanDay();
   thoatPdf();
   Object.assign(pt, {ds: [], tep: new Map(), xem: null, nhap: false, doi: false, ten: "", nguon: null});
   xvPdf.xoa();
@@ -175,6 +199,7 @@ function theKeTiep(buoc) {
   if (n > 1) chonThe(the.ds[(the.ds.indexOf(the.hien) + buoc + n) % n]);
 }
 
+addEventListener("DOMContentLoaded", veGanDay);
 addEventListener("beforeunload", e => { if (coTheChuaLuu()) e.preventDefault(); });
 addEventListener("keydown", e => {
   const c = e.ctrlKey || e.metaKey;

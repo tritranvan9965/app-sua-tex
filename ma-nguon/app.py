@@ -32,6 +32,8 @@ import loi  # noqa: E402
 
 STATIC = GOC_APP / "static"
 CAI_DAT = duong_app.DU_LIEU / "cai-dat.json"
+DS_GAN_DAY = duong_app.DU_LIEU / "gan-day.json"
+SO_GAN_DAY = 20
 DS_GOC = duong_app.DU_LIEU / "thu-muc-da-mo.json"  # tách khỏi cai-dat.json vì file đó do trang ghi đè cả tệp
 CONG_DANG_CHAY = duong_app.DU_LIEU / "cong-dang-chay.txt"  # để lần mở sau tìm được cửa sổ đang chạy
 MAC_DINH = None if duong_app.DA_DONG_GOI else GOC_APP.parent / "du-lieu-thu" / "du-an-thu.json"
@@ -69,9 +71,40 @@ def phien(p: Path) -> str:
     return str(p.stat().st_mtime_ns)
 
 
+def ghi_gan_day(duong, loai: str) -> None:
+    """Nhớ file, thư mục vừa mở (mới nhất đứng đầu) cho màn hình bắt đầu. Lỗi ghi không được làm hỏng việc mở."""
+    try:
+        d = str(duong)
+        ds = [x for x in doc_gan_day() if x["duong"].lower() != d.lower()]
+        ghi = DS_GAN_DAY.with_name(DS_GAN_DAY.name + ".tam-app")
+        ghi.write_text(json.dumps([{"duong": d, "loai": loai}, *ds][:SO_GAN_DAY], ensure_ascii=False, indent=1), encoding="utf-8")
+        ghi.replace(DS_GAN_DAY)
+    except OSError:
+        pass
+
+
+def doc_gan_day() -> list:
+    try:
+        ds = json.loads(DS_GAN_DAY.read_text(encoding="utf-8"))
+        return [x for x in ds if isinstance(x, dict) and isinstance(x.get("duong"), str)] if isinstance(ds, list) else []
+    except (OSError, ValueError):
+        return []
+
+
+def gan_day(_=None) -> dict:
+    """Bỏ mục đã bị xoá hay đổi tên ngoài app."""
+    ra = []
+    for x in doc_gan_day():
+        p = Path(x["duong"])
+        if p.exists():
+            ra.append({**x, "ten": p.name or x["duong"], "thu_muc": str(p if x["loai"] == "thu_muc" else p.parent)})
+    return {"ds": ra}
+
+
 def doc_tep(duong: str) -> dict:
     p = tep_trong_du_an(duong)
     chu = p.read_text(encoding="utf-8")
+    ghi_gan_day(p, "tex")
     return {"duong": str(p), "ten": p.name, "chu": chu, "phien": phien(p),
             "la_tex": p.suffix.lower() == ".tex", "la_file_rap": loi.la_file_rap(p)}
 
@@ -214,6 +247,8 @@ def mo_moi(duong: str, tep: str = None) -> dict:
         DA, DM, CHUA_LUU = da, loi.DanhMuc(), False
         loi.dat_du_an(DA)
         GOC_HIEN = them_goc(str(p), da)
+    if not tep and p.is_dir():
+        ghi_gan_day(p, "thu_muc")
     if CUA_SO:
         CUA_SO.set_title(f"{DA['ten']} - Sửa TeX")
     return {}
@@ -298,6 +333,7 @@ def pdf_chon(d: dict) -> dict:
         except ValueError as e:
             raise LoiApp(400, str(e))
         PDF_DA_CHON.add(str(p))
+        ghi_gan_day(p, "pdf")
     return {"tep": tep}
 
 
@@ -589,6 +625,8 @@ class XuLy(BaseHTTPRequestHandler):
             if hoi.get("duong") not in PDF_DA_CHON:
                 raise LoiApp(403, "File này chưa được chọn.")
             self._gui(200, Path(hoi["duong"]).read_bytes(), "application/pdf")
+        elif url.path == "/api/gan-day":
+            self._json(200, gan_day())
         elif url.path == "/api/thu-vien":
             self._json(200, thu_vien())
         elif url.path == "/api/phong":
@@ -637,7 +675,7 @@ def mo_cua_so(dia_chi: str, ten: str) -> bool:
         import webview
     except ImportError:
         return False
-    CUA_SO = cua_so = webview.create_window(f"{ten} - Sửa TeX", dia_chi, width=1440, height=900, min_size=(1000, 640))
+    CUA_SO = cua_so = webview.create_window(f"{ten} - Sửa TeX", dia_chi, width=1440, height=900, min_size=(1000, 640), text_select=True)
 
     def khi_dong():
         if not CHUA_LUU:
