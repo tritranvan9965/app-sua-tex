@@ -25,6 +25,16 @@ def tao_bieu_tuong(p: Path) -> None:
     im.save(p, sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
 
 
+def tao_bieu_tuong_loai(p: Path, nhan: str, chu: str, nen: str) -> None:
+    """Biểu tượng file .pdf, .tex: cùng kiểu nhãn màu như thanh file trong app."""
+    n = 512
+    im = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    v = ImageDraw.Draw(im)
+    v.rounded_rectangle((16, 96, n - 16, n - 96), 72, fill=nen)
+    v.text((n / 2, n / 2 + 6), nhan, font=ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 190), fill=chu, anchor="mm")
+    im.save(p, sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+
+
 def pyinstaller(*ts) -> None:
     subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--log-level", "WARN", "--workpath", str(TAM / "lam"),
                     "--specpath", str(TAM), "--windowed", "--paths", str(MA), "--icon", str(TAM / "sua-tex.ico"), *ts], check=True)
@@ -36,6 +46,8 @@ def main():
     tao_bieu_tuong(TAM / "sua-tex.ico")
     pyinstaller("--name", cai_dat.MA, "--distpath", str(TAM / "app"), "--add-data", f"{MA / 'static'};static",
                 "--add-data", f"{GOC / 'thu-vien-mau'};thu-vien-mau", str(MA / "app.py"))
+    tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "pdf.ico", "PDF", "#ff9d94", "#4b2f2f")
+    tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "tex.ico", "TEX", "#86d0ff", "#25415a")
     shutil.make_archive(str(TAM / "sua-tex"), "zip", TAM / "app" / cai_dat.MA)
     ten = f"SuaTeX-Setup-{cai_dat.PHIEN_BAN}"
     pyinstaller("--onefile", "--name", ten, "--distpath", str(PH), "--add-data", f"{TAM / 'sua-tex.zip'};.", str(PH / "bo_cai.py"))

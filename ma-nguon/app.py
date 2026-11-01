@@ -256,15 +256,21 @@ def mo_moi(duong: str, tep: str = None) -> dict:
     return {}
 
 
+def thu_muc_bat_dau() -> str:
+    """Hộp chọn của Windows mở sẵn ở thư mục đang làm việc, không phải Documents."""
+    g = DA and DA.get("goc")
+    return str(g) if g and Path(g).is_dir() else ""
+
+
 def chon_mo(d: dict) -> dict:
     """Hiện hộp chọn của Windows. Không có cửa sổ app thì để trang hỏi đường dẫn."""
     if not CUA_SO:
         return {"khong_co_hop": True}
     import webview
     if d.get("kieu") == "thu_muc":
-        ds = CUA_SO.create_file_dialog(webview.FileDialog.FOLDER)
+        ds = CUA_SO.create_file_dialog(webview.FileDialog.FOLDER, directory=thu_muc_bat_dau())
     else:
-        ds = CUA_SO.create_file_dialog(webview.FileDialog.OPEN, file_types=("File LaTeX và PDF (*.tex;*.pdf)", "File dự án (*.json)"))
+        ds = CUA_SO.create_file_dialog(webview.FileDialog.OPEN, directory=thu_muc_bat_dau(), file_types=("File LaTeX và PDF (*.tex;*.pdf)", "File dự án (*.json)"))
     if not ds:
         return {"huy": True}
     return pdf_chon({"duong": [ds[0]]}) if ds[0].lower().endswith(".pdf") else mo_moi(ds[0])
@@ -322,7 +328,7 @@ def pdf_chon(d: dict) -> dict:
         if not CUA_SO:
             return {"khong_co_hop": True}
         import webview
-        ds = CUA_SO.create_file_dialog(webview.FileDialog.OPEN, allow_multiple=True, file_types=("File PDF (*.pdf)",))
+        ds = CUA_SO.create_file_dialog(webview.FileDialog.OPEN, directory=thu_muc_bat_dau(), allow_multiple=True, file_types=("File PDF (*.pdf)",))
         if not ds:
             return {"huy": True}
     tep = []
@@ -728,15 +734,13 @@ def mo_luc_dau(duong) -> None:
 
 
 def chuyen_thanh_pdf(ds: list) -> None:
-    """Gọi từ menu chuột phải của Explorer: chuyển xong thì mở thư mục và chọn sẵn file PDF mới. Không mở cửa sổ app."""
+    """Gọi từ menu chuột phải của Explorer: chuyển xong thì thôi, vì người dùng đang đứng ngay trong thư mục đó. Không mở cửa sổ app."""
     import chuyen_pdf
     for x in ds:
         try:
-            dich = chuyen_pdf.chuyen(Path(x))
+            chuyen_pdf.chuyen(Path(x))
         except Exception as e:
             ctypes.windll.user32.MessageBoxW(0, f"{Path(x).name}\n\n{e}", "Sửa TeX - Chuyển thành PDF", 0x10)
-        else:
-            subprocess.Popen(["explorer", f"/select,{dich}"])
 
 
 def cho_gom_file(thu: Path, duong: str) -> list:
