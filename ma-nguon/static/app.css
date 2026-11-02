@@ -236,6 +236,8 @@ button.chinh{background:var(--bang);border-color:var(--bang);color:#fff;font-wei
 .to-trang{position:relative;margin:0 auto 12px;background:#fff;box-shadow:0 1px 3px #17302a33}
 .to-trang canvas{display:block;width:100%;height:100%}
 .tung-trang .to-trang:not(.hien){display:none}
+.toan-man :is(#xem-pdf,#xem-trang).o-toan-man{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:safe center;background:#000;scrollbar-gutter:auto}
+.o-toan-man .to-trang{flex:none;margin:0 auto;box-shadow:none}
 body{user-select:none}
 .textLayer,.textLayer *,.CodeMirror,.CodeMirror *,input,textarea,pre,.o-nhap{user-select:text}
 .textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;text-align:initial;-webkit-text-size-adjust:none;transform-origin:0 0;z-index:2}

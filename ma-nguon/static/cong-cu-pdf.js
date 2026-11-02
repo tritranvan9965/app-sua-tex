@@ -1,7 +1,7 @@
 "use strict";
 // Công cụ PDF: một dãy trang lấy từ một hay nhiều file. Gộp là lưu cả dãy, tách là lưu các trang đã chọn.
 
-const pt = {tep: new Map(), ds: [], xem: null, keo: null, soId: 0, nhap: false, doi: false, ten: "", nguon: null};  // nhap: dãy lấy từ PDF biên dịch; doi: dãy đã đổi so với lúc mở
+const pt = {tep: new Map(), ds: [], xem: null, keo: null, soId: 0, nhap: false, doi: false, ten: "", nguon: null, thuMuc: null};  // nhap: dãy lấy từ PDF biên dịch; doi: dãy đã đổi so với lúc mở; thuMuc: nơi gợi ý lưu của PDF chưa có file thật
 
 const dangPdf = () => document.body.classList.contains("che-do-pdf");
 
@@ -67,6 +67,18 @@ async function moGop(ds) {
   try {
     await moThePdf((await goi("/api/pdf-chon", {duong: ds})).tep);
   } catch (e) { bao(e.message, true); }
+}
+
+// Chuyển thành PDF và mở: mỗi file một thẻ, chưa lưu nên app còn hỏi trước khi đóng. Lưu thì gợi ý tên đó ở thư mục của file gốc.
+async function moChuyen(ds) {
+  for (const {duong, thu_muc} of ds) {
+    try {
+      await moThePdf((await goi("/api/pdf-chon", {duong: [duong]})).tep);
+      pt.doi = true;
+      pt.thuMuc = thu_muc;
+      capNhatRibbon();
+    } catch (e) { bao(e.message, true); }
+  }
 }
 
 // PDF biên dịch mở thành thẻ riêng để tách, gộp. Lưu ở thẻ này vẫn ghi vào vị trí đã định của file .tex.
@@ -210,8 +222,8 @@ async function luuTrang(chiChon, dich, loc = m => m.chon) {
   datViec("Đang lưu PDF...");
   try {
     const trang = await gomTrang(xvPdf, m => !chiChon || loc(m));
-    const ten = `${pt.ten.replace(/\.pdf$/i, "")}-moi.pdf`, nguon = chiChon ? null : pt.nguon;
-    let kq = await goi("/api/pdf-ghi", {trang, ten, dich, nguon});
+    const ten = pt.thuMuc && !chiChon ? pt.ten : `${pt.ten.replace(/\.pdf$/i, "")}-moi.pdf`, nguon = chiChon ? null : pt.nguon;
+    let kq = await goi("/api/pdf-ghi", {trang, ten, dich, nguon, thu_muc: pt.thuMuc});
     if (kq.khong_co_hop) {
       const nhap = prompt("Dán đường dẫn file PDF sẽ lưu:");
       if (!nhap) return;

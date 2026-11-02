@@ -396,6 +396,57 @@ $("o-zoom").onkeydown = e => {
 };
 $("o-trang").onblur = $("o-zoom").onblur = capNhatNav;
 
+// ---------- Toàn màn hình: từng trang vừa khít, lật bằng phím mũi tên hoặc con lăn ----------
+
+let toanMan = null;  // {v, kieu, tiLe, mot}: cách xem cũ để trả lại lúc thoát
+
+async function batToanMan() {
+  const v = xv();
+  if (!v.trang.length || (!dangPdf() && !bc.xem)) return bao("Chưa có PDF để xem toàn màn hình.", true);
+  toanMan = {v, kieu: v.kieu, tiLe: v.tiLe, mot: v.laTungTrang()};
+  document.activeElement?.blur();  // để phím lật trang không gõ vào ô soạn đang ẩn
+  document.body.classList.add("toan-man");
+  v.o.classList.add("o-toan-man", "tung-trang");
+  v.kieu = "trang";
+  v.den(v.hien);
+  try {
+    const kq = await goi("/api/toan-man", {bat: true});
+    if (kq.khong_co_cua_so) await document.documentElement.requestFullscreen();  // chạy bằng trình duyệt
+  } catch { /* không phóng được thì vẫn phủ kín cửa sổ */ }
+}
+
+function thoatToanMan() {
+  if (!toanMan) return;
+  const {v, kieu, tiLe, mot} = toanMan;
+  toanMan = null;
+  document.body.classList.remove("toan-man");
+  v.o.classList.remove("o-toan-man");
+  v.o.classList.toggle("tung-trang", mot);
+  Object.assign(v, {kieu, tiLe});
+  v.den(v.hien);
+  capNhatRibbon();
+  goi("/api/toan-man", {bat: false}).catch(() => {});
+  if (document.fullscreenElement) document.exitFullscreen();
+}
+
+function phimToanMan(e) {
+  if (e.target.closest?.("textarea, input") || e.ctrlKey || e.altKey || e.metaKey) return;
+  const v = toanMan.v, buoc = {ArrowRight: 1, ArrowDown: 1, PageDown: 1, " ": 1, ArrowLeft: -1, ArrowUp: -1, PageUp: -1}[e.key];
+  const den = buoc ? v.hien + buoc : e.key === "Home" ? 0 : e.key === "End" ? Infinity : null;
+  if (e.key === "Escape") thoatToanMan();
+  else if (den !== null) { e.preventDefault(); v.den(den); }
+}
+
+for (const v of [xvTex, xvPdf]) {
+  v.o.addEventListener("wheel", e => {
+    // Đã zoom to hơn màn hình thì con lăn vẫn để cuộn.
+    if (toanMan?.v !== v || e.ctrlKey || v.o.scrollHeight > v.o.clientHeight + 1) return;
+    e.preventDefault();
+    v.den(v.hien + Math.sign(e.deltaY));
+  }, {passive: false});
+}
+addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) thoatToanMan(); });
+
 let henKhop;
 addEventListener("resize", () => {
   clearTimeout(henKhop);
@@ -403,6 +454,8 @@ addEventListener("resize", () => {
 });
 addEventListener("keydown", e => {
   if (e.key === "Escape" && vungChon) return xoaVung();
+  if (e.key === "F11") { e.preventDefault(); return e.repeat ? undefined : toanMan ? thoatToanMan() : batToanMan(); }
+  if (toanMan) phimToanMan(e);
   if (vungChon && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") { e.preventDefault(); saoVung(); }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.target.closest?.("textarea, input, .CodeMirror") && hoanTacCt()) e.preventDefault();
   if (e.altKey && e.key === "1") { e.preventDefault(); datCongCu("chu"); }

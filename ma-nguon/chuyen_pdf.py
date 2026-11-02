@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 ANH = {".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif", ".tiff", ".webp"}
 CHU = {".txt", ".md", ".csv", ".json", ".tex", ".log"}
@@ -16,6 +16,8 @@ DUOI = sorted(ANH | CHU | WEB | OFFICE.keys())
 TRANG_A4 = (1654, 2339)  # A4 ở 200 dpi
 EDGE = [Path(os.environ.get(b, "")) / r"Microsoft\Edge\Application\msedge.exe" for b in ("ProgramFiles(x86)", "ProgramFiles")]
 CUA_SO_AN = subprocess.CREATE_NO_WINDOW
+QUA_GIO = 180  # giây cho mỗi file. Word, Excel có thể treo vì hộp thoại ẩn nên phải có giới hạn.
+TIEN_TRINH_OFFICE = {"Word": "WINWORD", "Excel": "EXCEL", "PowerPoint": "POWERPNT"}
 
 
 def dich_moi(nguon: Path) -> Path:
@@ -68,16 +70,30 @@ def tu_chu(nguon: Path, dich: Path) -> None:
         tu_edge(f.as_uri(), dich)
 
 
+def tat_ban_treo(ung_dung: str) -> None:
+    """Tắt powershell thì Word chạy ẩn vẫn còn. Chỉ tắt bản do tự động hoá mở trong lúc vừa rồi, không đụng Word người dùng đang soạn."""
+    lenh = (f"Get-CimInstance Win32_Process -Filter \"name='{TIEN_TRINH_OFFICE[ung_dung]}.EXE'\" | Where-Object {{ $_.CommandLine -match 'Automation|Embedding' "
+            f"-and $_.CreationDate -ge (Get-Date).AddSeconds(-{QUA_GIO + 10}) }} | ForEach-Object {{ Stop-Process -Id $_.ProcessId -Force }}")
+    subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", lenh], capture_output=True, creationflags=CUA_SO_AN, timeout=30, check=False)
+
+
 def tu_office(nguon: Path, dich: Path) -> None:
     ung_dung = OFFICE[nguon.suffix.lower()]
-    mo = {"Word": "$d=$a.Documents.Open($env:NGUON,$false,$true); $d.ExportAsFixedFormat($env:DICH,17); $d.Close($false)",
-          "Excel": "$d=$a.Workbooks.Open($env:NGUON,0,$true); $d.ExportAsFixedFormat(0,$env:DICH); $d.Close($false)",
-          "PowerPoint": "$d=$a.Presentations.Open($env:NGUON,$true,$false,$false); $d.SaveAs($env:DICH,32); $d.Close()"}[ung_dung]
-    lenh = f"$ErrorActionPreference='Stop'; $a=New-Object -ComObject {ung_dung}.Application; try {{ {mo} }} finally {{ $a.Quit() }}"
-    kq = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", lenh], capture_output=True, creationflags=CUA_SO_AN,
-                        env={**os.environ, "NGUON": str(nguon), "DICH": str(dich)}, timeout=300)
+    # Word đôi khi báo lỗi ở bước đóng tài liệu dù PDF đã xuất xong, nên để Word tự đóng khi thoát. Lỗi lúc đóng, thoát không tính là hỏng.
+    mo, thoat = {"Word": ("$d=$a.Documents.Open($env:NGUON,$false,$true); $d.ExportAsFixedFormat($env:DICH,17)", "$a.Quit([ref]0)"),
+                 "Excel": ("$d=$a.Workbooks.Open($env:NGUON,0,$true); $d.ExportAsFixedFormat(0,$env:DICH); $d.Close($false)", "$a.Quit()"),
+                 "PowerPoint": ("$d=$a.Presentations.Open($env:NGUON,$true,$false,$false); $d.SaveAs($env:DICH,32); $d.Close()", "$a.Quit()")}[ung_dung]
+    lenh = (f"$ErrorActionPreference='Stop'; [Console]::OutputEncoding=[Text.Encoding]::UTF8; try {{ $a=New-Object -ComObject {ung_dung}.Application; "
+            f"try {{ {mo} }} finally {{ try {{ {thoat} }} catch {{ }} }} }} catch {{ [Console]::Out.WriteLine($_.Exception.Message); exit 1 }}")
+    try:
+        kq = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", lenh], capture_output=True, creationflags=CUA_SO_AN,
+                            env={**os.environ, "NGUON": str(nguon), "DICH": str(dich)}, timeout=QUA_GIO)
+    except subprocess.TimeoutExpired:
+        tat_ban_treo(ung_dung)
+        raise RuntimeError(f"Quá {QUA_GIO} giây {ung_dung} vẫn chưa xong nên đã dừng. File có thể đang hiện hộp thoại, thử mở bằng {ung_dung} xem sao.")
     if kq.returncode or not dich.is_file():
-        raise RuntimeError(f"Cần cài {ung_dung} để chuyển file {nguon.suffix}.")
+        chu = kq.stdout.decode("utf-8", "replace").strip()
+        raise RuntimeError(f"Cần cài {ung_dung} để chuyển file {nguon.suffix}." if "80040154" in chu else f"{ung_dung} không chuyển được file này:\n{chu}")
 
 
 def chuyen(nguon: Path, dich: Path = None) -> Path:
@@ -86,6 +102,7 @@ def chuyen(nguon: Path, dich: Path = None) -> Path:
     if duoi not in DUOI:
         raise RuntimeError(f"Chưa chuyển được file {duoi or nguon.name} thành PDF.")
     dich = dich or dich_moi(nguon)
+    dich.parent.mkdir(parents=True, exist_ok=True)
     try:
         if duoi in ANH:
             tu_anh(nguon, dich)
@@ -95,6 +112,12 @@ def chuyen(nguon: Path, dich: Path = None) -> Path:
             tu_edge(nguon.resolve().as_uri(), dich)
         else:
             tu_office(nguon, dich)
+    except subprocess.TimeoutExpired:
+        dich.unlink(missing_ok=True)
+        raise RuntimeError("Edge quá lâu chưa xong nên đã dừng.")
+    except UnidentifiedImageError:
+        dich.unlink(missing_ok=True)
+        raise RuntimeError("File ảnh bị hỏng hoặc không đọc được.")
     except BaseException:
         dich.unlink(missing_ok=True)
         raise

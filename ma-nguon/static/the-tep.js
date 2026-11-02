@@ -59,7 +59,7 @@ function luuThe() {
     chotDong();
     t.s = {tep: tt.tep, chuGoc: tt.chuGoc, doc: soan.getDoc(), pdf: tt.pdf, trangBai: tt.trangBai, mocPdf: tt.mocPdf, pdfDaLuu: tt.pdfDaLuu,
       ban: t.goc === gocHien ? tt.ban : t.s?.ban ?? tt.ban, trang: xvTex.trang.map(x => x.m), tb: xvTex.tb, trangXem: xvTex.hien, cuonDong: $("vung-dong").scrollTop};
-  } else t.s = {ds: pt.ds, tep: pt.tep, xem: pt.xem, nhap: pt.nhap, doi: pt.doi, ten: pt.ten, nguon: pt.nguon, tb: xvPdf.tb};
+  } else t.s = {ds: pt.ds, tep: pt.tep, xem: pt.xem, nhap: pt.nhap, doi: pt.doi, ten: pt.ten, nguon: pt.nguon, thuMuc: pt.thuMuc, tb: xvPdf.tb};
 }
 
 // Phải tính lại bố cục ngay sau khi thoát chế độ PDF: hai chế độ có số cột khác nhau, sai cột là các vùng đè lên nhau.
@@ -94,7 +94,7 @@ async function hienTheTex(t) {
 
 async function hienThePdf(t) {
   const s = t.s;
-  Object.assign(pt, {ds: s.ds, tep: s.tep, xem: s.xem, nhap: s.nhap, doi: s.doi, ten: s.ten, nguon: s.nguon});
+  Object.assign(pt, {ds: s.ds, tep: s.tep, xem: s.xem, nhap: s.nhap, doi: s.doi, ten: s.ten, nguon: s.nguon, thuMuc: s.thuMuc});
   xvPdf.tb = s.tb;
   vaoPdf();
   veDsTrang();
@@ -182,7 +182,7 @@ const dongTheHien = () => the.hien && dongThe(the.hien);
 async function moThePdf(tep, khoa) {
   luuThe();
   const t = {ma: ++the.so, loai: "pdf", duong: khoa || tep[0].duong, ten: tep[0].ten, s: null};
-  Object.assign(pt, {ds: [], tep: new Map(), xem: null, nhap: false, doi: false, nguon: null});
+  Object.assign(pt, {ds: [], tep: new Map(), xem: null, nhap: false, doi: false, nguon: null, thuMuc: null});
   xvPdf.tb = null;
   xvPdf.xoa();
   the.ds.push(t);

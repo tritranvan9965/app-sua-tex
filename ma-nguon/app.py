@@ -44,6 +44,8 @@ DA = None
 GOC_HIEN = None  # phần tử của DS_GOC ứng với dự án đang mở
 PDF_DAU = None  # file PDF được truyền vào lúc mở app
 GOP_DAU = None  # các file chọn từ menu chuột phải Gộp thành PDF, đã chuyển hết sang PDF
+CHUYEN_DAU = None  # các file chọn từ menu chuột phải Chuyển thành PDF và mở: PDF tạm cùng thư mục gốc để gợi ý lúc lưu
+TOAN_MAN = False  # cửa sổ app đang toàn màn hình
 DM = loi.DanhMuc()
 KHOA = threading.Lock()  # lưu và xuất lần lượt, không chồng lên nhau
 CONG = 8765
@@ -157,11 +159,12 @@ def xuat(d: dict) -> dict:
 
 def thong_tin_du_an() -> dict:
     """Những gì trang cần biết để tách câu và hiện công thức đúng kiểu của dự án."""
-    global PDF_DAU, GOP_DAU
+    global PDF_DAU, GOP_DAU, CHUYEN_DAU
     pdf, PDF_DAU = PDF_DAU, None
     gop, GOP_DAU = GOP_DAU, None
+    chuyen, CHUYEN_DAU = CHUYEN_DAU, None
     return {"ten": DA["ten"], "goc_mo": cac_goc(), "cau": DA["cau"], "xem_nhanh": DA["xem_nhanh"],
-            "ban": list(DA["xuat"]["ban"]), "nhan_ban": DA["xuat"].get("nhan_ban", {}), "tep_dau": DA["tep_dau"], "pdf_dau": pdf, "gop_dau": gop}
+            "ban": list(DA["xuat"]["ban"]), "nhan_ban": DA["xuat"].get("nhan_ban", {}), "tep_dau": DA["tep_dau"], "pdf_dau": pdf, "gop_dau": gop, "chuyen_dau": chuyen}
 
 
 def doc_goc() -> list:
@@ -341,7 +344,8 @@ def pdf_chon(d: dict) -> dict:
         except ValueError as e:
             raise LoiApp(400, str(e))
         PDF_DA_CHON.add(str(p))
-        ghi_gan_day(p, "pdf")
+        if not p.is_relative_to(Path(tempfile.gettempdir()).resolve()):  # bản tạm của Gộp, Chuyển và mở không phải file của người dùng
+            ghi_gan_day(p, "pdf")
     return {"tep": tep}
 
 
@@ -397,7 +401,7 @@ def pdf_ghi(d: dict) -> dict:
         if not CUA_SO:
             return {"khong_co_hop": True}
         import webview
-        ds = CUA_SO.create_file_dialog(webview.FileDialog.SAVE, save_filename=d.get("ten", "moi.pdf"), file_types=("File PDF (*.pdf)",))
+        ds = CUA_SO.create_file_dialog(webview.FileDialog.SAVE, directory=d.get("thu_muc") or "", save_filename=d.get("ten", "moi.pdf"), file_types=("File PDF (*.pdf)",))
         if not ds:
             return {"huy": True}
         dich = ds if isinstance(ds, str) else ds[0]
@@ -407,6 +411,17 @@ def pdf_ghi(d: dict) -> dict:
         raise LoiApp(400, str(e))
     except PermissionError:
         raise LoiApp(409, f"File {Path(dich).name} đang mở ở phần mềm khác. Đóng file rồi lưu lại.")
+
+
+def toan_man(d: dict) -> dict:
+    """Trang web tự toàn màn hình chỉ phủ kín cửa sổ, nên cửa sổ app phải tự phóng ra cả màn hình."""
+    global TOAN_MAN
+    if not CUA_SO:
+        return {"khong_co_cua_so": True}
+    if bool(d.get("bat")) != TOAN_MAN:
+        TOAN_MAN = not TOAN_MAN
+        CUA_SO.toggle_fullscreen()
+    return {}
 
 
 def chay_ps(lenh: str, loi_bao: str, **bien) -> str:
@@ -573,7 +588,9 @@ def mo_ngoai(d: dict) -> dict:
         CUA_SO.restore()
         CUA_SO.on_top = True
         CUA_SO.on_top = False
-        if d.get("gop"):
+        if d.get("chuyen"):
+            CUA_SO.evaluate_js(f"moChuyen({json.dumps(d['chuyen'])})")
+        elif d.get("gop"):
             CUA_SO.evaluate_js(f"moGop({json.dumps(d['gop'])})")
         elif d.get("duong"):
             CUA_SO.evaluate_js(f"moTuNgoai({json.dumps(d['duong'])})")
@@ -672,7 +689,7 @@ class XuLy(BaseHTTPRequestHandler):
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
-                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
+                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
         if not viec:
             raise LoiApp(404, "Không có việc này.")
         self._json(200, viec(d))
@@ -698,10 +715,10 @@ def mo_cua_so(dia_chi: str, ten: str) -> bool:
     os._exit(0)  # máy chủ chạy nền không được giữ tiến trình lại sau khi đóng cửa sổ
 
 
-def gui_sang_cua_so_dang_chay(duong, gop=None) -> bool:
+def gui_sang_cua_so_dang_chay(duong, gop=None, chuyen=None) -> bool:
     try:
         cong = int(CONG_DANG_CHAY.read_text(encoding="utf-8"))
-        yc = urllib.request.Request(f"http://127.0.0.1:{cong}/api/mo-ngoai", json.dumps({"duong": duong, "gop": gop}).encode("utf-8"),
+        yc = urllib.request.Request(f"http://127.0.0.1:{cong}/api/mo-ngoai", json.dumps({"duong": duong, "gop": gop, "chuyen": chuyen}).encode("utf-8"),
                                     {"Content-Type": "application/json", "X-App": "sua-tex"})
         urllib.request.build_opener(urllib.request.ProxyHandler({})).open(yc, timeout=3).close()
         return True
@@ -734,20 +751,31 @@ def mo_luc_dau(duong) -> None:
 
 
 def chuyen_thanh_pdf(ds: list) -> None:
-    """Gọi từ menu chuột phải của Explorer: chuyển xong thì thôi, vì người dùng đang đứng ngay trong thư mục đó. Không mở cửa sổ app."""
+    """Gọi từ menu chuột phải của Explorer. Không mở cửa sổ app, chỉ hiện cửa sổ tiến trình nhỏ."""
+    import tien_trinh
+    tien_trinh.chay([Path(x) for x in ds])
+
+
+def chuyen_de_mo(ds: list) -> list:
+    """Chuyển thành PDF tạm để mở trong app, người dùng tự lưu. Không ghi gì vào thư mục của file gốc."""
     import chuyen_pdf
-    for x in ds:
+    tam = Path(tempfile.mkdtemp(prefix="SuaTeX-chuyen-"))
+    ra = []
+    for i, x in enumerate(ds):
+        p = Path(x)
         try:
-            chuyen_pdf.chuyen(Path(x))
+            ra.append({"duong": str(chuyen_pdf.chuyen(p, tam / f"{i}" / f"{p.stem}.pdf")), "thu_muc": str(p.parent)})
         except Exception as e:
-            ctypes.windll.user32.MessageBoxW(0, f"{Path(x).name}\n\n{e}", "Sửa TeX - Chuyển thành PDF", 0x10)
+            ctypes.windll.user32.MessageBoxW(0, f"{p.name}\n\n{e}", "Sửa TeX - Chuyển thành PDF", 0x10)
+    return ra
 
 
 def cho_gom_file(thu: Path, duong: str) -> list:
     """Explorer chạy một tiến trình cho mỗi file đã chọn. Tiến trình đầu tiên giành được khoá thì đợi các tiến trình kia ghi tên file,
     rồi gom tất cả lại; các tiến trình còn lại chỉ ghi tên rồi thoát. Trả về danh sách rỗng nếu không phải tiến trình gom."""
     thu.mkdir(exist_ok=True)
-    (thu / f"{time.time_ns():020d}.txt").write_text(duong, encoding="utf-8")
+    # Đồng hồ Windows không đủ mịn, các tiến trình chạy cùng lúc sẽ trùng giờ nên tên file phải có mã tiến trình.
+    (thu / f"{time.time_ns():020d}-{os.getpid()}.txt").write_text(duong, encoding="utf-8")
     khoa = thu / "khoa"
     try:
         if khoa.exists() and time.time() - khoa.stat().st_mtime > 30:
@@ -785,8 +813,17 @@ def gop_thanh_pdf(ds: list) -> list:
 
 
 def main():
-    global CONG, GOP_DAU
+    global CONG, GOP_DAU, CHUYEN_DAU
     gop = None
+    if "--chuyen-mo" in sys.argv:
+        i = sys.argv.index("--chuyen-mo")
+        ds = cho_gom_file(Path(tempfile.gettempdir()) / "SuaTeX-chuyen", sys.argv[i + 1])
+        del sys.argv[i:i + 2]
+        if not ds:
+            return
+        CHUYEN_DAU = chuyen_de_mo(ds)
+        if not CHUYEN_DAU:
+            return
     if "--gop" in sys.argv:
         i = sys.argv.index("--gop")
         gop = cho_gom_file(Path(tempfile.gettempdir()) / "SuaTeX-gop", sys.argv[i + 1])
@@ -812,7 +849,7 @@ def main():
     a = ap.parse_args()
     # Cửa sổ app lấy cổng trống bất kỳ. Bản đã cài chỉ giữ một cửa sổ để file luôn mở thành thẻ trong đó.
     cua_so = not (a.khong_mo or a.trinh_duyet)
-    if cua_so and duong_app.DA_DONG_GOI and gui_sang_cua_so_dang_chay(a.du_an, gop):
+    if cua_so and duong_app.DA_DONG_GOI and gui_sang_cua_so_dang_chay(a.du_an, gop, CHUYEN_DAU):
         return
     mo_luc_dau(a.du_an)
     may = ThreadingHTTPServer(("127.0.0.1", a.cong if a.cong is not None else (0 if cua_so else CONG)), XuLy)

@@ -4,6 +4,7 @@ Windows không cho phần mềm tự đặt mình làm app mặc định cho .pd
 App chỉ khai với Windows để hiện trong danh sách đó và trong Open with.
 """
 import ctypes
+import hashlib
 import os
 import shutil
 import subprocess
@@ -22,6 +23,8 @@ LOAI = {".tex": ("Tài liệu LaTeX", f"{MA}.tex"), ".pdf": ("Tài liệu PDF", 
 MENU_FILE = [rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}" for d in LOAI]
 MENU_GOP_CU = rf"{LOP}\*\shell\{MA}.Gop"  # bản 1.0.0 đăng ký ở đây nhưng file đơn lẻ không hiện
 MENU_THU_MUC = rf"{LOP}\Directory\shell\{MA}"
+MENU_DLL = "{7C3A9E52-4D1B-4E6F-9A21-5B8E0D1F6A33}"  # xem phat-hanh/menu_chuot_phai.c
+THU_MUC_MENU = THU_MUC_CAI.parent / f"{MA}-menu"  # ngoài thư mục cài, vì Explorer giữ DLL nên bộ cài không xoá được
 
 
 def thu_muc_he_thong(ma: int) -> Path:
@@ -77,6 +80,22 @@ def tao_loi_tat(p: Path) -> None:
                    env={**os.environ, "LOI_TAT": str(p), "DICH": str(EXE), "CHO": str(THU_MUC_CAI)}, creationflags=subprocess.CREATE_NO_WINDOW)
 
 
+def dat_menu_dll() -> Path:
+    """Tên file theo nội dung: bản cũ có thể đang bị Explorer giữ, bản mới vẫn đặt được bên cạnh."""
+    goc = THU_MUC_CAI / "menu.dll"
+    dich = THU_MUC_MENU / f"menu-{hashlib.sha1(goc.read_bytes()).hexdigest()[:10]}.dll"
+    THU_MUC_MENU.mkdir(parents=True, exist_ok=True)
+    if not dich.exists():
+        shutil.copy(goc, dich)
+    for cu in THU_MUC_MENU.glob("*.dll"):
+        if cu != dich:
+            try:
+                cu.unlink()
+            except OSError:
+                pass
+    return dich
+
+
 def dang_ky() -> None:
     mo = f'"{EXE}" "%1"'
     for duoi, (mo_ta, lop) in LOAI.items():
@@ -89,10 +108,14 @@ def dang_ky() -> None:
         ghi(k, {"": f"Mở bằng {TEN}", "Icon": f"{EXE},0"})
         ghi(rf"{k}\command", {"": mo})
     import chuyen_pdf
+    ghi(rf"{LOP}\CLSID\{MENU_DLL}", {"": f"{TEN} - Chuyển thành PDF"})
+    ghi(rf"{LOP}\CLSID\{MENU_DLL}\InprocServer32", {"": str(dat_menu_dll()), "ThreadingModel": "Apartment"})
     for d in chuyen_pdf.DUOI:
-        k = rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.ChuyenPdf"
-        ghi(k, {"": "Chuyển thành PDF", "Icon": f"{EXE},0"})
-        ghi(rf"{k}\command", {"": f'"{EXE}" --chuyen-pdf "%1"'})
+        xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.ChuyenPdf")  # bản cũ đăng ký chữ cố định
+        ghi(rf"{LOP}\SystemFileAssociations\{d}\shellex\ContextMenuHandlers\{MA}.ChuyenPdf", {"": MENU_DLL})
+        k = rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.ChuyenPdfMo"
+        ghi(k, {"": "Chuyển thành PDF trong app", "Icon": f"{EXE},0"})
+        ghi(rf"{k}\command", {"": f'"{EXE}" --chuyen-mo "%1"'})
     # Cùng tên khoá cho mọi đuôi: chọn lẫn PDF với ảnh thì Explorer chỉ hiện những mục chung của cả nhóm.
     xoa_cay(MENU_GOP_CU)
     for d in [".pdf", *chuyen_pdf.DUOI]:
@@ -130,9 +153,10 @@ def bo_dang_ky() -> None:
                 winreg.DeleteValue(k, "")
     import chuyen_pdf
     for d in [".pdf", *chuyen_pdf.DUOI]:
-        for viec in ("ChuyenPdf", "Gop"):
+        for viec in ("ChuyenPdf", "ChuyenPdfMo", "Gop"):
             xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.{viec}")
-    for k in [*MENU_FILE, MENU_GOP_CU, MENU_THU_MUC, rf"{LOP}\Applications\{MA}.exe", rf"Software\{MA}", UNINSTALL]:
+        xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shellex\ContextMenuHandlers\{MA}.ChuyenPdf")
+    for k in [*MENU_FILE, MENU_GOP_CU, MENU_THU_MUC, rf"{LOP}\CLSID\{MENU_DLL}", rf"{LOP}\Applications\{MA}.exe", rf"Software\{MA}", UNINSTALL]:
         xoa_cay(k)
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\RegisteredApplications", 0, winreg.KEY_SET_VALUE) as k:
@@ -150,6 +174,6 @@ def go(im_lang: bool = False) -> None:
     if not im_lang and hoi(f"Gỡ {TEN} khỏi máy? File .tex, .pdf và mẫu của bạn không bị xoá.", 0x34) != 6:
         return
     bo_dang_ky()
-    subprocess.Popen(f'cmd /c ping -n 3 127.0.0.1 >nul & rmdir /s /q "{THU_MUC_CAI}"', cwd=os.environ["TEMP"],
+    subprocess.Popen(f'cmd /c ping -n 3 127.0.0.1 >nul & rmdir /s /q "{THU_MUC_CAI}" & rmdir /s /q "{THU_MUC_MENU}"', cwd=os.environ["TEMP"],
                      creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS)
     sys.exit(0)

@@ -40,6 +40,12 @@ def pyinstaller(*ts) -> None:
                     "--specpath", str(TAM), "--windowed", "--paths", str(MA), "--icon", str(TAM / "sua-tex.ico"), *ts], check=True)
 
 
+def bien_dich_menu(dich: Path) -> None:
+    """DLL cho menu chuột phải. Trình biên dịch lấy từ gói ziglang, không cần cài Visual Studio."""
+    subprocess.run([sys.executable, "-m", "ziglang", "cc", "-shared", "-Os", "-s", "-target", "x86_64-windows-gnu", "-o", str(dich),
+                    str(PH / "menu_chuot_phai.c"), "-lshell32", "-lole32", "-luuid", "-lgdi32", "-luser32"], check=True)
+
+
 def main():
     shutil.rmtree(TAM, ignore_errors=True)
     TAM.mkdir(parents=True)
@@ -48,6 +54,7 @@ def main():
                 "--add-data", f"{GOC / 'thu-vien-mau'};thu-vien-mau", str(MA / "app.py"))
     tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "pdf.ico", "PDF", "#ff9d94", "#4b2f2f")
     tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "tex.ico", "TEX", "#86d0ff", "#25415a")
+    bien_dich_menu(TAM / "app" / cai_dat.MA / "menu.dll")
     shutil.make_archive(str(TAM / "sua-tex"), "zip", TAM / "app" / cai_dat.MA)
     ten = f"SuaTeX-Setup-{cai_dat.PHIEN_BAN}"
     pyinstaller("--onefile", "--name", ten, "--distpath", str(PH), "--add-data", f"{TAM / 'sua-tex.zip'};.", str(PH / "bo_cai.py"))

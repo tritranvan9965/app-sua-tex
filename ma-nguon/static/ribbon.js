@@ -155,7 +155,7 @@ function dsRibbon() {
       ["Bố cục", [
         {ten: "Chia đều hai vùng", ic: "chia-deu", lam: () => { bc.tiLe = 0.5; apBoCuc(); luuBoCuc(); capNhatVungPdf(); }},
         {ten: "Đặt lại bố cục", ic: "dat-lai", lam: () => datLaiBoCuc()},
-        sapCo("Toàn màn hình", "toan-man"),
+        {ten: "Toàn màn hình", ic: "toan-man", phim: "F11", goiY: "Xem PDF kín màn hình, Esc để thoát", lam: () => batToanMan(), bat: coXem},
       ]],
     ]},
   ];
