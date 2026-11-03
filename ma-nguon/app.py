@@ -28,6 +28,7 @@ sys.path.insert(0, str(GOC_APP))
 import bien_dich  # noqa: E402
 import cong_cu_pdf  # noqa: E402
 import duong_app  # noqa: E402
+import in_pdf  # noqa: E402
 import loi  # noqa: E402
 
 STATIC = GOC_APP / "static"
@@ -413,6 +414,44 @@ def pdf_ghi(d: dict) -> dict:
         raise LoiApp(409, f"File {Path(dich).name} đang mở ở phần mềm khác. Đóng file rồi lưu lại.")
 
 
+def pdf_in(d: dict) -> dict:
+    """Ghép các trang cần in (kèm chú thích) thành PDF tạm rồi in thẳng qua hộp thoại in của Windows, giữ nguyên vector."""
+    trang = [{**x, "so": int(x["so"]), "anh": base64.b64decode(x["anh"]) if x.get("anh") else None} for x in d.get("trang", [])]
+    if any(x["duong"] not in PDF_DA_CHON for x in trang):
+        raise LoiApp(403, "Trang này không thuộc file đã mở.")
+    thu_muc = Path(tempfile.gettempdir()) / "sua-tex-in"
+    thu_muc.mkdir(exist_ok=True)
+    ten = Path(str(d.get("ten") or "in")).stem[:60] or "in"
+    try:
+        p = Path(cong_cu_pdf.ghep(trang, thu_muc / f"{ten}-{time.time_ns()}.pdf")["duong"])
+    except ValueError as e:
+        raise LoiApp(400, str(e))
+    try:
+        in_pdf.in_pdf(p, ten, {**(d.get("tuy") or {}), "ra_tep": None})
+        return {}
+    except (OSError, KeyError, ValueError) as e:
+        raise LoiApp(500, f"Không in được: {e}")
+    finally:
+        p.unlink(missing_ok=True)
+
+
+def hoi_may_in(ham):
+    """Gọi hàm hỏi máy in, lỗi từ trình điều khiển máy in thành lỗi báo được cho người dùng."""
+    try:
+        return ham()
+    except (OSError, KeyError, ValueError) as e:
+        raise LoiApp(500, f"Máy in: {e}")
+
+
+def in_khung(d: dict) -> dict:
+    return hoi_may_in(lambda: in_pdf.khung_giay(d["may_in"], d.get("giay"), 2 if d.get("huong") == 2 else 1))
+
+
+def in_tuy_chon(d: dict) -> dict:
+    hien = {k: d[k] for k in ("giay", "huong", "hai_mat", "mau") if d.get(k) is not None}
+    return hoi_may_in(lambda: in_pdf.tuy_chon_may_in(d["may_in"], **hien))
+
+
 def toan_man(d: dict) -> dict:
     """Trang web tự toàn màn hình chỉ phủ kín cửa sổ, nên cửa sổ app phải tự phóng ra cả màn hình."""
     global TOAN_MAN
@@ -689,7 +728,7 @@ class XuLy(BaseHTTPRequestHandler):
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
-                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
+                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
         if not viec:
             raise LoiApp(404, "Không có việc này.")
         self._json(200, viec(d))

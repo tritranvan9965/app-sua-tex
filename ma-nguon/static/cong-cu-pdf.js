@@ -157,6 +157,7 @@ function veDsTrang() {
   }));
   capNhatChon();
   dongBoXem();
+  window.veMucLuc?.();
 }
 
 function capNhatChon() {
@@ -164,6 +165,7 @@ function capNhatChon() {
   $("so-chon").textContent = pt.ds.length ? `Đã chọn ${n} / ${pt.ds.length} trang` : "";
   $("chon-tat-ca").checked = n > 0 && n === pt.ds.length;
   $("chon-tat-ca").indeterminate = n > 0 && n < pt.ds.length;
+  window.capNhatMucLuc?.();
   capNhatRibbon();
 }
 
@@ -173,6 +175,7 @@ function danhDauXem() {
     d.classList.toggle("dang-xem", dung);
     if (dung) d.scrollIntoView({block: "nearest"});
   });
+  window.capNhatMucLuc?.();
 }
 
 async function xemTrang(x) {
@@ -315,33 +318,6 @@ async function xuatAnh(chiTrang) {
     bao(`Đã xuất ${ds.length} ảnh vào ${kq.duong}`);
   } catch (e) { bao(e.message, true); }
   finally { datViec(""); }
-}
-
-async function inTrang(ds) {
-  const o = $("vung-in");
-  datViec("Đang chuẩn bị bản in...");
-  try {
-    o.replaceChildren();
-    for (const [i, x] of ds.entries()) {
-      const cv = document.createElement("canvas");
-      await veCanvas(cv, x, 1400, "print", {tb: xv().tb, i, n: ds.length}, true);  // khoảng 170 dpi cho khổ A4
-      const a = document.createElement("img");
-      await new Promise((xong, hong) => {
-        a.onload = xong;
-        a.onerror = () => hong(new Error("Không chuẩn bị được trang để in."));
-        a.src = cv.toDataURL("image/jpeg", 0.92);
-      });
-      o.append(a);
-    }
-    window.print();
-  } catch (e) { bao(e.message, true); }
-  datViec("");
-}
-
-function inPdf() {
-  if (dangPdf()) return inTrang(pt.ds.some(x => x.chon) ? pt.ds.filter(x => x.chon) : pt.ds);
-  if (!tt.pdf) return bao("Chưa có PDF để in. Bấm Biên dịch trước.", true);
-  return inTrang(xvTex.trang.map(t => t.m));
 }
 
 $("khoang-trang").onkeydown = e => { if (e.key === "Enter") chonTheoKhoang(); };

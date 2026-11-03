@@ -45,9 +45,14 @@
   <div id="vung-trang">
     <div id="dau-day">
       <label><input type="checkbox" id="chon-tat-ca"> Chọn tất cả</label>
+      <div class="che-do-ben" role="group" aria-label="Kiểu hiện thanh bên">
+        <button type="button" id="ben-trang" class="nut-dau" aria-pressed="true" data-ic="hai-trang" data-ten="Trang thu nhỏ" aria-label="Hiện trang thu nhỏ"></button>
+        <button type="button" id="ben-muc" class="nut-dau" aria-pressed="false" data-ic="dai-bai" data-ten="Mục lục" aria-label="Hiện mục lục"></button>
+      </div>
       <button type="button" id="an-day" class="nut-dau" data-ic="vung-soan" data-ten="Ẩn dải trang" aria-label="Ẩn dải trang"></button>
     </div>
     <div id="ds-trang"></div>
+    <div id="ds-muc" hidden></div>
   </div>
   <div id="mo-dau">
     <div class="bat-dau">
@@ -154,7 +159,72 @@
   </form>
 </dialog>
 
-<div id="vung-in"></div>
+<dialog id="hop-in">
+  <form method="dialog" id="in-form">
+    <div class="in-dau"><h2>In</h2><button type="button" id="in-dong" class="in-x" aria-label="Đóng">&times;</button></div>
+    <div class="in-luoi">
+      <section class="in-xem" aria-label="Xem trước">
+        <canvas id="in-canvas" width="300" height="400"></canvas>
+        <div class="in-nav">
+          <button type="button" id="in-truoc" aria-label="Trang trước">&lsaquo;</button>
+          <input type="range" id="in-trang" min="1" max="1" value="1" aria-label="Trang xem trước">
+          <button type="button" id="in-sau" aria-label="Trang sau">&rsaquo;</button>
+        </div>
+        <div class="ghi-mau" id="in-so-trang"></div>
+        <div class="ghi-mau" id="in-ti-le"></div>
+      </section>
+      <div class="in-cot">
+        <fieldset>
+          <legend>Máy in</legend>
+          <div class="in-hang"><select id="in-may" class="o-rong" aria-label="Máy in"></select><button type="button" id="in-tuy-chon" class="nut-phu">Tùy chọn máy in...</button></div>
+          <div class="in-hang">
+            <label>Số bản <input id="in-so-ban" class="o-rong" type="number" min="1" max="99" value="1"></label>
+            <label><input id="in-den-trang" type="checkbox"> In đen trắng</label>
+          </div>
+          <div class="in-hang">
+            <label>Khổ giấy <select id="in-giay" class="o-rong"></select></label>
+            <label>Hướng giấy
+              <select id="in-huong" class="o-rong">
+                <option value="tu_dong">Tự động theo trang</option>
+                <option value="doc">Dọc</option>
+                <option value="ngang">Ngang</option>
+              </select>
+            </label>
+          </div>
+          <label>In hai mặt
+            <select id="in-hai-mat" class="o-rong">
+              <option value="1">Một mặt</option>
+              <option value="2">Hai mặt, lật cạnh dài</option>
+              <option value="3">Hai mặt, lật cạnh ngắn</option>
+            </select>
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Phạm vi in</legend>
+          <label><input type="radio" name="in-pham-vi" value="xem"> Trang đang xem</label>
+          <label><input type="radio" name="in-pham-vi" value="het" checked> Tất cả các trang</label>
+          <label><input type="radio" name="in-pham-vi" value="dai"> Các trang <input id="in-dai" class="o-rong" placeholder="1-3, 5" aria-label="Các trang cần in"> <span id="in-tong"></span></label>
+          <div class="in-hang">
+            <label>Chỉ in <select id="in-tap-con" class="o-rong"><option value="">Mọi trang trong phạm vi</option><option value="le">Trang lẻ</option><option value="chan">Trang chẵn</option></select></label>
+            <label><input id="in-dao" type="checkbox"> In ngược thứ tự</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Co giãn trang</legend>
+          <label><input type="radio" name="in-co" value="vua" checked> Vừa vùng in được của máy in</label>
+          <label><input type="radio" name="in-co" value="thu"> Chỉ thu nhỏ khi trang tràn vùng in</label>
+          <label><input type="radio" name="in-co" value="khong"> Giữ nguyên cỡ thật (100%)</label>
+          <label><input type="radio" name="in-co" value="tuy_y"> Tỉ lệ tùy ý <input id="in-ti-le-nhap" class="o-rong" type="number" min="10" max="400" value="100"> %</label>
+          <label><input id="in-giua" type="checkbox" checked> Căn giữa trang</label>
+        </fieldset>
+      </div>
+    </div>
+    <div class="nut-hop">
+      <button value="huy">Hủy</button>
+      <button value="in" class="chinh" id="in-ok">In</button>
+    </div>
+  </form>
+</dialog>
 
 <dialog id="hop-phim">
   <form method="dialog">
@@ -191,6 +261,8 @@
 <script src="/static/chu-thich.js"></script>
 <script src="/static/xem-pdf.js"></script>
 <script src="/static/cong-cu-pdf.js"></script>
+<script src="/static/hop-in.js"></script>
+<script src="/static/muc-luc.js"></script>
 <script src="/static/the-tep.js"></script>
 <script src="/static/ribbon.js"></script>
 <script src="/static/bo-cuc.js"></script>

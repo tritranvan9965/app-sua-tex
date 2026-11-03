@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "app-sua-tex",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
       "runtimeArgs": [
         "-I",
         "ma-nguon/app.py",
