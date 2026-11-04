@@ -1,8 +1,11 @@
 """Chuyển file thành PDF từ menu chuột phải của Explorer. Ảnh làm bằng Pillow, chữ và trang web nhờ Edge (máy Windows nào cũng có),
 tài liệu Office nhờ chính Word, Excel, PowerPoint nếu máy có cài. Kết quả nằm cạnh file gốc, không ghi đè PDF đã có."""
+import contextlib
 import os
 import subprocess
 import tempfile
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -18,12 +21,15 @@ EDGE = [Path(os.environ.get(b, "")) / r"Microsoft\Edge\Application\msedge.exe" f
 CUA_SO_AN = subprocess.CREATE_NO_WINDOW
 QUA_GIO = 180  # giây cho mỗi file. Word, Excel có thể treo vì hộp thoại ẩn nên phải có giới hạn.
 TIEN_TRINH_OFFICE = {"Word": "WINWORD", "Excel": "EXCEL", "PowerPoint": "POWERPNT"}
+SO_LUONG_SONG_SONG = 3  # Word mất 8-10 giây mỗi file, ba file cùng lúc xong sau chừng 12 giây thay vì 27
+# Mỗi lần Word mở một bản riêng nên chạy song song được. Excel, PowerPoint dùng chung một bản đang chạy, hai file cùng lúc sẽ đóng nhầm của nhau.
+KHOA_OFFICE = {"Excel": threading.Lock(), "PowerPoint": threading.Lock()}
 
 
-def dich_moi(nguon: Path) -> Path:
+def dich_moi(nguon: Path, da_giu=()) -> Path:
     d = nguon.with_suffix(".pdf")
     n = 2
-    while d.exists():
+    while d.exists() or d in da_giu:
         d = nguon.with_name(f"{nguon.stem} ({n}).pdf")
         n += 1
     return d
@@ -86,8 +92,9 @@ def tu_office(nguon: Path, dich: Path) -> None:
     lenh = (f"$ErrorActionPreference='Stop'; [Console]::OutputEncoding=[Text.Encoding]::UTF8; try {{ $a=New-Object -ComObject {ung_dung}.Application; "
             f"try {{ {mo} }} finally {{ try {{ {thoat} }} catch {{ }} }} }} catch {{ [Console]::Out.WriteLine($_.Exception.Message); exit 1 }}")
     try:
-        kq = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", lenh], capture_output=True, creationflags=CUA_SO_AN,
-                            env={**os.environ, "NGUON": str(nguon), "DICH": str(dich)}, timeout=QUA_GIO)
+        with KHOA_OFFICE.get(ung_dung) or contextlib.nullcontext():
+            kq = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", lenh], capture_output=True, creationflags=CUA_SO_AN,
+                                env={**os.environ, "NGUON": str(nguon), "DICH": str(dich)}, timeout=QUA_GIO)
     except subprocess.TimeoutExpired:
         tat_ban_treo(ung_dung)
         raise RuntimeError(f"Quá {QUA_GIO} giây {ung_dung} vẫn chưa xong nên đã dừng. File có thể đang hiện hộp thoại, thử mở bằng {ung_dung} xem sao.")
@@ -122,3 +129,23 @@ def chuyen(nguon: Path, dich: Path = None) -> Path:
         dich.unlink(missing_ok=True)
         raise
     return dich
+
+
+def chuyen_nhieu(viec: list, bao) -> None:
+    """viec là danh sách (nguồn, đích hoặc None). Chuyển song song vài file một lúc; bao(loại, vị trí, giá trị) được gọi từ luồng con:
+    "bat" khi bắt đầu file, "xong" kèm đường PDF, "loi" kèm thông báo lỗi. Tên đích được chọn trước để hai file cùng tên không giành nhau."""
+    giu, dich = set(), []
+    for nguon, d in viec:
+        d = d or dich_moi(nguon, giu)
+        giu.add(d)
+        dich.append(d)
+
+    def lam(i):
+        bao("bat", i, None)
+        try:
+            bao("xong", i, chuyen(viec[i][0], dich[i]))
+        except Exception as e:
+            bao("loi", i, str(e))
+
+    with ThreadPoolExecutor(SO_LUONG_SONG_SONG) as ho:
+        list(ho.map(lam, range(len(viec))))

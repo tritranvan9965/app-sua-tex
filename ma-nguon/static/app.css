@@ -67,7 +67,8 @@ button:disabled{cursor:default;opacity:.5}
 #ribbon-than button{border:0;background:none;color:var(--muc);border-radius:5px;transition:background-color .12s ease-out}
 #ribbon-than button:hover:not([aria-disabled=true]){background:var(--le)}
 #ribbon-than button:active:not([aria-disabled=true]){background:var(--phan)}
-#ribbon-than button[aria-pressed=true]{background:var(--phan);box-shadow:inset 0 0 0 1px var(--phan-mo)}
+#ribbon-than button[aria-pressed=true],#ribbon-than button[aria-pressed=true]:hover:not([aria-disabled=true]){background:var(--bang);color:#fff}
+#ribbon-than button[aria-pressed=true]:active:not([aria-disabled=true]){background:var(--bang-sang)}
 #ribbon-than button[aria-disabled=true]{cursor:default}
 #ribbon-than button[aria-disabled=true] .bt,#ribbon-than button[aria-disabled=true] span{opacity:.38}
 .nut-nho{display:flex;align-items:center;gap:6px;padding:0 8px 0 5px;font-size:12px;font-weight:400;line-height:1.2;white-space:nowrap;text-align:left}
@@ -83,6 +84,7 @@ button:disabled{cursor:default;opacity:.5}
 #goi-y strong{font-weight:600}
 #goi-y kbd{color:var(--phan-mo);margin-left:8px}
 #goi-y p{margin:1px 0 0;color:var(--phan)}
+#goi-y p.ly-do{margin-top:3px;padding-top:3px;border-top:1px solid #ffffff30;color:#ffd9a8}
 .bang-menu{position:fixed;z-index:7;min-width:260px;max-height:calc(100vh - 40px);overflow:auto;padding:4px;background:#fff;
   border-radius:0 0 6px 6px;box-shadow:0 8px 24px #17302a33}
 .bang-menu button{display:grid;grid-template-columns:1fr auto;gap:16px;width:100%;border:0;background:none;padding:5px 10px;text-align:left;border-radius:4px;font-size:13px}
@@ -131,7 +133,8 @@ button:disabled{cursor:default;opacity:.5}
 #tong-trang{padding:0 4px;color:var(--muc)}
 .dieu-khien button{display:grid;place-items:center;width:22px;height:22px;padding:0;border:0;background:none;border-radius:4px;color:var(--muc)}
 .dieu-khien button:hover:not(:disabled){background:var(--phan)}
-.dieu-khien button[aria-pressed=true]{background:var(--phan)}
+.dieu-khien button[aria-pressed=true],.dieu-khien button[aria-pressed=true]:hover:not(:disabled){background:var(--bang);color:#fff}
+#cong-cu-hien{margin-right:6px;padding:0 4px;color:var(--bang);font-weight:600;white-space:nowrap}
 .dieu-khien .bt{width:15px;height:15px}
 .an-ban .ban,.an-le .le,.an-soan .soan,.an-xem .xem{display:none}
 .tay-keo{position:fixed;bottom:26px;width:6px;z-index:4;cursor:col-resize;touch-action:none}

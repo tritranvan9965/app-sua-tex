@@ -64,6 +64,49 @@ def trang_trong(rong: float, cao: float, dich: Path) -> None:
     pdf.save(dich)
 
 
+def _trang_cua_muc(pdf, muc, chi_so_trang: dict):
+    """Số thứ tự trang (từ 0) mà một mục dấu trang trỏ tới, None nếu không xác định được. Đích có thể là mảng, tên hay hành động GoTo."""
+    dich = muc.destination
+    if dich is None and muc.action is not None:
+        dich = muc.action.get("/D")
+    if isinstance(dich, (String, Name)) and "/Names" in pdf.Root and "/Dests" in pdf.Root.Names:
+        try:
+            dich = pikepdf.NameTree(pdf.Root.Names.Dests)[str(dich)]
+        except KeyError:
+            return None
+        dich = dich.get("/D") if isinstance(dich, Dictionary) else dich
+    elif isinstance(dich, Name) and "/Dests" in pdf.Root:
+        dich = pdf.Root.Dests.get(str(dich))
+        dich = dich.get("/D") if isinstance(dich, Dictionary) else dich
+    if isinstance(dich, Array) and len(dich) and isinstance(dich[0], pikepdf.Object) and dich[0].objgen != (0, 0):
+        return chi_so_trang.get(dich[0].objgen)
+    return None
+
+
+def _chep_dau_trang(moi, nguon: dict, vi_tri_moi: dict) -> None:
+    """Giữ mục lục (dấu trang) của file nguồn cho những trang còn lại. Mục trỏ vào trang đã bỏ thì bỏ, mục con được nâng lên cấp của cha."""
+    with moi.open_outline() as dau:
+        for duong, pdf in nguon.items():
+            chi_so = {tr.objgen: i for i, tr in enumerate(pdf.pages)}
+
+            def doi(ds):
+                ra = []
+                for m in ds:
+                    cu = _trang_cua_muc(pdf, m, chi_so)
+                    moi_so = vi_tri_moi.get((duong, cu + 1)) if cu is not None else None
+                    con = doi(m.children)
+                    if moi_so is None:
+                        ra += con
+                        continue
+                    it = pikepdf.OutlineItem(str(m.title), moi_so, "Fit")
+                    it.children.extend(con)
+                    ra.append(it)
+                return ra
+
+            with pdf.open_outline() as goc:
+                dau.root.extend(doi(goc.root))
+
+
 def ghep(trang: list, dich: Path) -> dict:
     """trang = [{duong, so, xoay, anh, ghi_chu}], so tính từ 1, xoay là số độ thêm vào, anh là PNG lớp chú thích.
     Ghi qua file tạm rồi đổi tên, để lỗi giữa chừng không để lại file hỏng."""
@@ -96,6 +139,11 @@ def ghep(trang: list, dich: Path) -> dict:
                 _dong_anh(moi, tr, t["anh"], r)
             if t.get("ghi_chu"):
                 _them_ghi_chu(moi, tr, t["ghi_chu"], r)
+        # Trang nhân bản chỉ tính lần đầu: mục lục trỏ về bản đầu tiên.
+        try:
+            _chep_dau_trang(moi, nguon, {(t["duong"], t["so"]): i for i, t in reversed(list(enumerate(trang)))})
+        except (pikepdf.PdfError, KeyError, ValueError, TypeError, AttributeError):
+            pass  # mục lục của file nguồn hỏng thì vẫn lưu được trang, chỉ không có mục lục
         dich.parent.mkdir(parents=True, exist_ok=True)
         moi.save(tam)
         os.replace(tam, dich)

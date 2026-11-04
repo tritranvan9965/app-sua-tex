@@ -8,6 +8,7 @@ Mặc định mở cửa sổ app riêng; --trinh-duyet mở bằng trình duy�
 import argparse
 import base64
 import ctypes
+import http.client
 import json
 import mimetypes
 import os
@@ -17,8 +18,6 @@ import sys
 import tempfile
 import threading
 import time
-import urllib.request
-import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -26,10 +25,31 @@ from urllib.parse import parse_qs, urlparse
 GOC_APP = Path(__file__).resolve().parent
 sys.path.insert(0, str(GOC_APP))
 import bien_dich  # noqa: E402
-import cong_cu_pdf  # noqa: E402
 import duong_app  # noqa: E402
-import in_pdf  # noqa: E402
 import loi  # noqa: E402
+
+
+class NapKhiDung:
+    """pikepdf, pypdfium2 mất gần 0,1 giây để nạp mà lúc mở app chưa ai cần, nên nạp ở lần dùng đầu (hoặc nạp nền trong lúc cửa sổ đang dựng)."""
+    def __init__(self, nap):
+        self._nap = nap
+
+    def __getattr__(self, ten):
+        return getattr(self._nap(), ten)
+
+
+def _nap_cong_cu_pdf():
+    import cong_cu_pdf as m
+    return m
+
+
+def _nap_in_pdf():
+    import in_pdf as m
+    return m
+
+
+cong_cu_pdf = NapKhiDung(_nap_cong_cu_pdf)
+in_pdf = NapKhiDung(_nap_in_pdf)
 
 STATIC = GOC_APP / "static"
 CAI_DAT = duong_app.DU_LIEU / "cai-dat.json"
@@ -757,11 +777,16 @@ def mo_cua_so(dia_chi: str, ten: str) -> bool:
 def gui_sang_cua_so_dang_chay(duong, gop=None, chuyen=None) -> bool:
     try:
         cong = int(CONG_DANG_CHAY.read_text(encoding="utf-8"))
-        yc = urllib.request.Request(f"http://127.0.0.1:{cong}/api/mo-ngoai", json.dumps({"duong": duong, "gop": gop, "chuyen": chuyen}).encode("utf-8"),
-                                    {"Content-Type": "application/json", "X-App": "sua-tex"})
-        urllib.request.build_opener(urllib.request.ProxyHandler({})).open(yc, timeout=3).close()
+        kn = http.client.HTTPConnection("127.0.0.1", cong, timeout=3)
+        try:
+            kn.request("POST", "/api/mo-ngoai", json.dumps({"duong": duong, "gop": gop, "chuyen": chuyen}).encode("utf-8"),
+                       {"Content-Type": "application/json", "X-App": "sua-tex"})
+            if kn.getresponse().status >= 400:
+                return False
+        finally:
+            kn.close()
         return True
-    except (OSError, ValueError):
+    except (OSError, ValueError, http.client.HTTPException):
         return False  # cửa sổ cũ đã tắt, file cổng còn sót lại
 
 
@@ -795,18 +820,28 @@ def chuyen_thanh_pdf(ds: list) -> None:
     tien_trinh.chay([Path(x) for x in ds])
 
 
+def chuyen_vao_tam(ds: list, tam: Path, tieu_de: str) -> dict:
+    """Chuyển song song sang PDF tạm. Trả về {vị trí trong ds: PDF}; file lỗi thì báo một lần sau khi cả lô xong."""
+    import chuyen_pdf
+    ps = [Path(x) for x in ds]
+    ra, bao_loi = {}, []
+
+    def bao(viec, i, gt):
+        if viec == "xong":
+            ra[i] = gt
+        elif viec == "loi":
+            bao_loi.append(f"{ps[i].name}\n\n{gt}")
+
+    chuyen_pdf.chuyen_nhieu([(p, tam / f"{i}" / f"{p.stem}.pdf") for i, p in enumerate(ps)], bao)
+    for chu in bao_loi:
+        ctypes.windll.user32.MessageBoxW(0, chu, f"Sửa TeX - {tieu_de}", 0x10)
+    return ra
+
+
 def chuyen_de_mo(ds: list) -> list:
     """Chuyển thành PDF tạm để mở trong app, người dùng tự lưu. Không ghi gì vào thư mục của file gốc."""
-    import chuyen_pdf
-    tam = Path(tempfile.mkdtemp(prefix="SuaTeX-chuyen-"))
-    ra = []
-    for i, x in enumerate(ds):
-        p = Path(x)
-        try:
-            ra.append({"duong": str(chuyen_pdf.chuyen(p, tam / f"{i}" / f"{p.stem}.pdf")), "thu_muc": str(p.parent)})
-        except Exception as e:
-            ctypes.windll.user32.MessageBoxW(0, f"{p.name}\n\n{e}", "Sửa TeX - Chuyển thành PDF", 0x10)
-    return ra
+    ra = chuyen_vao_tam(ds, Path(tempfile.mkdtemp(prefix="SuaTeX-chuyen-")), "Chuyển thành PDF")
+    return [{"duong": str(ra[i]), "thu_muc": str(Path(ds[i]).parent)} for i in sorted(ra)]
 
 
 def cho_gom_file(thu: Path, duong: str) -> list:
@@ -835,20 +870,11 @@ def cho_gom_file(thu: Path, duong: str) -> list:
 
 
 def gop_thanh_pdf(ds: list) -> list:
-    """File không phải PDF được chuyển thành PDF tạm trước, rồi mới đưa vào công cụ gộp."""
-    import chuyen_pdf
-    tam = Path(tempfile.mkdtemp(prefix="SuaTeX-gop-"))
-    ra = []
-    for i, x in enumerate(ds):
-        p = Path(x)
-        if p.suffix.lower() == ".pdf":
-            ra.append(str(p))
-            continue
-        try:
-            ra.append(str(chuyen_pdf.chuyen(p, tam / f"{i}" / f"{p.stem}.pdf")))
-        except Exception as e:
-            ctypes.windll.user32.MessageBoxW(0, f"{p.name}\n\n{e}", "Sửa TeX - Gộp thành PDF", 0x10)
-    return ra
+    """File không phải PDF được chuyển thành PDF tạm trước, rồi mới đưa vào công cụ gộp. Giữ nguyên thứ tự đã chọn."""
+    can_chuyen = [i for i, x in enumerate(ds) if Path(x).suffix.lower() != ".pdf"]
+    ra = chuyen_vao_tam([ds[i] for i in can_chuyen], Path(tempfile.mkdtemp(prefix="SuaTeX-gop-")), "Gộp thành PDF")
+    moi = {i: str(ra[j]) for j, i in enumerate(can_chuyen) if j in ra}
+    return [moi.get(i, str(Path(x))) for i, x in enumerate(ds) if i in moi or i not in can_chuyen]
 
 
 def main():
@@ -899,11 +925,14 @@ def main():
     if cua_so:
         threading.Thread(target=may.serve_forever, daemon=True).start()
         CONG_DANG_CHAY.write_text(str(CONG), encoding="utf-8")
+        threading.Thread(target=lambda: (_nap_cong_cu_pdf(), _nap_in_pdf()), daemon=True).start()  # nạp nền trong lúc WebView2 khởi động
         if mo_cua_so(dia_chi, DA["ten"]):
             return
+        import webbrowser
         webbrowser.open(dia_chi)
         threading.Event().wait()
     if a.trinh_duyet:
+        import webbrowser
         threading.Timer(0.3, webbrowser.open, [dia_chi]).start()
     try:
         may.serve_forever()

@@ -344,8 +344,11 @@ function datCongCu(c) {
 
 // ---------- Thanh điều hướng dưới đáy ----------
 
+let coXemCu = false;
 function capNhatNav() {
   const v = xv(), n = v.trang.length;
+  // Nút ribbon lệ thuộc có PDF để xem (coXem): có hay mất trang thì ribbon phải tính lại, không chờ sự kiện khác.
+  if ((n > 0) !== coXemCu) { coXemCu = n > 0; queueMicrotask(capNhatRibbon); }
   $("nav-pdf").hidden = !n || (!dangPdf() && !bc.xem);
   $("dieu-trang").hidden = $("dieu-zoom").hidden = !n;
   if (!n) return;
@@ -354,6 +357,7 @@ function capNhatNav() {
   $("tong-trang").textContent = `/ ${n}`;
   $("ve-dau").disabled = $("trang-truoc").disabled = v.hien === 0;
   $("ve-cuoi").disabled = $("trang-sau").disabled = v.hien === n - 1;
+  $("cong-cu-hien").textContent = `Đang dùng: ${TEN_CT[congCu] ?? ""}`;
   $("nav-chu").setAttribute("aria-pressed", congCu === "chu");
   $("nav-vung").setAttribute("aria-pressed", congCu === "vung");
   $("nav-mot").setAttribute("aria-pressed", v.laTungTrang());

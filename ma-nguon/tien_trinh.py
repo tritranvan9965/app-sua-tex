@@ -1,7 +1,7 @@
 """Cửa sổ tiến trình khi chuyển thành PDF từ menu chuột phải mà không mở app.
 
 Word, Edge không báo tiến độ ra ngoài, nên % của file đang chuyển là ước lượng theo thời gian: tăng dần, dừng trước 100%,
-chỉ khi file thật sự xong mới lên 100%. Các file chuyển lần lượt. Hết giờ thì chuyen_pdf báo lỗi, nên cửa sổ luôn đi đến nút OK.
+chỉ khi file thật sự xong mới lên 100%. Các file chuyển song song vài file một lúc. Hết giờ thì chuyen_pdf báo lỗi, nên cửa sổ luôn đi đến nút OK.
 """
 import ctypes
 import math
@@ -26,12 +26,7 @@ def giay_uoc_tinh(p: Path) -> float:
 
 
 def lam_viec(ds: list, tin: queue.Queue) -> None:
-    for i, p in enumerate(ds):
-        tin.put(("bat", i, None))
-        try:
-            tin.put(("xong", i, chuyen_pdf.chuyen(p).name))
-        except Exception as e:
-            tin.put(("loi", i, str(e)))
+    chuyen_pdf.chuyen_nhieu([(p, None) for p in ds], lambda viec, i, gt: tin.put((viec, i, gt.name if viec == "xong" else gt)))
 
 
 def chay(ds: list) -> None:
