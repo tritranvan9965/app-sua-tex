@@ -72,17 +72,18 @@
 % và \baimoi trước mỗi bài để đánh số dạng, bài tập, ví dụ lại từ 1.
 \newcommand{\baimoi}{\setcounter{dang}{0}\setcounter{bt}{0}\setcounter{vd}{0}}
 \newcommand{\tieude}[2]{%
+  \cophanfalse\dautrang{0}{\if\relax\detokenize{#2}\relax#1\else#2\fi}%
   \begin{center}
     \if\relax\detokenize{#1}\relax\else{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\vspace{2pt}\fi
     {\Large\bfseries\color{xanh}\MakeUppercase{#2}}
   \end{center}\vspace{4pt}}
 
 % Phần lớn: A. KIẾN THỨC CẦN NHỚ / B. CÁC DẠNG BÀI TẬP / C. BÀI TẬP TỰ LUYỆN
-\newcommand{\phan}[1]{\par\medskip{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\smallskip}
+\newcommand{\phan}[1]{\par\cophantrue\dautrang{1}{#1}\medskip{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\smallskip}
 
 % Dạng bài: \dang{Tìm căn bậc hai của một số}
 \newcounter{dang}
-\newcommand{\dang}[1]{\par\medskip\refstepcounter{dang}%
+\newcommand{\dang}[1]{\par\medskip\refstepcounter{dang}\ifcophan\dautrang{2}{Dạng \thedang. #1}\else\dautrang{1}{Dạng \thedang. #1}\fi%
   \begin{tcolorbox}[colback=xanh,colframe=xanh,coltext=white,boxrule=0pt,arc=2pt,
     left=6pt,right=6pt,top=3pt,bottom=3pt,before skip=6pt,after skip=4pt]
   \bfseries Dạng \thedang. #1\end{tcolorbox}}
@@ -152,5 +153,12 @@
 \providecommand{\widearc}[1]{\wideparen{#1}}
 % Kiểu Việt Nam: ≥ ≤ viết nghiêng (⩾ ⩽)
 \AtBeginDocument{\let\geq\geqslant\let\ge\geqslant\let\leq\leqslant\let\le\leqslant}
+
+% ---------- Dấu trang: mục lục trong PDF, hiện ở thanh bên của app ----------
+% \tieude là cấp 0, \phan cấp 1, \dang cấp 2. hidelinks để chữ không bị khung màu.
+\RequirePackage[unicode,bookmarksopen=true,hidelinks]{hyperref}
+\newif\ifcophan  % đã có \phan trước \dang chưa: có thì \dang nằm cấp 2, chưa thì cấp 1 (tránh nhảy cấp làm mục lục lồng sai)
+\newcounter{dautrang}
+\newcommand{\dautrang}[2]{\refstepcounter{dautrang}\pdfbookmark[#1]{#2}{dautrang.\thedautrang}}
 
 \endinput
