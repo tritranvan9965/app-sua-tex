@@ -503,13 +503,13 @@ async function napPdf(giuCuon = false, tuDich = false) {
     bienDich(true);
   }
   if (!tl.ok) {
-    if (!tt.dangXuat) thongBaoPdf(`Chưa có PDF${ten}. Bấm Biên dịch để tạo.`);
+    if (!tt.dangXuat) thongBaoPdf(`Chưa có PDF${ten}. Bấm Chạy thử (F5) để tạo.`);
     return;
   }
   let doc;
   try {
     doc = await pdfjsLib.getDocument({data: await tl.arrayBuffer()}).promise;
-  } catch { return thongBaoPdf(`Không đọc được file PDF${ten}. Bấm Biên dịch để tạo lại.`); }
+  } catch { return thongBaoPdf(`Không đọc được file PDF${ten}. Bấm Chạy thử (F5) để tạo lại.`); }
   if (lan !== tt.soLanPdf) return;
   tt.pdf = doc;
   capNhatRibbon();
@@ -589,16 +589,16 @@ async function bienDich(imLang = false) {
   chotDong();
   tt.dangXuat = true;
   const duong = tt.tep.duong, ban = tt.ban;
-  datViec("Đang biên dịch...");
+  datViec("Đang chạy thử...");
   let napSau = false, conDung = false;
   try {
     const kq = await goi("/api/bien-dich", {duong, ban, chu: soan.getValue()});
     conDung = tt.tep?.duong === duong && tt.ban === ban;
     if (kq.ok || !conDung) {
       if (kq.ok) { tt.pdfDaLuu = false; xvTex.tb = null; }  // biên dịch lại là bỏ mọi sửa đổi trên PDF cũ
-      if (kq.ok && !imLang && conDung) bao("Đã biên dịch xong");
+      if (kq.ok && !imLang && conDung) bao("Chạy thử xong, PDF ở khung bên phải");
       napSau = true;
-    } else hienLoiLatex(kq.nhat_ky, "Biên dịch");
+    } else hienLoiLatex(kq.nhat_ky, "Chạy thử");
   } catch (e) { bao(e.message, true); }
   tt.dangXuat = false;
   datViec("");
@@ -606,20 +606,20 @@ async function bienDich(imLang = false) {
   if (napSau) await napPdf(conDung);
 }
 
-// Xuất PDF mới tạo file dùng thật, đủ các bản của dự án. Luôn lưu trước để file khớp nội dung.
+// Lưu ra file PDF mới tạo file dùng thật, đủ các bản của dự án. Luôn lưu trước để file khớp nội dung.
 async function xuatDung() {
-  if (!tt.tep || !tt.tep.la_tex) return bao("Mở một file .tex trước khi xuất.", true);
+  if (!tt.tep || !tt.tep.la_tex) return bao("Mở một file .tex trước khi lưu ra file PDF.", true);
   await luu();
   if (coThayDoi()) return;
   const cacBan = tt.dsBan.length ? tt.dsBan : [""];
   try {
     for (const ban of cacBan) {
-      datViec(`Đang xuất${ban ? ` ${ban}` : ""}...`);
+      datViec(`Đang lưu ra file PDF${ban ? ` ${ban}` : ""}...`);
       const kq = await goi("/api/xuat", {duong: tt.tep.duong, ban});
-      if (!kq.ok) { hienLoiLatex(kq.nhat_ky, `Xuất PDF${ban ? ` bản ${ban}` : ""}`); return; }
+      if (!kq.ok) { hienLoiLatex(kq.nhat_ky, `Lưu ra file PDF${ban ? ` bản ${ban}` : ""}`); return; }
     }
     tt.pdfDaLuu = true;
-    bao(`Đã xuất PDF${cacBan[0] ? `: ${cacBan.join(", ")}` : ""}`);
+    bao(`Đã lưu ra file PDF${cacBan[0] ? `: ${cacBan.join(", ")}` : ""}`);
   } catch (e) { bao(e.message, true); }
   finally { datViec(""); }
 }

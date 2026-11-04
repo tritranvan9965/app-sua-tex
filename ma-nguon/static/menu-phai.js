@@ -144,20 +144,23 @@ async function trenThePdf(so, lam) {
   if (m) lam(m);
 }
 
+// Đang chọn nhiều trang mà bấm phải vào một trang trong nhóm đã chọn thì lệnh áp cho cả nhóm, chữ trong menu ghi rõ số trang.
 function menuTrang(v, t, x, y) {
   const pdf = v === xvPdf, chonChu = String(getSelection()).trim(), so = t.m.so, m = t.m;
-  const doi = lam => (pdf ? lam(m) : trenThePdf(so, lam));
+  const chon = pdf ? pt.ds.filter(c => c.chon) : [], nhom = m.chon && chon.length > 1 ? chon : [m], nhieu = nhom.length > 1;
+  const cua = nhieu ? `${nhom.length} trang đã chọn` : `trang ${v.trang.indexOf(t) + 1}`;
+  const doi = lam => (pdf ? lam(nhom) : trenThePdf(so, c => lam([c])));
   moMenu(null, [
     ...(chonChu ? [{ten: "Sao chép chữ", phim: "Ctrl+C", lam: () => document.execCommand("copy")}, null] : []),
-    {ten: "Xuất trang này ra ảnh", lam: () => xuatAnh(t)},
-    ...(pdf ? [{ten: "Lưu trang này thành PDF", lam: () => luuTrang(true, undefined, c => c === m)}] : []),
+    {ten: `Xuất ${cua} ra ảnh`, lam: () => (nhieu ? xuatAnh() : xuatAnh(t))},
+    ...(pdf ? [{ten: `Tách ${cua} thành PDF`, lam: () => luuTrang(true, undefined, c => nhom.includes(c))}] : []),
     null,
-    {ten: "Xoay trái", lam: () => doi(c => xoayTrang(false, [c]))},
-    {ten: "Xoay phải", lam: () => doi(c => xoayTrang(true, [c]))},
-    {ten: "Nhân bản trang này", lam: () => doi(c => nhanBanTrang([c]))},
-    {ten: "Thêm trang trắng phía sau", lam: () => doi(c => themTrangTrong(c))},
+    {ten: `Xoay trái ${cua}`, lam: () => doi(c => xoayTrang(false, c))},
+    {ten: `Xoay phải ${cua}`, lam: () => doi(c => xoayTrang(true, c))},
+    {ten: `Nhân bản ${cua}`, lam: () => doi(c => nhanBanTrang(c))},
+    {ten: `Thêm trang trắng sau trang ${v.trang.indexOf(t) + 1}`, lam: () => (pdf ? themTrangTrong(m) : trenThePdf(so, c => themTrangTrong(c)))},
     null,
-    {ten: "Xóa trang này", nguy: true, lam: () => doi(c => boTrang([c]))},
+    {ten: `Xóa ${cua}`, nguy: true, lam: () => doi(c => boTrang(c))},
   ], [x, y]);
 }
 

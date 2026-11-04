@@ -376,7 +376,7 @@ def pdf_nhap(d: dict) -> dict:
     ban = ban_xuat(d.get("ban")) or ""
     nguon = loi.duong_nhap(tex, ban)
     if not nguon.is_file():
-        raise LoiApp(404, "Chưa có PDF. Bấm Biên dịch trước.")
+        raise LoiApp(404, "Chưa có PDF. Bấm Chạy thử (F5) trước.")
     ban_sao = nguon.with_name(f"{nguon.stem}-{time.time_ns()}.pdf")
     shutil.copy(nguon, ban_sao)
     PDF_DA_CHON.add(str(ban_sao))

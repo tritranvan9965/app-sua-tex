@@ -168,7 +168,7 @@ async function thoatApp() {
 
 addEventListener("resize", () => { apBoCuc(); });
 addEventListener("keydown", e => {
-  if (e.key === "Escape" && menuMo) { const n = menuMo.nut; dongMenu(); n.focus(); return; }
+  if (e.key === "Escape" && menuMo) { const n = menuMo.nut; dongMenu(); n?.focus(); return; }
   const c = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
   const lam = e.key === "F5" ? () => { if (coTex()) bienDich(); }
     : !c ? null

@@ -124,7 +124,7 @@ async function inNapKhaNang(giuGiay) {
 
 async function inMo() {
   const pdf = dangPdf();
-  if (!pdf && !tt.pdf) return bao("Chưa có PDF để in. Bấm Biên dịch trước.", true);
+  if (!pdf && !tt.pdf) return bao("Chưa có PDF để in. Bấm Chạy thử (F5) trước.", true);
   const v = xv(), ds = v.trang;
   if (!ds.length) return bao("Chưa có trang nào để in.", true);
   Object.assign(inTt, {ds, v, pdf, ten: pdf ? pt.ten : `${tt.tep.ten.replace(/\.[^.]+$/, "")}.pdf`, anh: new Map(), khung: new Map(), seq: 0});
@@ -151,6 +151,7 @@ async function inMo() {
   $("in-tap-con").value = "";
   $("in-dao").checked = false;
   $("hop-in").showModal();
+  $("in-ok").focus();  // Enter là in; showModal không tự chọn nút này vì nút Đóng đứng trước
   inVeXem();
 }
 

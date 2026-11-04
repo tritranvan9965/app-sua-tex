@@ -13,7 +13,7 @@ const coXem = () => xv().trang.length > 0;
 const LD_TEX = () => (dangPdf() ? "Đang xem PDF. Mở một file .tex để dùng lệnh này." : "Chưa mở file .tex nào. Mở một file .tex để dùng lệnh này.");
 const LD_CHON = () => "Chưa chọn trang nào. Bấm chọn trang ở dải trang, hoặc gõ số trang rồi Enter.";
 const LD_TRANG = () => "Chưa mở PDF nào. Mở một file PDF để dùng lệnh này.";
-const LD_XEM = () => "Chưa có PDF để xem. Mở file PDF, hoặc biên dịch file .tex (F5).";
+const LD_XEM = () => "Chưa có PDF để xem. Mở file PDF, hoặc bấm Chạy thử (F5) với file .tex.";
 const LD_RANH = () => "Đang chạy việc khác, chờ xong đã.";
 const LD_CHEN = "Lệnh soạn LaTeX, chỉ dùng khi mở file .tex.";
 const LY_DO_CHUNG = new Map([[coTex, LD_TEX], [coChon, LD_CHON], [coTrang, LD_TRANG], [coXem, LD_XEM], [ranh, LD_RANH]]);
@@ -39,16 +39,17 @@ function dsRibbon() {
           khoa: () => (tt.dangBan ? "Đang lưu, chờ xong đã." : dangPdf() ? "Chưa mở PDF nào." : !tt.tep ? "Chưa mở file nào." : "Chưa có thay đổi cần lưu.")},
         {ten: "Mở thư mục", ic: "thu-muc", lam: () => moKhac("thu_muc")},
         {ten: "In", ic: "in", phim: "Ctrl+P", lam: inPdf, bat: ranh},
+        {ten: "Đóng file", ic: "dong", phim: "Ctrl+W", lam: dongTheHien, bat: () => !!the.hien, khoa: "Chưa mở file nào."},
       ]],
       ["Hoàn tác", [
         {ten: "Hoàn tác", ic: "hoan-tac", phim: "Ctrl+Z", lam: () => hoanTac(false), bat: () => !!tt.tep, khoa: "Chưa mở file nào."},
         {ten: "Làm lại", ic: "lam-lai", phim: "Ctrl+Y", lam: () => hoanTac(true), bat: () => !!tt.tep, khoa: "Chưa mở file nào."},
       ]],
       ["LaTeX", [
-        {ten: "Biên dịch", ic: "bien-dich", to: true, phim: "F5", goiY: "Tạo PDF để xem, chưa tạo file dùng", lam: () => bienDich(), bat: () => coTex() && ranh(), khoa: khoaTheo([coTex, LD_TEX], [ranh, LD_RANH])},
-        {ten: "Xuất PDF", ic: "xuat", to: true, phim: "Ctrl+E", goiY: "Tạo file PDF dùng thật, đủ các bản", lam: xuatDung, bat: () => coTex() && ranh(), khoa: khoaTheo([coTex, LD_TEX], [ranh, LD_RANH])},
+        {ten: "Chạy thử (Xem PDF)", ic: "bien-dich", to: true, phim: "F5", goiY: "Tạo bản PDF để xem thử ngay. Chưa ghi ra file PDF dùng thật", lam: () => bienDich(), bat: () => coTex() && ranh(), khoa: khoaTheo([coTex, LD_TEX], [ranh, LD_RANH])},
+        {ten: "Lưu ra file PDF", ic: "xuat", to: true, phim: "Ctrl+E", goiY: "Tạo file PDF dùng thật, đủ các bản", lam: xuatDung, bat: () => coTex() && ranh(), khoa: khoaTheo([coTex, LD_TEX], [ranh, LD_RANH])},
         {ten: "Thư viện mẫu", ic: "thu-vien", lam: moThuVien},
-        {ten: "Tách, gộp trang của PDF đang xem", tenNgan: "Tách, gộp trang", ic: "hai-trang", lam: sapTrangTuBienDich, bat: coTex, khoa: () => (dangPdf() ? "Đang xem PDF. Mở file .tex rồi biên dịch để tách, gộp trang." : LD_TEX())},
+        {ten: "Tách, gộp trang của PDF đang xem", tenNgan: "Tách, gộp trang", ic: "hai-trang", lam: sapTrangTuBienDich, bat: coTex, khoa: () => (dangPdf() ? "Đang xem PDF. Mở file .tex rồi bấm Chạy thử để tách, gộp trang." : LD_TEX())},
       ]],
       ["Tìm", [
         {o: "tim"},
@@ -78,9 +79,8 @@ function dsRibbon() {
       ]],
     ]).map(([t, m]) => [t, m.map(lenhChen)])},
     {ma: "trang", ten: "Trang", nhom: [
-      ["Tệp", [
-        {ten: "Thêm PDF", ic: "them-pdf", to: true, goiY: "Đang mở PDF thì thêm vào cuối dãy để gộp", lam: () => themPdf()},
-        {ten: "Đóng file", ic: "dong", phim: "Ctrl+W", lam: dongTheHien, bat: () => !!the.hien, khoa: "Chưa mở file nào."},
+      ["Gộp PDF", [
+        {ten: "Chèn thêm file PDF", tenNgan: "Chèn thêm PDF", ic: "them-pdf", to: true, goiY: "Thêm một file PDF khác vào cuối dãy trang để gộp lại", lam: () => themPdf()},
       ]],
       ["Chọn trang", [
         {o: "khoang-trang"},
@@ -101,9 +101,9 @@ function dsRibbon() {
         sapCo("Cắt lề", "cat-le"), sapCo("Đổi khổ giấy", "kho-giay"),
         sapCo("Ghép 2 trang lên 1 tờ", "ghep-to", false, "Ghép 2 trang"),
       ]],
-      ["Lưu thành file", [
-        {ten: "Lưu trang chọn", ic: "luu-chon", to: true, goiY: "Tách các trang đã chọn thành file mới", lam: () => luuTrang(true), bat: coChon},
-        {ten: "Lưu cả dãy", ic: "luu-het", to: true, goiY: "Gộp cả dãy trang thành một file", lam: () => luuTrang(false), bat: coTrang},
+      ["Tách & Lưu PDF", [
+        {ten: "Tách trang đã chọn", tenNgan: "Tách trang chọn", ic: "luu-chon", to: true, goiY: "Tách các trang đã chọn thành một file PDF mới", lam: () => luuTrang(true), bat: coChon},
+        {ten: "Lưu toàn bộ PDF", ic: "luu-het", to: true, goiY: "Lưu cả dãy trang hiện có (đã gộp, sắp xếp) thành một file PDF", lam: () => luuTrang(false), bat: coTrang},
         sapCo("Tách mỗi N trang", "tach"),
         {ten: "Xuất ra ảnh", ic: "anh", goiY: "Mỗi trang thành một ảnh PNG. Đã chọn trang thì chỉ xuất các trang đó", lam: xuatAnh, bat: () => coXem() && ranh(), khoa: khoaTheo([coXem, LD_XEM], [ranh, LD_RANH])},
       ]],
@@ -174,7 +174,7 @@ function dsRibbon() {
       ["Bố cục", [
         {ten: "Chia đều hai vùng", tenNgan: "Chia đều", ic: "chia-deu", lam: () => { bc.tiLe = 0.5; apBoCuc(); luuBoCuc(); capNhatVungPdf(); }},
         {ten: "Đặt lại bố cục", ic: "dat-lai", lam: () => datLaiBoCuc()},
-        {ten: "Toàn màn hình", ic: "toan-man", phim: "F11", goiY: "Xem PDF kín màn hình, Esc để thoát", lam: () => batToanMan(), bat: coXem, khoa: "Chưa có PDF để xem toàn màn hình. Mở file PDF, hoặc biên dịch file .tex (F5)."},
+        {ten: "Toàn màn hình", ic: "toan-man", phim: "F11", goiY: "Xem PDF kín màn hình, Esc để thoát", lam: () => batToanMan(), bat: coXem, khoa: "Chưa có PDF để xem toàn màn hình. Mở file PDF, hoặc bấm Chạy thử (F5) với file .tex."},
       ]],
     ]},
   ];
@@ -186,8 +186,8 @@ function dsTep() {
     {ten: "Mở thư mục...", lam: () => moKhac("thu_muc")},
     null,
     {ten: "Lưu", phim: "Ctrl+S", lam: luuVaXuat, bat: () => !!tt.tep || dangPdf()},
-    {ten: "Biên dịch để xem", phim: "F5", lam: () => bienDich(), bat: coTex},
-    {ten: "Xuất PDF", phim: "Ctrl+E", lam: xuatDung, bat: coTex},
+    {ten: "Chạy thử (Xem PDF)", phim: "F5", lam: () => bienDich(), bat: coTex},
+    {ten: "Lưu ra file PDF", phim: "Ctrl+E", lam: xuatDung, bat: coTex},
     {ten: "In", phim: "Ctrl+P", lam: inPdf},
     null,
     {ten: "Đóng file", phim: "Ctrl+W", lam: dongTheHien, bat: () => !!the.hien},
@@ -211,7 +211,7 @@ function taoNut(x) {
   b.setAttribute("aria-label", x.ten);
   // Nút to: chữ nằm dưới biểu tượng. Nút nhỏ: chữ (tên ngắn nếu có) nằm bên phải, nhóm thiếu chỗ thì ẩn chữ đi.
   const s = document.createElement("span");
-  s.textContent = x.to ? x.ten : x.tenNgan || x.ten;
+  s.textContent = x.tenNgan || x.ten;
   b.append(s);
   b.dataset.ten = x.ten;
   if (x.phim) b.dataset.phim = x.phim;
@@ -306,6 +306,8 @@ function taoRibbon() {
     if (b.dataset.chu) b.insertAdjacentHTML("beforeend", `<span class="chu-nut">${b.dataset.chu}</span>`);
   });
   document.getElementById("nut-gon").onclick = doiThuGon;
+  document.getElementById("bd-mo-file").onclick = () => moKhac("tep");
+  document.getElementById("bd-mo-thu-muc").onclick = () => moKhac("thu_muc");
   document.getElementById("luu-tep").onclick = e => { if (e.currentTarget.getAttribute("aria-disabled") !== "true") luuVaXuat(); };
   document.getElementById("luu-pdf").onclick = e => {
     if (e.currentTarget.getAttribute("aria-disabled") === "true") return;

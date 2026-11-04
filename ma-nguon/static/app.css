@@ -18,7 +18,7 @@
 
 :root{
   --phong:"So Inter","Be Vietnam Pro","Segoe UI",system-ui,sans-serif;
-  --bang:#1d4238; --bang-sang:#2b5a4d; --phan:#e8efe9; --phan-mo:#a9c2b6;
+  --bang:#1d4238; --bang-sang:#2b5a4d; --phan:#e8efe9; --phan-mo:#a9c2b6; --phan-phu:#cfe0d6;
   --giay:#fbfcfa; --le:#eef2ee; --muc:#17302a; --muc-mo:#5b6f68; --ke:#d6dfd8;
   --but-do:#c0262d; --but-do-nhat:#fbe9e8;
   --phong-code:Consolas,"Cascadia Mono",monospace; --phong-ban:var(--phong); --co-ban:12px;
@@ -30,7 +30,9 @@ body{font-family:var(--phong);font-variant-numeric:tabular-nums;font-size:14px;l
   height:100vh;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer}
 button:disabled{cursor:default;opacity:.5}
-:focus-visible{outline:2px solid var(--but-do);outline-offset:1px}
+:focus-visible{outline:2px solid var(--bang);outline-offset:1px}
+button.chinh:focus-visible{outline-offset:2px}
+.ban :focus-visible{outline-color:#fff}
 [hidden]{display:none!important}
 
 /* Ribbon */
@@ -157,7 +159,7 @@ kbd{font:inherit;color:var(--muc-mo)}
 #cay details>summary .bt:nth-child(3),#cay details[open]>summary .bt:nth-child(2){display:none}
 #cay details[open]>summary .bt:nth-child(3){display:block}
 .ten-tm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
-.dem{flex:none;color:var(--phan-mo);font-size:.9em}
+.dem{flex:none;color:var(--phan-phu);font-size:.9em}
 .goc>summary{font-weight:700;background:#ffffff0f}
 .dong-goc{display:none;place-items:center;flex:none;width:20px;height:20px;padding:0;border:0;background:none;border-radius:4px;color:var(--phan)}
 .goc>summary:hover .dong-goc,.dong-goc:focus-visible{display:grid}
@@ -172,7 +174,7 @@ kbd{font:inherit;color:var(--muc-mo)}
 .nhan-tep.mau{color:var(--mau);background:#c7b8ff26}
 #cay .nut-tep[aria-current=true]{background:var(--phan);color:var(--bang);font-weight:600}
 #cay .nut-tep[aria-current=true] .nhan-tep{color:#fff;background:var(--bang)}
-#cay .thieu{padding:3px 8px;color:var(--phan-mo);font-size:.95em}
+#cay .thieu{padding:3px 8px;color:var(--phan-phu);font-size:.95em}
 #cay .nhan-tep{width:2.5em;font-size:.8em}
 #cay .nut-tep.dang-cat{opacity:.5}
 #cay .o-doi-ten{flex:1;min-width:0;height:1.8em;padding:0 4px;border:1px solid var(--tex);border-radius:3px;background:#fff;color:var(--muc);font:inherit}
@@ -223,17 +225,26 @@ button.chinh{background:var(--bang);border-color:var(--bang);color:#fff;font-wei
 .CodeMirror-gutters{background:var(--giay);border-right:1px solid var(--ke)}
 .CodeMirror-linenumber{color:var(--muc-mo)}
 .dong-sua{background:var(--but-do-nhat)}
-#mo-dau{flex:1;display:grid;place-items:center;color:var(--muc-mo);overflow:auto;min-height:0}
+#mo-dau{flex:1;display:flex;justify-content:center;align-items:flex-start;color:var(--muc-mo);overflow:auto;min-height:0}
+/* Chưa mở file: màn hình bắt đầu dùng cả hai vùng làm việc */
+.soan:has(#mo-dau:not([hidden])){grid-column:span 2;border-right:0}
+.soan:has(#mo-dau:not([hidden]))~.xem{display:none}
 #mo-dau[hidden]{display:none}
-.bat-dau{width:min(560px,100%);padding:24px 16px}
+.bat-dau{width:100%;padding:32px 40px}
 .bat-dau h2{margin:0 0 4px;font-size:20px;font-weight:700;color:var(--muc)}
 .bat-dau p{margin:0 0 20px}
 .bat-dau h3{margin:0 0 6px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 #ds-gan-day{list-style:none;margin:0;padding:0}
 #ds-gan-day button{display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px;border:0;border-radius:6px;background:none;color:var(--muc);font:inherit;text-align:left;cursor:pointer}
 #ds-gan-day button:hover,#ds-gan-day button:focus-visible{background:var(--ke)}
-#ds-gan-day .ten{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-#ds-gan-day .duong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:left;color:var(--muc-mo);font-size:12px}
+#ds-gan-day .ten{flex:none;max-width:35%;overflow-wrap:anywhere;font-weight:600}
+#ds-gan-day .duong{flex:1;min-width:0;overflow-wrap:anywhere;text-align:left;color:var(--muc-mo);font-size:12px;line-height:1.35}
+.bat-dau-nut{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 28px}
+.bat-dau-nut button{display:flex;align-items:center;gap:10px;height:52px;padding:0 24px;border:1px solid var(--ke);border-radius:8px;background:#fff;font-size:16px;font-weight:600;color:var(--muc)}
+.bat-dau-nut button:hover{background:var(--le)}
+.bat-dau-nut button.chinh{background:var(--bang);border-color:var(--bang);color:#fff}
+.bat-dau-nut button.chinh:hover{background:var(--bang-sang)}
+.bat-dau-nut .bt{width:22px;height:22px}
 #ds-gan-day svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}
 
 .xem .thanh{padding:0 8px;gap:4px;justify-content:flex-start}
@@ -341,8 +352,8 @@ dialog h2{font-size:17px;margin:0}
 #bao.loi{background:var(--but-do)}
 
 .o-rong{height:28px;font:inherit;font-size:13px;padding:0 8px;border:1px solid var(--ke);border-radius:5px;background:#fff;color:var(--muc);min-width:0}
-.o-rong:disabled{background:var(--le);opacity:.6}
-.o-rong::placeholder{color:var(--muc-mo)}
+.o-rong:disabled{background:var(--le)}
+.o-rong::placeholder{color:var(--muc-mo);opacity:1}
 
 /* Theo dòng: mỗi hàng là một dòng đã hiện công thức, bấm vào là sửa */
 #vung-dong{flex:1;min-height:0;overflow:auto;position:relative;padding:12px 14px 40px;font-size:calc(var(--co-soan,14px) + 1px);line-height:1.65}
@@ -399,7 +410,11 @@ dialog h2{font-size:17px;margin:0}
 .che-do-pdf .le{display:none}
 #dau-day{flex:none;display:flex;align-items:center;justify-content:space-between;height:38px;padding:0 6px 0 11px;border-bottom:1px solid var(--ke);font-size:12.5px;white-space:nowrap}
 .che-do-ben{display:flex;gap:2px;margin-left:auto;margin-right:4px}
-#dau-day label{display:flex;align-items:center;gap:5px;cursor:pointer}
+#dau-day{container-type:inline-size}
+#dau-day label{display:flex;align-items:center;gap:5px;cursor:pointer;min-width:0;white-space:pre}
+.che-do-ben,#an-day{flex:none}
+#dau-day .chu-ngan{display:none}
+@container (max-width:205px){#dau-day .chu-dai{display:none}#dau-day .chu-ngan{display:inline}}
 #ds-trang{flex:1;min-height:0;overflow:auto;padding:8px 6px;background:var(--le);display:flex;flex-direction:column;gap:6px;scrollbar-width:thin}
 .o-trang{flex:none;padding:5px;border-radius:5px;border:2px solid transparent;cursor:grab}
 .o-trang.dang-xem{border-color:var(--bang)}

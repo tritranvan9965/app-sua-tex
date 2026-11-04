@@ -116,7 +116,7 @@ async function chonThe(t) {
 // Màn hình bắt đầu: file và thư mục mở gần đây, bấm để mở lại.
 async function veGanDay() {
   let ds;
-  try { ds = (await goi("/api/gan-day")).ds; } catch { return; }
+  try { ds = (await goi("/api/gan-day")).ds.filter(x => !/\.json$/i.test(x.duong)); } catch { return; }
   $("gan-day").hidden = !ds.length;
   $("ds-gan-day").replaceChildren(...ds.map(x => {
     const li = document.createElement("li"), b = document.createElement("button"), ten = document.createElement("span"), duong = document.createElement("span");

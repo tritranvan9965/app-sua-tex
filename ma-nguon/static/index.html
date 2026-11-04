@@ -44,7 +44,7 @@
   <div id="vung-soan"><textarea id="o-soan"></textarea></div>
   <div id="vung-trang">
     <div id="dau-day">
-      <label><input type="checkbox" id="chon-tat-ca"> Chọn tất cả</label>
+      <label><input type="checkbox" id="chon-tat-ca"> <span class="chu-dai">Chọn tất cả</span><span class="chu-ngan">Tất cả</span></label>
       <div class="che-do-ben" role="group" aria-label="Kiểu hiện thanh bên">
         <button type="button" id="ben-trang" class="nut-dau" aria-pressed="true" data-ic="hai-trang" data-ten="Trang thu nhỏ" aria-label="Hiện trang thu nhỏ"></button>
         <button type="button" id="ben-muc" class="nut-dau" aria-pressed="false" data-ic="dai-bai" data-ten="Mục lục" aria-label="Hiện mục lục"></button>
@@ -57,7 +57,11 @@
   <div id="mo-dau">
     <div class="bat-dau">
       <h2>Bắt đầu</h2>
-      <p>Chọn một file ở cột trái, hoặc bấm Mở file.</p>
+      <p>Chọn một file ở cột trái, hoặc mở file hay thư mục mới.</p>
+      <div class="bat-dau-nut">
+        <button type="button" id="bd-mo-file" class="chinh" data-ic="mo"><span>Mở file</span></button>
+        <button type="button" id="bd-mo-thu-muc" data-ic="thu-muc"><span>Mở thư mục</span></button>
+      </div>
       <div id="gan-day" hidden>
         <h3>Gần đây</h3>
         <ul id="ds-gan-day"></ul>
