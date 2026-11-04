@@ -344,6 +344,7 @@ function veMucLuc(chu) {
     return li;
   }));
   tt.hienTai = null;
+  $("vi-tri-bai").textContent = "";  // danhDauBai chỉ ghi lại khi có bài, không có thì phải tự xoá chữ của file trước
 }
 
 function capNhatTrangThai() {

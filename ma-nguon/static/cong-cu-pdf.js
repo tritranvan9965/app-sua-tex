@@ -157,7 +157,7 @@ function veDsTrang() {
   }));
   capNhatChon();
   dongBoXem();
-  window.veMucLuc?.();
+  window.veMucLucPdf?.();
 }
 
 function capNhatChon() {

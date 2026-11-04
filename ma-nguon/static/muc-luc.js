@@ -46,10 +46,10 @@ function mlDatChe(che) {
   $("ben-muc").setAttribute("aria-pressed", che === "muc");
   $("ds-trang").hidden = che === "muc";
   $("ds-muc").hidden = che !== "muc";
-  if (che === "muc") veMucLuc();
+  if (che === "muc") veMucLucPdf();
 }
 
-async function veMucLuc() {
+async function veMucLucPdf() {
   if (ml.che !== "muc") return;
   const seq = ++ml.seq, o = $("ds-muc"), cuon = o.scrollTop;
   const tep = [...new Set(pt.ds.map(x => x.duong))];
@@ -88,7 +88,7 @@ async function veMucLuc() {
       gap.tabIndex = m.co_con ? 0 : -1;
       gap.onclick = () => {
         if (ml.gap.has(khoa)) ml.gap.delete(khoa); else ml.gap.add(khoa);
-        veMucLuc();
+        veMucLucPdf();
       };
       td.className = "tieu-de";
       so.className = "so-tr";

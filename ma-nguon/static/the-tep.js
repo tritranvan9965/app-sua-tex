@@ -124,7 +124,7 @@ async function veGanDay() {
     ten.className = "ten";
     ten.textContent = x.ten;
     duong.className = "duong";
-    duong.textContent = x.thu_muc;
+    duong.textContent = rutGonDuong(x.thu_muc);
     duong.title = x.duong;
     b.title = x.duong;
     b.insertAdjacentHTML("afterbegin", x.loai === "thu_muc" ? bieuTuong("thu-muc") : "");
@@ -134,6 +134,12 @@ async function veGanDay() {
     li.append(b);
     return li;
   }));
+}
+
+// Đường dài thì giữ ổ đĩa và hai thư mục cuối, đủ nhận ra file nằm đâu; đường đầy đủ nằm ở title.
+function rutGonDuong(d) {
+  const p = d.split(/[\\/]/);
+  return d.length > 60 && p.length > 4 ? `${p[0]}\\…\\${p.slice(-2).join("\\")}` : d;
 }
 
 // Không còn thẻ nào thì trở về màn hình trống.

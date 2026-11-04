@@ -238,7 +238,7 @@ button.chinh{background:var(--bang);border-color:var(--bang);color:#fff;font-wei
 #ds-gan-day button{display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px;border:0;border-radius:6px;background:none;color:var(--muc);font:inherit;text-align:left;cursor:pointer}
 #ds-gan-day button:hover,#ds-gan-day button:focus-visible{background:var(--ke)}
 #ds-gan-day .ten{flex:none;max-width:35%;overflow-wrap:anywhere;font-weight:600}
-#ds-gan-day .duong{flex:1;min-width:0;overflow-wrap:anywhere;text-align:left;color:var(--muc-mo);font-size:12px;line-height:1.35}
+#ds-gan-day .duong{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left;color:var(--muc-mo);font-size:12px;line-height:1.35}
 .bat-dau-nut{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 28px}
 .bat-dau-nut button{display:flex;align-items:center;gap:10px;height:52px;padding:0 24px;border:1px solid var(--ke);border-radius:8px;background:#fff;font-size:16px;font-weight:600;color:var(--muc)}
 .bat-dau-nut button:hover{background:var(--le)}
