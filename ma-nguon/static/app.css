@@ -227,8 +227,9 @@ button.chinh{background:var(--bang);border-color:var(--bang);color:#fff;font-wei
 .dong-sua{background:var(--but-do-nhat)}
 #mo-dau{flex:1;display:flex;justify-content:center;align-items:flex-start;color:var(--muc-mo);overflow:auto;min-height:0}
 /* Chưa mở file: màn hình bắt đầu dùng cả hai vùng làm việc */
-.soan:has(#mo-dau:not([hidden])){grid-column:span 2;border-right:0}
-.soan:has(#mo-dau:not([hidden]))~.xem{display:none}
+/* Mở PDF thì #mo-dau chỉ bị ẩn bằng .che-do-pdf, không có thuộc tính hidden, nên phải loại chế độ PDF ra kẻo khung xem bị ẩn */
+body:not(.che-do-pdf) .soan:has(#mo-dau:not([hidden])){grid-column:span 2;border-right:0}
+body:not(.che-do-pdf) .soan:has(#mo-dau:not([hidden]))~.xem{display:none}
 #mo-dau[hidden]{display:none}
 .bat-dau{width:100%;padding:32px 40px}
 .bat-dau h2{margin:0 0 4px;font-size:20px;font-weight:700;color:var(--muc)}
