@@ -8,8 +8,8 @@ const coChon = () => dangPdf() && pt.ds.some(x => x.chon);
 const ranh = () => !tt.viec;
 const coXem = () => xv().trang.length > 0;
 
-const sapCo = (ten, ic, to = false) => ({ten, ic, to, sapCo: true});
-const lenhCt = (ten, ic, ma, to = false, goiY) => ({ten, ic, to, goiY, lam: () => datCongCu(ma), tich: () => congCu === ma, bat: coXem});
+const sapCo = (ten, ic, to = false, tenNgan) => ({ten, ic, to, tenNgan, sapCo: true});
+const lenhCt = (ten, ic, ma, to = false, goiY, tenNgan) => ({ten, ic, to, goiY, tenNgan, lam: () => datCongCu(ma), tich: () => congCu === ma, bat: coXem});
 
 function dsRibbon() {
   return [
@@ -29,7 +29,7 @@ function dsRibbon() {
         {ten: "Biên dịch", ic: "bien-dich", to: true, phim: "F5", goiY: "Tạo PDF để xem, chưa tạo file dùng", lam: () => bienDich(), bat: () => coTex() && ranh()},
         {ten: "Xuất PDF", ic: "xuat", to: true, phim: "Ctrl+E", goiY: "Tạo file PDF dùng thật, đủ các bản", lam: xuatDung, bat: () => coTex() && ranh()},
         {ten: "Thư viện mẫu", ic: "thu-vien", lam: moThuVien},
-        {ten: "Tách, gộp trang của PDF đang xem", ic: "hai-trang", lam: sapTrangTuBienDich, bat: coTex},
+        {ten: "Tách, gộp trang của PDF đang xem", tenNgan: "Tách, gộp trang", ic: "hai-trang", lam: sapTrangTuBienDich, bat: coTex},
       ]],
       ["Tìm", [
         {o: "tim"},
@@ -80,7 +80,7 @@ function dsRibbon() {
       ]],
       ["Khổ giấy", [
         sapCo("Cắt lề", "cat-le"), sapCo("Đổi khổ giấy", "kho-giay"),
-        sapCo("Ghép 2 trang lên 1 tờ", "ghep-to"),
+        sapCo("Ghép 2 trang lên 1 tờ", "ghep-to", false, "Ghép 2 trang"),
       ]],
       ["Lưu thành file", [
         {ten: "Lưu trang chọn", ic: "luu-chon", to: true, goiY: "Tách các trang đã chọn thành file mới", lam: () => luuTrang(true), bat: coChon},
@@ -112,7 +112,7 @@ function dsRibbon() {
         {ten: "Độ dày nét", ic: "net", goiY: "Bấm để đổi 1, 2, 4 pt", lam: doiNetCt},
       ]],
       ["Quản lý", [
-        sapCo("Danh sách ghi chú", "ds-ghi-chu"), {ten: "Xóa hết chú thích", ic: "xoa", lam: xoaHetCt, bat: coXem},
+        sapCo("Danh sách ghi chú", "ds-ghi-chu", false, "Các ghi chú"), {ten: "Xóa hết chú thích", tenNgan: "Xóa hết", ic: "xoa", lam: xoaHetCt, bat: coXem},
       ]],
     ]},
     {ma: "tai-lieu", ten: "Tài liệu", nhom: [
@@ -135,7 +135,7 @@ function dsRibbon() {
         {ten: "Thanh file", ic: "thanh-ben", phim: "Ctrl+B", lam: () => batTat("ban"), tich: () => bc.ban},
         {ten: "Mục lục", ic: "dai-bai", lam: () => batTat("le"), tich: () => bc.le},
         {ten: "Vùng bên trái", ic: "vung-soan", lam: () => batTat("soan"), tich: () => (dangPdf() ? bc.day : bc.soan)},
-        {ten: "Vùng xem kết quả", ic: "vung-xem", lam: () => batTat("xem"), tich: () => bc.xem, bat: () => !dangPdf()},
+        {ten: "Vùng xem kết quả", tenNgan: "Vùng kết quả", ic: "vung-xem", lam: () => batTat("xem"), tich: () => bc.xem, bat: () => !dangPdf()},
       ]],
       ["Cách sửa", [
         {ten: "Theo dòng", ic: "theo-dong", to: true, lam: () => datCheDo("dong"), tich: () => tt.cheDo === "dong", bat: coTex},
@@ -144,7 +144,7 @@ function dsRibbon() {
       ["Phông chữ", [
         {ten: "Chữ to hơn", ic: "chu-to", phim: "Ctrl+=", lam: () => doiCoChu(1)},
         {ten: "Chữ nhỏ hơn", ic: "chu-nho", phim: "Ctrl+-", lam: () => doiCoChu(-1)},
-        {ten: "Cỡ chữ mặc định", ic: "chu-goc", phim: "Ctrl+0", lam: () => doiCoChu(0)},
+        {ten: "Cỡ chữ mặc định", tenNgan: "Cỡ chữ gốc", ic: "chu-goc", phim: "Ctrl+0", lam: () => doiCoChu(0)},
       ], {ten: "Cài đặt phông chữ, cỡ chữ", goiY: "Của code và thanh file", lam: () => moHopPhong()}],
       ["Trang PDF", [
         {ten: "Vừa chiều rộng", ic: "vua-rong", lam: () => xv().datKhop("rong"), tich: () => xv().kieu === "rong", bat: coXem},
@@ -153,7 +153,7 @@ function dsRibbon() {
         sapCo("Xem hai trang", "hai-trang"),
       ]],
       ["Bố cục", [
-        {ten: "Chia đều hai vùng", ic: "chia-deu", lam: () => { bc.tiLe = 0.5; apBoCuc(); luuBoCuc(); capNhatVungPdf(); }},
+        {ten: "Chia đều hai vùng", tenNgan: "Chia đều", ic: "chia-deu", lam: () => { bc.tiLe = 0.5; apBoCuc(); luuBoCuc(); capNhatVungPdf(); }},
         {ten: "Đặt lại bố cục", ic: "dat-lai", lam: () => datLaiBoCuc()},
         {ten: "Toàn màn hình", ic: "toan-man", phim: "F11", goiY: "Xem PDF kín màn hình, Esc để thoát", lam: () => batToanMan(), bat: coXem},
       ]],
@@ -190,11 +190,10 @@ function taoNut(x) {
   b.className = x.to ? "nut-to" : "nut-nho";
   b.innerHTML = bieuTuong(x.ic);
   b.setAttribute("aria-label", x.ten);
-  if (x.to) {
-    const s = document.createElement("span");
-    s.textContent = x.ten;
-    b.append(s);
-  }
+  // Nút to: chữ nằm dưới biểu tượng. Nút nhỏ: chữ (tên ngắn nếu có) nằm bên phải, nhóm thiếu chỗ thì ẩn chữ đi.
+  const s = document.createElement("span");
+  s.textContent = x.to ? x.ten : x.tenNgan || x.ten;
+  b.append(s);
   b.dataset.ten = x.ten;
   if (x.phim) b.dataset.phim = x.phim;
   if (x.goiY) b.dataset.goiY = x.goiY;
@@ -307,12 +306,14 @@ function chuyenTab(ma) {
     t.nut.tabIndex = k === ma ? 0 : -1;
     t.than.hidden = k !== ma;
   }
+  vuaRibbon();
 }
 
 // Đang thu gọn thì bấm tab chỉ mở tạm, bấm ra ngoài là gập lại như Word.
 function bamTab(ma) {
   chuyenTab(ma);
   if (bc.thuGon) document.getElementById("ribbon").classList.add("mo-tam");
+  vuaRibbon();
 }
 
 function apThuGon() {
@@ -330,6 +331,24 @@ function doiThuGon() {
   apBoCuc();
   luuBoCuc();
 }
+
+// Nhóm thiếu chỗ thì thu về chỉ biểu tượng, nhóm ít dùng thu trước, rồi đến các nhóm bên phải.
+const NHOM_IT_DUNG = ["Khổ giấy", "Định dạng", "Quản lý", "Kiểu nét", "Bố cục", "Phông chữ", "Nhận dạng"];
+
+function vuaRibbon() {
+  const t = THE_TAB.get(tabHienTai), than = t?.than;
+  if (!than || than.hidden || !than.clientWidth) return;
+  const ds = [...than.querySelectorAll(".nhom")];
+  ds.forEach(n => n.classList.remove("gon"));
+  const hang = n => { const i = NHOM_IT_DUNG.indexOf(n.getAttribute("aria-label")); return i >= 0 ? i : 100 - ds.indexOf(n); };
+  const xep = ds.filter(n => n.querySelector(".nut-nho")).sort((a, b) => hang(a) - hang(b));
+  for (const n of xep) {
+    if (than.scrollWidth <= than.clientWidth) break;
+    n.classList.add("gon");
+  }
+}
+new ResizeObserver(vuaRibbon).observe(document.getElementById("ribbon-than"));
+document.fonts?.ready.then(vuaRibbon);
 
 function capNhatRibbon() {
   for (const {nut, x} of NUT_RIBBON) {
