@@ -181,13 +181,14 @@ function datCauHinh(da) {
     b.type = "button";
     b.id = "tich-ban";
     b.className = "nut-dau";
-    b.innerHTML = bieuTuong("o-trong");
+    b.innerHTML = `${bieuTuong("o-trong")}<span class="chu-nut"></span>`;
+    b.dataset.chu = "x";
     b.onclick = () => chonBan(da.ban[tt.ban === da.ban[0] ? 1 : 0]);
     hop.replaceChildren(b);
   } else hop.replaceChildren(...da.ban.map(ban => {
     const b = document.createElement("button");
     b.textContent = tt.nhanBan[ban] || ban;
-    b.title = `Xem PDF bản ${ban}`;
+    b.dataset.ten = `Xem PDF bản ${ban}`;
     b.dataset.ban = ban;
     b.onclick = () => chonBan(ban);
     return b;
@@ -555,6 +556,9 @@ function datDauBan(ban) {
     nut.setAttribute("aria-pressed", co);
     nut.setAttribute("aria-label", ten);
     nut.dataset.ten = ten;
+    const kia = tt.nhanBan[tt.dsBan[co ? 1 : 0]] || tt.dsBan[co ? 1 : 0];
+    nut.dataset.goiY = `Đang xem bản "${ten}". Bấm để chuyển sang bản "${kia}".`;
+    nut.querySelector(".chu-nut").textContent = ten;
     nut.querySelector("svg").innerHTML = BT[co ? "chon-het" : "o-trong"];
   }
 }

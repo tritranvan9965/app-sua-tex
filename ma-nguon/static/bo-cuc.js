@@ -56,7 +56,18 @@ function datTayKeo() {
   dat(tayBan, bc.ban, ban.right, ban.top);
   dat(tayGiua, dangPdf() ? bc.day : bc.soan && bc.xem, soan_.right, soan_.top);
   datMuiBen(bc.ban ? ban.right : 0, hep);
-  $("nav-pdf").style.left = hep ? "" : `${document.querySelector(".xem").getBoundingClientRect().left}px`;  // phần số trang nằm đúng dưới vùng PDF
+  datViTriNav();
+}
+
+// Phần số trang nằm đúng dưới vùng PDF. Vùng PDF hẹp hơn thanh điều hướng thì lùi sang trái cho khỏi tràn ra ngoài cửa sổ.
+function datViTriNav() {
+  const nav = $("nav-pdf"), hep = innerWidth <= 900;
+  nav.style.left = "";
+  if (hep) return;
+  const trai = document.querySelector(".xem").getBoundingClientRect().left;
+  nav.style.left = `${trai}px`;
+  const du = trai + nav.offsetWidth - innerWidth;
+  if (du > 0 && !nav.hidden) nav.style.left = `${Math.max(0, trai - du)}px`;
 }
 
 // Mũi tên nằm giữa cạnh phải thanh file. Thanh file ẩn thì mũi tên nằm sát mép trái cửa sổ để bấm hiện lại.

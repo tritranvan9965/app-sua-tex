@@ -358,6 +358,7 @@ function capNhatNav() {
   $("ve-dau").disabled = $("trang-truoc").disabled = v.hien === 0;
   $("ve-cuoi").disabled = $("trang-sau").disabled = v.hien === n - 1;
   $("cong-cu-hien").textContent = `Đang dùng: ${TEN_CT[congCu] ?? ""}`;
+  datViTriNav();
   $("nav-chu").setAttribute("aria-pressed", congCu === "chu");
   $("nav-vung").setAttribute("aria-pressed", congCu === "vung");
   $("nav-mot").setAttribute("aria-pressed", v.laTungTrang());

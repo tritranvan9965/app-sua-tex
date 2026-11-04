@@ -301,7 +301,10 @@ function taoRibbon() {
     dsNut[(i + (e.key === "ArrowRight" ? 1 : -1) + dsNut.length) % dsNut.length].click();
     ds.querySelector("[aria-selected=true]").focus();
   };
-  document.querySelectorAll("[data-ic]").forEach(b => { b.insertAdjacentHTML("afterbegin", bieuTuong(b.dataset.ic)); });
+  document.querySelectorAll("[data-ic]").forEach(b => {
+    b.insertAdjacentHTML("afterbegin", bieuTuong(b.dataset.ic));
+    if (b.dataset.chu) b.insertAdjacentHTML("beforeend", `<span class="chu-nut">${b.dataset.chu}</span>`);
+  });
   document.getElementById("nut-gon").onclick = doiThuGon;
   document.getElementById("luu-tep").onclick = e => { if (e.currentTarget.getAttribute("aria-disabled") !== "true") luuVaXuat(); };
   document.getElementById("luu-pdf").onclick = e => {
@@ -364,6 +367,11 @@ function vuaRibbon() {
   for (const n of xep) {
     if (than.scrollWidth <= than.clientWidth) break;
     n.classList.add("gon");
+  }
+  // Thu dư thì mở lại nhóm nào còn vừa, nhóm hay dùng mở trước.
+  for (const n of xep.filter(n => n.classList.contains("gon")).reverse()) {
+    n.classList.remove("gon");
+    if (than.scrollWidth > than.clientWidth) n.classList.add("gon");
   }
 }
 new ResizeObserver(vuaRibbon).observe(document.getElementById("ribbon-than"));
@@ -454,7 +462,7 @@ addEventListener("pointerover", e => {
   anGoiY();
   if (b) henGoiY = setTimeout(() => hienGoiY(b), Date.now() - vuaHienGoiY < 400 ? 0 : 350);
 });
-addEventListener("focusin", e => { if (e.target.matches("[data-ten]:focus-visible")) hienGoiY(e.target); });
+addEventListener("focusin", e => { if (e.target.matches("[data-ten]:focus-visible:not(input)")) hienGoiY(e.target); });
 addEventListener("focusout", anGoiY);
 addEventListener("pointerdown", anGoiY, true);
 

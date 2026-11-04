@@ -208,6 +208,12 @@ body.khong-bai{grid-template-columns:216px minmax(0,1fr) minmax(0,1fr)}
 .nut-dau:hover:not([aria-disabled=true]){background:var(--le)}
 .nut-dau[aria-disabled=true]{cursor:default;color:var(--phan-mo)}
 #dau-pdf{gap:4px}
+.thanh{container-type:inline-size}
+.chu-nut{display:none}
+@container (min-width:470px){
+  .thanh :is(.nut-dau,#cd-nhom button)[data-chu]{display:flex;align-items:center;gap:5px;width:auto;padding:0 8px 0 6px;font-size:12px;white-space:nowrap}
+  .thanh :is(.nut-dau,#cd-nhom button)[data-chu] .chu-nut{display:inline}
+}
 #chon-ban{flex:none;display:flex;align-items:center}
 .nut-dau[aria-pressed=true]{color:var(--bang)}
 .nut-hop button{border:1px solid var(--ke);background:#fff;border-radius:5px;padding:5px 9px;white-space:nowrap}

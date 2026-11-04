@@ -31,12 +31,12 @@
 
 <main class="soan">
   <header class="thanh">
-    <div class="ten-tep"><strong id="ten-tep">Chưa mở file</strong><button type="button" id="luu-tep" class="nut-dau" data-ic="luu" data-ten="Lưu" data-phim="Ctrl+S" aria-label="Lưu"></button></div>
+    <div class="ten-tep"><strong id="ten-tep">Chưa mở file</strong><button type="button" id="luu-tep" class="nut-dau" data-chu="Lưu" data-ic="luu" data-ten="Lưu" data-phim="Ctrl+S" aria-label="Lưu"></button></div>
     <div class="nhom-nut">
       <div id="chon-ban" role="group" aria-label="Chọn bản PDF" hidden></div>
       <div class="chon-ban" id="cd-nhom" role="group" aria-label="Cách hiển thị" hidden>
-        <button type="button" id="cd-dong" aria-pressed="true" data-ic="theo-dong" data-ten="Theo dòng" aria-label="Theo dòng"></button>
-        <button type="button" id="cd-code" aria-pressed="false" data-ic="code" data-ten="Toàn bộ code" aria-label="Toàn bộ code"></button>
+        <button type="button" id="cd-dong" aria-pressed="true" data-chu="Theo dòng" data-ic="theo-dong" data-ten="Theo dòng" aria-label="Theo dòng"></button>
+        <button type="button" id="cd-code" aria-pressed="false" data-chu="Toàn bộ code" data-ic="code" data-ten="Toàn bộ code" aria-label="Toàn bộ code"></button>
       </div>
     </div>
   </header>
@@ -69,7 +69,7 @@
 <section class="xem" aria-label="Xem kết quả">
   <header class="thanh">
     <button type="button" id="nut-trai" class="nut-dau" data-ic="vung-soan" data-ten="Ẩn, hiện vùng bên trái" aria-label="Ẩn, hiện vùng bên trái" hidden></button>
-    <div class="ten-tep" id="dau-pdf" hidden><strong id="ten-pdf"></strong><button type="button" id="luu-pdf" class="nut-dau" data-ic="luu" data-ten="Lưu PDF" aria-label="Lưu PDF"></button></div>
+    <div class="ten-tep" id="dau-pdf" hidden><strong id="ten-pdf"></strong><button type="button" id="luu-pdf" class="nut-dau" data-chu="Lưu PDF" data-ic="luu" data-ten="Lưu PDF" aria-label="Lưu PDF"></button></div>
   </header>
   <div id="xem-pdf" class="o-xem"></div>
   <div id="khung-xem">
@@ -85,7 +85,7 @@
   <div class="dieu-khien" id="dieu-trang" hidden>
     <button type="button" id="ve-dau" data-ic="ve-dau" data-ten="Trang đầu" aria-label="Trang đầu"></button>
     <button type="button" id="trang-truoc" data-ic="tro-trai" data-ten="Trang trước" aria-label="Trang trước"></button>
-    <input id="o-trang" inputmode="numeric" aria-label="Số trang">
+    <input id="o-trang" inputmode="numeric" data-ten="Số trang" data-goi-y="Gõ số trang rồi Enter để đến trang đó" aria-label="Số trang">
     <span id="tong-trang"></span>
     <button type="button" id="trang-sau" data-ic="tro-phai" data-ten="Trang sau" aria-label="Trang sau"></button>
     <button type="button" id="ve-cuoi" data-ic="ve-cuoi" data-ten="Trang cuối" aria-label="Trang cuối"></button>
@@ -100,7 +100,7 @@
     <button type="button" id="nav-trang" data-ic="vua-trang" data-ten="Vừa cả trang" aria-label="Vừa cả trang"></button>
     <i></i>
     <button type="button" id="zoom-nho" data-ic="tru" data-ten="Thu nhỏ" aria-label="Thu nhỏ"></button>
-    <input id="o-zoom" aria-label="Mức zoom">
+    <input id="o-zoom" data-ten="Mức phóng to" data-goi-y="Gõ số phần trăm rồi Enter" aria-label="Mức zoom">
     <button type="button" id="zoom-to" data-ic="cong" data-ten="Phóng to" aria-label="Phóng to"></button>
   </div>
   </div>
