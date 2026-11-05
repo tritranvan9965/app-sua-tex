@@ -247,6 +247,7 @@ const nutKhac = dung("Màu khác", "Khác…", "Mở bảng màu để chọn b�
 const oDay = el("input", "tn-truot"), soDay = el("span", "tn-so");
 const nutKieu = dung("Kiểu nét", "", "Liền, gạch, chấm hay gạch chấm"), menuKieu = el("div", "tn-menu");
 const nutXong = dung("Bỏ chọn", "Xong", "Thôi sửa nét này, trở lại vẽ nét mới"), nutXoa = dung("Xóa nét này", "Xóa", "Xóa nét đang chọn. Ctrl+Z để lấy lại");
+const nutDong = dung("Tắt công cụ", "×", "Tắt công cụ này, quay về Chọn chữ");
 const nutViTri = dung("Đưa thanh này xuống dưới", "", "Chuyển thanh lên hoặc xuống mép trang cho khỏi che chỗ đang vẽ");
 let mauBon = "";  // màu đang nằm ở ô thứ tư
 
@@ -311,7 +312,9 @@ function nutMuc(ma, gia, b) {
   nutXong.onclick = () => boChonNet();
   nutXoa.onclick = xoaNetChon;
   nutViTri.onclick = () => { viTriNet = viTriNet === "tren" ? "duoi" : "tren"; luuNet(); capNhatThanhNet(); };
-  cuoi.append(veMau, nutXong, nutXoa, nutViTri);
+  nutDong.className = "tn-dong";
+  nutDong.onclick = () => datCongCu("chu");
+  cuoi.append(veMau, nutXong, nutXoa, nutViTri, nutDong);
   thanhNet.append(cuoi);
   document.body.append(thanhNet);
 })();
@@ -355,11 +358,14 @@ function capNhatConTroNet() {
   daVeConTro = v.daVe;
   document.body.classList.toggle("cc-ve", ve);
   if (!ve) return document.body.style.removeProperty("--con-tro");
-  const p = tn[loai], d = Math.max(5, Math.min(64, p.net * v.daVe)), S = Math.ceil(Math.max(32, d + 10)), m = S / 2, mau = p.mau;
-  const chu = `<path d="M${m - 10} ${m}H${m + 10}M${m} ${m - 10}V${m + 10}" stroke="#fff" stroke-width="3"/><path d="M${m - 10} ${m}H${m + 10}M${m} ${m - 10}V${m + 10}" stroke="#17302a" stroke-width="1"/>`;
-  const noi = (loai === "but" ? "" : chu) + `<circle cx="${m}" cy="${m}" r="${d / 2 + 0.75}" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="${m}" cy="${m}" r="${d / 2}" fill="${mau}" stroke="#17302a" stroke-opacity=".55" stroke-width=".8"/>`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">${noi}</svg>`;
-  document.body.style.setProperty("--con-tro", `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${Math.round(m)} ${Math.round(m)}, crosshair`);
+  // Chấm tròn đúng cỡ nét trên trang (đổi theo thanh trượt), có viền sáng và viền tối nên màu trắng hay đen đều thấy.
+  // Thêm hình cây bút chĩa lên phải, đầu bút trùng tâm chấm.
+  const p = tn[loai], d = Math.max(4, Math.min(80, p.net * v.daVe)), r = d / 2, mau = p.mau, o = 3;
+  const W = Math.ceil(d + 38), H = W, cx = r + o, cy = H - r - o;
+  const but = `<g transform="translate(${cx} ${cy}) rotate(-45)"><path d="M0 0L8 -3.2V3.2Z" fill="${mau}" stroke="#fff" stroke-width="3.4" stroke-linejoin="round"/><path d="M8 -3.2H27V3.2H8Z" fill="#fff" stroke="#fff" stroke-width="3.4" stroke-linejoin="round"/><path d="M0 0L8 -3.2V3.2Z" fill="${mau}" stroke="#17302a" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 -3.2H27V3.2H8Z" fill="#fff" stroke="#17302a" stroke-width="1.1" stroke-linejoin="round"/><path d="M13 -3.2V3.2" stroke="#17302a" stroke-width="1"/></g>`;
+  const cham = `<circle cx="${cx}" cy="${cy}" r="${r + 1.6}" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="${cx}" cy="${cy}" r="${r + 0.4}" fill="none" stroke="#17302a" stroke-width="1"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="${mau}"/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${cham}${but}</svg>`;
+  document.body.style.setProperty("--con-tro", `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${Math.round(cx)} ${Math.round(cy)}, crosshair`);
 }
 
 // ---------- Cập nhật thanh ----------

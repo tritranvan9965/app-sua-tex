@@ -118,11 +118,12 @@ for (const [ten, ds] of LENH) {
   for (const [tn_, ic, ma] of ds) {
     const b = document.createElement("button");
     b.type = "button"; b.className = "nut-nho"; b.innerHTML = `${bieuTuong(ic)}<span>${tn_}</span>`;
-    if (ma) { nutCt[ma] = b; b.onclick = () => datCongCuThu(ma); } else { b.setAttribute("aria-disabled", "true"); b.title = "Không dùng trong bản thử"; }
+    if (ma) { nutCt[ma] = b; b.onclick = () => datCongCuThu(congCu === ma ? "chu" : ma); } else { b.setAttribute("aria-disabled", "true"); b.title = "Không dùng trong bản thử"; }
     cot.append(b);
   }
   hang.append(cot); nhom.append(hang, nhan); $("bang").append(nhom);
 }
+const datCongCu = ma => datCongCuThu(ma);
 function datCongCuThu(ma) {
   congCu = ma;
   document.body.dataset.cc = ma;

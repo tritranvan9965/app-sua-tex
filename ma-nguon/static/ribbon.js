@@ -25,7 +25,7 @@ const TEN_CT = {chu: "Chọn chữ", vung: "Chọn vùng", "sua-chu": "Sửa ch�
 const sapCo = (ten, ic, to = false, tenNgan) => ({ten, ic, to, tenNgan, sapCo: true});
 const lenhCt = (ten, ic, ma, to = false, goiY, tenNgan) => {
   TEN_CT[ma] = ten;
-  return {ten, ic, to, goiY, tenNgan, lam: () => datCongCu(ma), tich: () => coXem() && congCu === ma, bat: coXem};
+  return {ten, ic, to, goiY, tenNgan, lam: () => datCongCu(congCu === ma ? "chu" : ma), tich: () => coXem() && congCu === ma, bat: coXem};  // bấm lần hai vào công cụ đang bật thì tắt, về Chọn chữ
 };
 // Tab Chèn là lệnh soạn LaTeX: xem PDF thì mờ hết.
 const lenhChen = x => ({...x, bat: () => !dangPdf(), khoa: LD_CHEN});
