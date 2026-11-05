@@ -87,7 +87,7 @@ $("lop").addEventListener("pointerdown", e => {
   const p0 = toa(e), cu = [...t.m.ct], c = {loai: congCu, ...thuocTinhMoi(congCu)};
   if (marks) c.khung = []; else c.d = [p0, p0];
   let keo = false;
-  $("lop").setPointerCapture(e.pointerId);
+  try { $("lop").setPointerCapture(e.pointerId); } catch {}
   const di = ev => {
     const p = toa(ev);
     if (!keo && Math.hypot(p[0] - p0[0], p[1] - p0[1]) < 2) return;
@@ -131,6 +131,11 @@ function datCongCuThu(ma) {
   capNhatThanhNet();
 }
 
+// Gợi ý khi rê chuột (app có hệ thống gợi ý riêng; bản thử dùng gợi ý của trình duyệt)
+addEventListener("pointerover", e => {
+  const b = e.target.closest?.("[data-ten]");
+  if (b && !b.title) b.title = b.dataset.goiY ? `${b.dataset.ten}. ${b.dataset.goiY}` : b.dataset.ten;
+});
 addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); hoanTacCt(); }
 });

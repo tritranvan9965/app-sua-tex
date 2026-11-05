@@ -4,9 +4,7 @@
 // và không ép ribbon rộng thêm. Mỗi công cụ nhớ thuộc tính riêng, lưu chung với bố cục (bc.net).
 // Vẽ ra màn hình, ra bản in, ra file đều qua veMot1 trong chu-thich.js nên các thuộc tính ở đây tự ra đúng mọi nơi.
 
-const MAU_NET = [["#c0262d", "Đỏ"], ["#e8791d", "Cam"], ["#f2c400", "Vàng"], ["#1f8a4c", "Xanh lá"], ["#0b8f8c", "Xanh ngọc"],
-  ["#1f5fbf", "Xanh dương"], ["#7a3db5", "Tím"], ["#d6467f", "Hồng"], ["#1a1a1a", "Đen"], ["#6b7280", "Xám"]];
-const DAY_NET = [0.5, 1, 2, 3, 5];
+const DAY_TOI_THIEU = 0.5, DAY_TOI_DA = 10, DAY_BUOC = 0.5;
 const KIEU_NET = [["lien", "Nét liền"], ["gach", "Nét gạch"], ["cham", "Nét chấm"], ["gach-cham", "Nét gạch chấm"]];
 const TRONG_NET = [[0.2, "Nhạt"], [0.35, "Vừa"], [0.55, "Đậm"]];
 const DAU_NET = [[1, "Một đầu"], [2, "Hai đầu"]];
@@ -34,7 +32,9 @@ let daVeConTro = 0;
 
 const laMauHop = s => typeof s === "string" && /^#[0-9a-f]{6}$/i.test(s);
 const cungMau = (a, b) => a?.toLowerCase() === b?.toLowerCase();
-const coTrongPalette = m => MAU_NET.some(([x]) => cungMau(x, m));
+// Bảng chỉ hiện 3 màu cố định theo công cụ; ô thứ tư là màu đang dùng hoặc màu dùng gần nhất.
+const MAU_CO_DINH = loai => (loai === "to-sang" ? ["#f2c400", "#5bc25b", "#d6467f"] : ["#c0262d", "#1f5fbf", "#1a1a1a"]);
+const TEN_MAU = {"#c0262d": "Đỏ", "#1f5fbf": "Xanh dương", "#1a1a1a": "Đen", "#f2c400": "Vàng", "#5bc25b": "Xanh lá", "#d6467f": "Hồng"};
 const soPt = n => String(n).replace(".", ",");
 
 function napThuocTinhNet(luu) {
@@ -163,24 +163,25 @@ function loaiHienNet() { return chonNet ? chonNet.c.loai : congCu; }
 function giaTriHienNet(k) { return chonNet ? giaTriNet(chonNet.c, k) : tn[congCu]?.[k]; }
 
 // Đổi thuộc tính nét đang chọn: tạo mục mới thay vào mảng (giống hộp chữ), nên Ctrl+Z chỉ cần giữ mảng cũ.
-function doiNetChon(doi) {
+function doiNetChon(doi, khongLich = false) {
   const {v, t, c} = chonNet, i = t.m.ct.indexOf(c);
   if (i < 0) return;
   const moi = {...c, ...doi};
-  lichCt.push({v, t, ct: t.m.ct, chonI: i});
+  if (!khongLich) lichCt.push({v, t, ct: t.m.ct, chonI: i});
   t.m.ct = t.m.ct.map((x, j) => (j === i ? moi : x));
   chonNet.c = moi;
   v.veLop(t);
   daDoiCt(v);
 }
 
-function datThuocTinhNet(k, gia) {
-  if (chonNet) doiNetChon({[k]: gia});
+// khongLich: đang kéo thanh trượt, cả lượt kéo chỉ là một bước hoàn tác (đã ghi ở lần đổi đầu tiên).
+function datThuocTinhNet(k, gia, khongLich = false) {
+  if (chonNet) doiNetChon({[k]: gia}, khongLich);
   else if (tn[congCu]) {
     tn[congCu][k] = gia;
     if (k === "mau" && congCu !== "to-sang") mauCt = gia;
   }
-  if (k === "mau" && !coTrongPalette(gia)) ganDayNet = [gia, ...ganDayNet.filter(m => !cungMau(m, gia))].slice(0, TOI_DA_GAN_DAY);
+  if (k === "mau" && !MAU_CO_DINH(loaiHienNet()).some(m => cungMau(m, gia))) ganDayNet = [gia, ...ganDayNet.filter(m => !cungMau(m, gia))].slice(0, TOI_DA_GAN_DAY);
   luuNet();
   capNhatThanhNet();
 }
@@ -200,6 +201,7 @@ function xoaNetChon() {
 
 const svgNet = (r, c, noi) => `<svg width="${r}" height="${c}" viewBox="0 0 ${r} ${c}" aria-hidden="true">${noi}</svg>`;
 const mauChu = h => { const n = parseInt(h.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 150 ? "#17302a" : "#fff"; };
+const dauTich = m => svgNet(14, 14, `<path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="${mauChu(m)}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`);
 
 function svgKieu(kieu) {
   const d = KIEU_GACH[kieu](2.5).map(n => +n.toFixed(2)).join(" ");
@@ -207,12 +209,12 @@ function svgKieu(kieu) {
 }
 
 function svgDau(n) {
-  const mui = (x, y, h) => `<path d="M${x + h * 6} ${y - 5}L${x} ${y}L${x + h * 6} ${y + 5}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-  return svgNet(40, 20, `<line x1="6" y1="10" x2="34" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>${mui(34, 10, -1)}${n === 2 ? mui(6, 10, 1) : ""}`);
+  const mui = (x, y, h) => `<path d="M${x + h * 5} ${y - 4}L${x} ${y}L${x + h * 5} ${y + 4}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return svgNet(32, 16, `<line x1="5" y1="8" x2="27" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>${mui(27, 8, -1)}${n === 2 ? mui(5, 8, 1) : ""}`);
 }
 
 function svgNen(n) {
-  return svgNet(26, 20, `<rect x="3" y="3" width="20" height="14" rx="2" fill="${n ? "currentColor" : "none"}" fill-opacity="${n ? 0.25 : 0}" stroke="currentColor" stroke-width="2"/>`);
+  return svgNet(22, 16, `<rect x="3" y="2.5" width="16" height="11" rx="2" fill="${n ? "currentColor" : "none"}" fill-opacity="${n ? 0.25 : 0}" stroke="currentColor" stroke-width="1.8"/>`);
 }
 
 const dung = (nhan, noi, h) => {
@@ -224,98 +226,84 @@ const dung = (nhan, noi, h) => {
   if (h) b.dataset.goiY = h;
   return b;
 };
+const el = (tag, lop, chu) => Object.assign(document.createElement(tag), {className: lop ?? "", textContent: chu ?? ""});
 
-const thanhNet = document.createElement("div");
+// ---------- Thanh: một hàng thấp ----------
+
+const thanhNet = el("div");
 thanhNet.id = "thanh-net";
 thanhNet.hidden = true;
 thanhNet.setAttribute("role", "toolbar");
 thanhNet.setAttribute("aria-label", "Màu, độ dày và kiểu nét");
-const mucNet = {};  // mã mục -> {o: khung mục, nut: [[giá trị, nút]]}
-const oMauNet = document.createElement("input");
-oMauNet.type = "color";
-oMauNet.hidden = true;
+const mucNet = {};  // mã mục -> {o, nut: [[giá trị, nút]]}
+const tieuNet = el("span", "tn-tieu");
+const oMauNet = Object.assign(el("input"), {type: "color", hidden: true});
 oMauNet.setAttribute("aria-label", "Màu khác");
-const veMau = document.createElement("canvas");
+const veMau = el("canvas");
 veMau.id = "tn-mau-thu";
 veMau.setAttribute("aria-label", "Xem trước nét");
-const tieuNet = document.createElement("div"), phuNet = document.createElement("div");
-const hangMau = document.createElement("div"), nutKhac = document.createElement("button"), ganDayO = document.createElement("span");
-const nutXong = dung("Bỏ chọn", "Xong", "Thôi chỉnh nét này, trở lại vẽ nét mới"), nutXoa = dung("Xóa nét này", "Xóa", "Xóa nét đang chọn. Ctrl+Z để lấy lại");
+const nutMau4 = el("button", "tn-o-mau"), hangMau = el("span", "tn-nhom");
+const nutKhac = dung("Màu khác", "Khác…", "Mở bảng màu để chọn bất kỳ màu nào");
+const oDay = el("input", "tn-truot"), soDay = el("span", "tn-so");
+const nutKieu = dung("Kiểu nét", "", "Liền, gạch, chấm hay gạch chấm"), menuKieu = el("div", "tn-menu");
+const nutXong = dung("Bỏ chọn", "Xong", "Thôi sửa nét này, trở lại vẽ nét mới"), nutXoa = dung("Xóa nét này", "Xóa", "Xóa nét đang chọn. Ctrl+Z để lấy lại");
 const nutViTri = dung("Đưa thanh này xuống dưới", "", "Chuyển thanh lên hoặc xuống mép trang cho khỏi che chỗ đang vẽ");
+let mauBon = "";  // màu đang nằm ở ô thứ tư
 
-function taoMuc(ma, tenMuc, hang) {
-  const o = document.createElement("div"), nhan = document.createElement("div");
-  o.className = "tn-muc";
+function taoMuc(ma, ...con) {
+  const o = el("span", "tn-nhom");
   o.dataset.muc = ma;
-  nhan.className = "tn-nhan";
-  nhan.textContent = tenMuc;
-  o.append(nhan, hang);
-  hang.classList.add("tn-hang");
+  o.append(...con);
   thanhNet.append(o);
   mucNet[ma] = {o, nut: []};
   return o;
 }
 
-function taoNutMuc(ma, gia, nut) {
-  nut.onclick = () => datThuocTinhNet(ma, gia);
-  mucNet[ma].nut.push([gia, nut]);
-  return nut;
+function nutMuc(ma, gia, b) {
+  b.onclick = () => { datThuocTinhNet(ma, gia); menuKieu.hidden = true; };
+  mucNet[ma].nut.push([gia, b]);
+  return b;
 }
 
 (function dungThanhNet() {
-  const dau = document.createElement("div");
-  dau.className = "tn-dau";
-  tieuNet.className = "tn-tieu";
-  phuNet.className = "tn-phu";
-  dau.append(tieuNet, phuNet);
-  thanhNet.append(dau);
-
-  hangMau.className = "tn-mau";
-  taoMuc("mau", "Màu", hangMau);
-  for (const [m, ten] of MAU_NET) {
-    const b = dung(ten, svgNet(14, 14, `<path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="${mauChu(m)}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`), `Chọn màu ${ten.toLowerCase()}`);
-    b.className = "tn-o-mau";
-    b.style.background = m;
-    hangMau.append(taoNutMuc("mau", m, b));
-  }
-  nutKhac.type = "button";
+  thanhNet.append(tieuNet);
+  // Màu: 3 ô cố định theo công cụ, ô thứ tư là màu đang dùng hoặc gần nhất, rồi "Khác…".
+  const o = taoMuc("mau");
+  for (let i = 0; i < 3; i++) { const b = el("button", "tn-o-mau"); b.type = "button"; o.append(b); b.onclick = () => datThuocTinhNet("mau", b.dataset.mau); mucNet.mau.nut.push([i, b]); }
+  nutMau4.type = "button";
+  nutMau4.onclick = () => datThuocTinhNet("mau", nutMau4.dataset.mau);
   nutKhac.className = "tn-khac";
-  nutKhac.textContent = "Màu khác…";
-  nutKhac.dataset.ten = "Màu khác";
-  nutKhac.dataset.goiY = "Mở bảng màu để chọn bất kỳ màu nào";
+  nutKhac.textContent = "Khác…";
   nutKhac.onclick = () => { oMauNet.value = giaTriHienNet("mau") ?? "#c0262d"; oMauNet.click(); };
   oMauNet.onchange = () => datThuocTinhNet("mau", oMauNet.value.toLowerCase());
-  ganDayO.className = "tn-gan";
-  hangMau.append(nutKhac, ganDayO, oMauNet);
+  o.append(nutMau4, nutKhac, oMauNet);
 
-  const hangDay = document.createElement("div");
-  taoMuc("net", "Độ dày", hangDay);
-  for (const d of DAY_NET) {
-    const b = dung(`${soPt(d)} pt`, `<i style="height:${Math.max(1, d * 4 / 3).toFixed(2)}px"></i><small>${soPt(d)}</small>`, `Độ dày nét ${soPt(d)} pt`);
-    b.className = "tn-day";
-    hangDay.append(taoNutMuc("net", d, b));
-  }
-  const hangKieu = document.createElement("div");
-  taoMuc("kieu", "Kiểu nét", hangKieu);
-  for (const [k, ten] of KIEU_NET) hangKieu.append(taoNutMuc("kieu", k, dung(ten, svgKieu(k), ten)));
+  // Độ dày: thanh trượt, số pt bên cạnh. Kéo khi đang chọn một nét thì áp ngay, cả lượt kéo là một bước hoàn tác.
+  oDay.type = "range";
+  oDay.min = DAY_TOI_THIEU; oDay.max = DAY_TOI_DA; oDay.step = DAY_BUOC;
+  oDay.setAttribute("aria-label", "Độ dày nét");
+  oDay.dataset.ten = "Độ dày nét";
+  oDay.dataset.goiY = "Kéo để đổi độ dày, từ 0,5 đến 10 pt";
+  let dangKeo = false;
+  oDay.oninput = () => { datThuocTinhNet("net", +oDay.value, dangKeo); dangKeo = true; };
+  oDay.onchange = () => { dangKeo = false; };
+  taoMuc("net", oDay, soDay);
 
-  const hangDauMui = document.createElement("div");
-  taoMuc("dau", "Đầu mũi tên", hangDauMui);
-  for (const [n, ten] of DAU_NET) hangDauMui.append(taoNutMuc("dau", n, dung(ten, svgDau(n), `${ten}: ${n === 2 ? "mũi tên ở cả hai đầu" : "mũi tên ở đầu cuối nét kéo"}`)));
-  const hangNen = document.createElement("div");
-  taoMuc("nen", "Tô nền", hangNen);
-  for (const [n, ten] of NEN_NET) hangNen.append(taoNutMuc("nen", n, dung(ten, svgNen(n), n ? "Tô nền bên trong bằng màu nhạt cùng màu nét" : "Chỉ vẽ viền, không tô nền")));
-  const hangTrong = document.createElement("div");
-  taoMuc("trong", "Độ trong", hangTrong);
-  for (const [a, ten] of TRONG_NET) {
-    const b = dung(ten, `<i style="opacity:${a}"></i>${ten}`, `Màu tô ${ten.toLowerCase()}${a < 0.3 ? ", thấy chữ rõ nhất" : a > 0.5 ? ", đậm nhất" : ""}`);
-    b.className = "tn-trong";
-    hangTrong.append(taoNutMuc("trong", a, b));
-  }
+  // Kiểu nét: một nút thả xuống, hiện luôn mẫu của kiểu đang dùng.
+  const mk = taoMuc("kieu", nutKieu);
+  menuKieu.hidden = true;
+  for (const [k, ten] of KIEU_NET) { const b = dung(ten, `${svgKieu(k)}<span>${ten.replace("Nét ", "")}</span>`, ten); b.className = "tn-muc-kieu"; menuKieu.append(nutMuc("kieu", k, b)); }
+  mk.append(menuKieu);
+  nutKieu.onclick = () => { menuKieu.hidden = !menuKieu.hidden; };
 
-  const cuoi = document.createElement("div"), hanh = document.createElement("div");
-  cuoi.className = "tn-cuoi";
-  hanh.className = "tn-hanh";
+  const dau = taoMuc("dau");
+  for (const [n, ten] of DAU_NET) dau.append(nutMuc("dau", n, dung(ten, svgDau(n), n === 2 ? "Mũi tên ở cả hai đầu" : "Mũi tên ở đầu cuối nét kéo")));
+  const nen = taoMuc("nen");
+  for (const [n, ten] of NEN_NET) nen.append(nutMuc("nen", n, dung(ten, svgNen(n), n ? "Tô nền bên trong bằng màu nhạt cùng màu nét" : "Chỉ vẽ viền, không tô nền")));
+  const tr = taoMuc("trong");
+  for (const [a, ten] of TRONG_NET) { const b = dung(ten, `<i style="opacity:${a}"></i>${ten}`, `Màu tô ${ten.toLowerCase()}`); b.className = "tn-trong"; tr.append(nutMuc("trong", a, b)); }
+
+  const cuoi = el("span", "tn-cuoi");
   nutXong.className = nutXoa.className = "tn-chu";
   nutXong.textContent = "Xong";
   nutXoa.textContent = "Xóa";
@@ -323,21 +311,21 @@ function taoNutMuc(ma, gia, nut) {
   nutXong.onclick = () => boChonNet();
   nutXoa.onclick = xoaNetChon;
   nutViTri.onclick = () => { viTriNet = viTriNet === "tren" ? "duoi" : "tren"; luuNet(); capNhatThanhNet(); };
-  hanh.append(nutXong, nutXoa, nutViTri);
-  cuoi.append(veMau, hanh);
+  cuoi.append(veMau, nutXong, nutXoa, nutViTri);
   thanhNet.append(cuoi);
   document.body.append(thanhNet);
 })();
 
 thanhNet.addEventListener("pointerdown", e => e.stopPropagation());
 thanhNet.addEventListener("mousedown", e => { if (!e.target.closest("input")) e.preventDefault(); });  // giữ chữ đang bôi đen khi bấm thanh
+addEventListener("pointerdown", e => { if (!menuKieu.hidden && !menuKieu.parentElement.contains(e.target)) menuKieu.hidden = true; }, true);
 
 // ---------- Xem trước ----------
 
-// Mẫu vẽ bằng chính veMot1 ở cỡ thật đang xem, nên màu, độ dày, kiểu nét, đầu mũi tên, tô nền, độ trong đúng như trên trang.
+// Ô nhỏ vẽ bằng chính veMot1 ở cỡ thật đang xem, nên màu, độ dày, kiểu nét, đầu mũi tên, tô nền, độ trong đúng như trên trang.
 function veMauThu() {
-  const loai = loaiHienNet(), v = chonNet?.v ?? xv(), he = Math.max(0.8, Math.min(2, v.daVe || 1.33)), dpr = devicePixelRatio || 1;
-  const R = 112, C = 38;
+  const loai = loaiHienNet(), v = chonNet?.v ?? xv(), he = Math.max(0.8, Math.min(1.5, v.daVe || 1.33)), dpr = devicePixelRatio || 1;
+  const R = 64, C = 28;
   veMau.width = Math.round(R * dpr);
   veMau.height = Math.round(C * dpr);
   veMau.style.width = `${R}px`;
@@ -346,17 +334,17 @@ function veMauThu() {
   ctx.scale(dpr * he, dpr * he);
   const r = R / he, c = C / he, base = chonNet ? chonNet.c : {loai, ...tn[loai]};
   const mau = {...base, loai};
-  const ngang = [[8 / he, c / 2], [r - 8 / he, c / 2]];
-  if (loai === "but") veMot1(ctx, {...mau, d: Array.from({length: 24}, (_, i) => [8 / he + i * (r - 16 / he) / 23, c / 2 + Math.sin(i / 3.2) * c * 0.22])});
-  else if (loai === "duong-thang" || loai === "mui-ten") veMot1(ctx, {...mau, d: ngang});
-  else if (loai === "chu-nhat" || loai === "tron") veMot1(ctx, {...mau, d: [[16 / he, 7 / he], [r - 16 / he, c - 7 / he]]});
+  if (loai === "but") veMot1(ctx, {...mau, d: Array.from({length: 24}, (_, i) => [7 / he + i * (r - 14 / he) / 23, c / 2 + Math.sin(i / 3.2) * c * 0.22])});
+  else if (loai === "duong-thang" || loai === "mui-ten") veMot1(ctx, {...mau, d: [[7 / he, c / 2], [r - 7 / he, c / 2]]});
+  else if (loai === "chu-nhat" || loai === "tron") veMot1(ctx, {...mau, d: [[10 / he, 6 / he], [r - 10 / he, c - 6 / he]]});
   else {
-    ctx.font = `${Math.min(15, c * 0.42)}px "Be Vietnam Pro","Segoe UI",sans-serif`;
+    const co = Math.min(13, c * 0.45);
+    ctx.font = `${co}px ${PHONG_CT}`;
     ctx.fillStyle = "#17302a";
     ctx.textBaseline = "middle";
-    ctx.fillText("Chữ mẫu", 14 / he, c / 2);
-    const w = ctx.measureText("Chữ mẫu").width, h = Math.min(15, c * 0.42) * 1.35;
-    veMot1(ctx, {...mau, khung: [[14 / he - 2, c / 2 - h / 2, w + 4, h]]});
+    ctx.fillText("Chữ mẫu", 6 / he, c / 2);
+    const w = ctx.measureText("Chữ mẫu").width;
+    veMot1(ctx, {...mau, khung: [[6 / he - 2, c / 2 - co * 0.68, w + 4, co * 1.36]]});
   }
 }
 
@@ -376,6 +364,14 @@ function capNhatConTroNet() {
 
 // ---------- Cập nhật thanh ----------
 
+function datOMau(b, m, ten) {
+  b.dataset.mau = m;
+  b.dataset.ten = ten;
+  b.setAttribute("aria-label", ten);
+  b.style.background = m;
+  b.innerHTML = dauTich(m);
+}
+
 function capNhatThanhNet() {
   const v = xv();
   if (chonNet && (chonNet.v !== v || !chonNet.t.o.isConnected || !chonNet.t.m.ct.includes(chonNet.c))) chonNet = null;
@@ -385,28 +381,29 @@ function capNhatThanhNet() {
   if (!hien) return;
   const coMuc = MUC_NET[loai];
   for (const [ma, {o, nut}] of Object.entries(mucNet)) {
+    if (ma === "mau") continue;
     o.hidden = !coMuc.includes(ma);
     const gt = giaTriHienNet(ma);
-    for (const [g, b] of nut) b.setAttribute("aria-pressed", ma === "mau" ? cungMau(g, gt) : g === gt);
+    for (const [g, b] of nut) b.setAttribute("aria-pressed", g === gt);
   }
-  const mau = giaTriHienNet("mau");
+  const mau = giaTriHienNet("mau"), cd = MAU_CO_DINH(loai);
+  cd.forEach((m, i) => { const b = mucNet.mau.nut[i][1]; datOMau(b, m, TEN_MAU[m]); b.setAttribute("aria-pressed", cungMau(m, mau)); });
+  // Ô thứ tư: màu đang dùng nếu ngoài ba màu trên, không thì màu tự chọn gần nhất, không có thì cam.
+  mauBon = !cd.some(m => cungMau(m, mau)) ? mau : ganDayNet.find(m => !cd.some(x => cungMau(x, m))) ?? "#e8791d";
+  datOMau(nutMau4, mauBon, mauBon === "#e8791d" && !ganDayNet.length ? "Cam" : "Màu dùng gần nhất");
+  nutMau4.setAttribute("aria-pressed", cungMau(mauBon, mau));
   thanhNet.style.setProperty("--mau-tn", mau);
-  nutKhac.classList.toggle("dang-chon", !coTrongPalette(mau) && !ganDayNet.some(m => cungMau(m, mau)));
-  ganDayO.replaceChildren(...(ganDayNet.length ? [Object.assign(document.createElement("span"), {className: "tn-nhan", textContent: "Gần đây"})] : []),
-    ...ganDayNet.map(m => {
-      const b = dung(`Màu ${m.toUpperCase()}`, svgNet(14, 14, `<path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="${mauChu(m)}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`), "Màu đã dùng gần đây");
-      b.className = "tn-o-mau";
-      b.style.background = m;
-      b.setAttribute("aria-pressed", cungMau(m, mau));
-      b.onclick = () => datThuocTinhNet("mau", m);
-      return b;
-    }));
+  const dd = giaTriHienNet("net");
+  if (coMuc.includes("net")) { oDay.value = dd; soDay.textContent = `${soPt(dd)} pt`; }
+  nutKieu.innerHTML = `${svgKieu(giaTriHienNet("kieu") ?? "lien")}<svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M1 2.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
   thanhNet.classList.toggle("dang-sua", !!chonNet);
-  tieuNet.textContent = TEN_NET[loai];
-  phuNet.textContent = chonNet ? "Đang sửa nét đã chọn" : "Cho nét sắp vẽ";
+  tieuNet.textContent = chonNet ? `${TEN_NET[loai]} đã chọn` : TEN_NET[loai];
+  tieuNet.title = chonNet ? "Đang sửa nét đã chọn" : "Thuộc tính cho nét sắp vẽ";
   nutXong.hidden = nutXoa.hidden = !chonNet;
   nutViTri.dataset.ten = nutViTri.ariaLabel = viTriNet === "tren" ? "Đưa thanh này xuống dưới" : "Đưa thanh này lên trên";
   nutViTri.innerHTML = bieuTuong(viTriNet === "tren" ? "tro-xuong" : "tro-len");
+  menuKieu.style[viTriNet === "tren" ? "bottom" : "top"] = "";
+  menuKieu.style[viTriNet === "tren" ? "top" : "bottom"] = "100%";
   veMauThu();
   datViTriNet();
 }
@@ -415,7 +412,7 @@ function capNhatThanhNet() {
 function datViTriNet() {
   if (thanhNet.hidden) return;
   const v = chonNet?.v ?? xv(), kv = v.o.getBoundingClientRect(), le = 8;
-  thanhNet.style.maxWidth = `${Math.max(240, kv.width - 2 * le)}px`;
+  thanhNet.style.maxWidth = `${Math.max(260, kv.width - 2 * le)}px`;
   const tr = thanhNet.getBoundingClientRect();
   const tren = Math.max(4, kv.top + le), duoi = Math.min(innerHeight - tr.height - 4, kv.bottom - tr.height - le - 36);
   let k = null;
