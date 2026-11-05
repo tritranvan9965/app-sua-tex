@@ -26,7 +26,7 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{font-family:var(--phong);font-variant-numeric:tabular-nums;font-size:14px;line-height:1.5;color:var(--muc);
-  background:var(--giay);display:grid;grid-template-columns:216px 132px minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) 26px;
+  background:var(--giay);display:grid;grid-template-columns:216px 132px minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) calc(26px*var(--co-ui,1));
   height:100vh;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer}
 button:disabled{cursor:default;opacity:.5}
@@ -36,7 +36,9 @@ button.chinh:focus-visible{outline-offset:2px}
 [hidden]{display:none!important}
 
 /* Ribbon */
-#ribbon{grid-column:1/-1;position:relative;z-index:6}
+#ribbon{grid-column:1/-1;position:relative;z-index:6;zoom:var(--co-ui,1)}
+dialog{zoom:var(--co-ui,1)}
+#thanh-duoi{zoom:var(--co-ui,1)}
 #ribbon-hang{height:32px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 6px 0 0;background:var(--bang)}
 #ribbon-tab,.ds-tab{display:flex;align-items:flex-end;height:100%}
 #ribbon-tab button{border:0;background:none;color:var(--phan);height:28px;padding:0 13px;font-size:13px;border-radius:6px 6px 0 0;
@@ -296,6 +298,8 @@ dialog::backdrop{background:#17302a66}
 dialog form{padding:20px 22px;display:flex;flex-direction:column;gap:12px;max-height:84vh}
 dialog h2{font-size:17px;margin:0}
 .ghi-mau{margin:0;color:var(--muc-mo);font-size:13px}
+.dong-tich{display:flex;align-items:center;gap:8px;margin:2px 0 6px 104px;color:var(--muc)}
+.dong-tich input{width:auto;height:auto}
 #ds-mau{list-style:none;margin:0;padding:0;overflow:auto}
 #ds-mau li{padding:6px 0;border-bottom:1px solid var(--ke)}
 #ds-mau span{color:var(--muc-mo);font-size:13px;margin-left:8px}

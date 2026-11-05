@@ -1,7 +1,7 @@
 "use strict";
 // Bố cục: ẩn hiện từng vùng, kéo đổi kích thước, cỡ chữ. Cài đặt lưu ở máy chủ vì cổng của app đổi mỗi lần mở.
 
-const BO_CUC_GOC = {ban: true, le: true, soan: true, xem: true, rongBan: 216, tiLe: 0.5, co: 14, cheDo: "dong", thuGon: false, day: true, rongDay: 170, coBan: 12, phongCode: "", phongBan: ""};
+const BO_CUC_GOC = {ban: true, le: true, soan: true, xem: true, rongBan: 216, tiLe: 0.5, co: 14, cheDo: "dong", thuGon: false, day: true, rongDay: 170, coBan: 12, phongCode: "", phongUi: "", soInter: true, coUi: 100};
 const RONG_LE = 132, MIN_VUNG = 260;
 let bc = {...BO_CUC_GOC};
 let henLuuBoCuc;
@@ -12,6 +12,7 @@ function luuBoCuc() {
 }
 
 const PHONG_CODE_GOC = 'Consolas,"Cascadia Mono",monospace';
+const PHONG_UI_DU_PHONG = '"Be Vietnam Pro","Segoe UI",system-ui,sans-serif';
 
 function apBoCuc() {
   const b = document.body, hep = innerWidth <= 900;
@@ -22,7 +23,10 @@ function apBoCuc() {
   goc.setProperty("--co-soan", `${bc.co}px`);
   goc.setProperty("--co-ban", `${bc.coBan}px`);
   if (bc.phongCode) goc.setProperty("--phong-code", `"${bc.phongCode}",${PHONG_CODE_GOC}`); else goc.removeProperty("--phong-code");
-  if (bc.phongBan) goc.setProperty("--phong-ban", `"${bc.phongBan}",var(--phong)`); else goc.removeProperty("--phong-ban");
+  // Phông giao diện: chữ số vẫn dùng Inter cho thẳng cột nếu còn tích; thanh file theo phông giao diện.
+  if (bc.phongUi) goc.setProperty("--phong", `${bc.soInter ? '"So Inter",' : ""}"${bc.phongUi}",${PHONG_UI_DU_PHONG}`);
+  else if (bc.soInter) goc.removeProperty("--phong"); else goc.setProperty("--phong", PHONG_UI_DU_PHONG);
+  goc.setProperty("--co-ui", `${(bc.coUi || 100) / 100}`);
   const cot = [];
   if (bc.ban) cot.push(`${bc.rongBan}px`);
   if (bc.le && !b.classList.contains("khong-bai") && !b.classList.contains("che-do-pdf")) cot.push(`${RONG_LE}px`);

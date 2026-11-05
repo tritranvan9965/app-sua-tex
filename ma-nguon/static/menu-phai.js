@@ -184,26 +184,34 @@ $("ds-trang").addEventListener("contextmenu", e => {
 
 // ---------- Hộp phông chữ ----------
 
-const MAC_DINH_PHONG = {code: "Consolas", ban: "Be Vietnam Pro"};
-let daNapPhong = false;
+const MAC_DINH_PHONG = {code: "Consolas", ui: "Be Vietnam Pro"};
+let daNapPhong = false, bcTruoc = null;
 
 function dienPhong(ds = []) {
-  for (const [id, gia, mac] of [["ph-code", bc.phongCode, MAC_DINH_PHONG.code], ["ph-ban", bc.phongBan, MAC_DINH_PHONG.ban]]) {
+  for (const [id, gia, mac] of [["ph-code", bc.phongCode, MAC_DINH_PHONG.code], ["ph-ui", bc.phongUi, MAC_DINH_PHONG.ui]]) {
     const o = $(id), cac = [...new Set([...ds, gia].filter(Boolean))].filter(t => t !== mac);
     o.replaceChildren(...[["", `${mac} (mặc định)`], ...cac.map(t => [t, t])].map(([val, chu]) => {
       const c = document.createElement("option");
       c.value = val;
       c.textContent = chu;
+      if (val) c.style.fontFamily = `"${val}"`;  // tên phông viết bằng chính phông đó
       return c;
     }));
     o.value = gia || "";
   }
 }
 
-async function moHopPhong() {
-  dienPhong();
+function docHopPhong() {
+  $("so-inter").checked = bc.soInter !== false;
+  $("co-ui").value = String(bc.coUi || 100);
   $("co-code").value = bc.co;
   $("co-ban").value = bc.coBan;
+}
+
+async function moHopPhong() {
+  bcTruoc = {...bc};
+  dienPhong();
+  docHopPhong();
   $("hop-phong").showModal();
   if (daNapPhong) return;
   try {
@@ -213,19 +221,29 @@ async function moHopPhong() {
   } catch (e) { bao(e.message, true); }
 }
 
+// Áp ngay để xem trước, chưa lưu; ribbon tính lại độ rộng vì chữ đổi có thể làm tràn.
 function apPhong() {
   bc.phongCode = $("ph-code").value;
-  bc.phongBan = $("ph-ban").value;
+  bc.phongUi = $("ph-ui").value;
+  bc.soInter = $("so-inter").checked;
+  bc.coUi = +$("co-ui").value || 100;
   bc.co = Math.min(24, Math.max(11, +$("co-code").value || BO_CUC_GOC.co));
   bc.coBan = Math.min(18, Math.max(9, +$("co-ban").value || BO_CUC_GOC.coBan));
   apBoCuc();
-  luuBoCuc();
+  requestAnimationFrame(() => { vuaRibbon(); datTayKeo(); });
+  document.fonts?.ready.then(vuaRibbon);
 }
 
-for (const id of ["ph-code", "ph-ban", "co-code", "co-ban"]) $(id).onchange = apPhong;
+for (const id of ["ph-code", "ph-ui", "so-inter", "co-ui", "co-code", "co-ban"]) $(id).onchange = apPhong;
 $("dat-lai-phong").onclick = () => {
-  $("ph-code").value = $("ph-ban").value = "";
-  $("co-code").value = BO_CUC_GOC.co;
-  $("co-ban").value = BO_CUC_GOC.coBan;
+  Object.assign(bc, {phongCode: "", phongUi: "", soInter: true, coUi: 100, co: BO_CUC_GOC.co, coBan: BO_CUC_GOC.coBan});
+  dienPhong();
+  docHopPhong();
   apPhong();
 };
+$("hop-phong").addEventListener("close", () => {
+  if ($("hop-phong").returnValue === "ap") luuBoCuc();
+  else if (bcTruoc) { Object.assign(bc, bcTruoc); apBoCuc(); requestAnimationFrame(() => { vuaRibbon(); datTayKeo(); }); }
+  bcTruoc = null;
+  $("hop-phong").returnValue = "";
+});
