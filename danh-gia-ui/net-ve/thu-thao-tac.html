@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thử thanh thuộc tính nét vẽ</title>
+<!-- Bản thử tự chạy (mở thẳng bằng trình duyệt, không cần máy chủ). Nạp đúng chu-thich.js, net-ve.js, app.css của app nên hình vẽ và thanh giống hệt. -->
+<link rel="stylesheet" href="../../ma-nguon/static/app.css">
+<style>
+body{display:flex;flex-direction:column;height:100vh;overflow:hidden;background:#dfe5e1}
+#ribbon{flex:none}
+#khung{position:relative;flex:1;overflow:auto;padding:80px 0 60px;background:#dfe5e1}
+#trang{position:relative;margin:0 auto;box-shadow:0 2px 12px #17302a40;background:#fff}
+#trang canvas{position:absolute;left:0;top:0}
+#nen{pointer-events:none}
+#lop{touch-action:none;user-select:none}
+.cc-ve #lop{cursor:var(--con-tro,crosshair)}
+#huong{position:fixed;left:8px;bottom:8px;z-index:5;max-width:430px;padding:6px 10px;font-size:12.5px;line-height:1.45;background:#fffffff2;border:1px solid var(--ke);border-radius:8px}
+#huong kbd{padding:0 4px;border:1px solid var(--ke);border-radius:4px;background:#fff;font:inherit;font-size:11.5px}
+</style>
+</head>
+<body class="cc-vung">
+<header id="ribbon">
+  <div id="ribbon-hang">
+    <div id="ribbon-tab"><button type="button" id="tab-tep">Tệp</button>
+      <div class="ds-tab"><button type="button">Trang chủ</button><button type="button">Chèn</button><button type="button">Trang</button><button type="button" aria-selected="true">Chú thích</button><button type="button">Tài liệu</button><button type="button">Xem</button></div></div>
+  </div>
+  <div id="ribbon-than"><div class="bang-lenh" id="bang"></div></div>
+</header>
+<div id="khung"><div id="trang"><canvas id="nen"></canvas><canvas id="lop"></canvas></div></div>
+<div id="huong"><b>Bản thử, chưa phải app.</b> Chọn công cụ ở ribbon rồi kéo chuột trên trang. Bấm (không kéo) vào nét đã vẽ để chọn, rồi đổi màu, độ dày, kiểu nét trên thanh. <kbd>Ctrl+Z</kbd> hoàn tác, <kbd>Delete</kbd> xóa nét, <kbd>Esc</kbd> bỏ chọn. Tô sáng, gạch chân, gạch ngang: kéo một khung quanh chữ.</div>
+<dialog id="hop-tb"><form></form></dialog>
+<input id="o-mau" type="color" hidden>
+<div id="goi-y" hidden></div>
+
+<script>
+"use strict";
+// ---- Phần giả lập của app: chỉ những thứ mà chu-thich.js và net-ve.js cần ----
+const $ = id => document.getElementById(id);
+const KHO_W = 595.28, KHO_H = 841.89;
+let congCu = "but";
+const pt = {}, tt = {}, bao = () => {}, goi = () => Promise.resolve();
+const boChonHc = () => {}, huySuaChu = () => {}, veHopChu = () => {}, veSuaDong = () => {}, mucHc = () => ({}), khungHc = () => ({});
+let bc = {};
+const luuBoCuc = () => { try { localStorage.setItem("thu-net", JSON.stringify(bc.net)); } catch {} };
+const capNhatRibbon = () => { capNhatThanhNet(); };
+const xv = () => xvTex;
+const xvPdf = {o: document.createElement("div")};
+const xvTex = {
+  o: $("khung"), daVe: 1.3, trang: [],
+  veLop(t) {
+    const ctx = t.lop.getContext("2d"), he = this.daVe * t.net;
+    t.lop.width = Math.round(t.w * he); t.lop.height = Math.round(t.h * he);
+    t.lop.style.width = `${t.w * this.daVe}px`; t.lop.style.height = `${t.h * this.daVe}px`;
+    ctx.scale(he, he);
+    veCt(ctx, t.m.ct);
+    veChonNet(ctx, t, this.daVe);
+    if (this.daVe !== daVeConTro) capNhatConTroNet();
+  },
+};
+</script>
+<script src="../../ma-nguon/static/bieu-tuong.js"></script>
+<script src="../../ma-nguon/static/chu-thich.js"></script>
+<script src="../../ma-nguon/static/net-ve.js"></script>
+<script>
+"use strict";
+// ---- Trang giấy A4 ----
+const dpr = devicePixelRatio || 1;
+const t = {o: $("trang"), lop: $("lop"), m: {ct: []}, w: KHO_W, h: KHO_H, net: dpr};
+xvTex.trang = [t];
+$("trang").style.width = `${KHO_W * xvTex.daVe}px`;
+$("trang").style.height = `${KHO_H * xvTex.daVe}px`;
+{
+  const nen = $("nen"), anh = new Image();
+  nen.width = Math.round(KHO_W * xvTex.daVe * dpr); nen.height = Math.round(KHO_H * xvTex.daVe * dpr);
+  nen.style.width = `${KHO_W * xvTex.daVe}px`; nen.style.height = `${KHO_H * xvTex.daVe}px`;
+  anh.onload = () => nen.getContext("2d").drawImage(anh, 0, 0, nen.width, nen.height);
+  anh.src = "nen-a4.png";
+}
+
+// ---- Kéo vẽ (giống keoVe và danhDauChu trong app, nhưng tô sáng, gạch chân, gạch ngang kéo khung vì không có lớp chữ) ----
+$("lop").addEventListener("pointerdown", e => {
+  if (e.button || !MUC_NET[congCu]) return;
+  e.preventDefault();
+  const g = $("lop").getBoundingClientRect(), marks = !NHOM_KEO.has(congCu);
+  const toa = ev => [Math.max(0, Math.min(t.w, (ev.clientX - g.left) / xvTex.daVe)), Math.max(0, Math.min(t.h, (ev.clientY - g.top) / xvTex.daVe))];
+  const p0 = toa(e), cu = [...t.m.ct], c = {loai: congCu, ...thuocTinhMoi(congCu)};
+  if (marks) c.khung = []; else c.d = [p0, p0];
+  let keo = false;
+  $("lop").setPointerCapture(e.pointerId);
+  const di = ev => {
+    const p = toa(ev);
+    if (!keo && Math.hypot(p[0] - p0[0], p[1] - p0[1]) < 2) return;
+    if (!keo) { keo = true; if (chonNet) boChonNet(); t.m.ct.push(c); }
+    if (marks) c.khung = [[Math.min(p0[0], p[0]), Math.min(p0[1], p[1]), Math.abs(p[0] - p0[0]), Math.abs(p[1] - p0[1])]];
+    else if (c.loai === "but") c.d.push(p); else c.d = [p0, p];
+    xvTex.veLop(t);
+  };
+  $("lop").addEventListener("pointermove", di);
+  $("lop").addEventListener("pointerup", () => {
+    $("lop").removeEventListener("pointermove", di);
+    if (!keo) return chonNetTai(xvTex, t, p0[0], p0[1]);
+    lichCt.push({v: xvTex, t, ct: cu});
+  }, {once: true});
+});
+
+// ---- Ribbon giả, tab Chú thích ----
+const LENH = [
+  ["Công cụ", [["Chọn chữ", "chon-chu"], ["Chọn vùng", "chon-vung"], ["Sửa chữ", "sua-chu"], ["Tẩy", "tay"]]],
+  ["Đánh dấu", [["Tô sáng", "to-sang", "to-sang"], ["Gạch chân", "gach-chan", "gach-chan"], ["Gạch ngang", "gach-ngang", "gach-ngang"]]],
+  ["Vẽ", [["Bút vẽ", "but", "but"], ["Đường thẳng", "duong-thang", "duong-thang"], ["Mũi tên", "mui-ten", "mui-ten"], ["Hình chữ nhật", "chu-nhat", "chu-nhat"], ["Hình tròn", "tron", "tron"]]],
+  ["Ghi chú", [["Ghi chú", "ghi-chu"], ["Hộp chữ", "hop-chu"], ["Đóng dấu", "dong-dau"]]],
+];
+const nutCt = {};
+for (const [ten, ds] of LENH) {
+  const nhom = document.createElement("section"), hang = document.createElement("div"), nhan = document.createElement("div"), cot = document.createElement("div");
+  nhom.className = "nhom"; hang.className = "nhom-than"; nhan.className = "nhom-ten"; nhan.textContent = ten; cot.className = "nhom-nho";
+  for (const [tn_, ic, ma] of ds) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "nut-nho"; b.innerHTML = `${bieuTuong(ic)}<span>${tn_}</span>`;
+    if (ma) { nutCt[ma] = b; b.onclick = () => datCongCuThu(ma); } else { b.setAttribute("aria-disabled", "true"); b.title = "Không dùng trong bản thử"; }
+    cot.append(b);
+  }
+  hang.append(cot); nhom.append(hang, nhan); $("bang").append(nhom);
+}
+function datCongCuThu(ma) {
+  congCu = ma;
+  document.body.dataset.cc = ma;
+  boChonNet();
+  for (const [k, b] of Object.entries(nutCt)) b.setAttribute("aria-pressed", k === ma);
+  capNhatThanhNet();
+}
+
+addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); hoanTacCt(); }
+});
+
+try { napThuocTinhNet(JSON.parse(localStorage.getItem("thu-net") || "null")); } catch {}
+datCongCuThu("but");
+document.fonts?.ready.then(() => capNhatThanhNet());
+</script>
+</body>
+</html>
