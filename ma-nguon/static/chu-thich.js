@@ -5,11 +5,12 @@
 const NHOM_CHU = new Set(["to-sang", "gach-chan", "gach-ngang"]);  // đánh dấu theo chữ đã bôi đen
 const NHOM_KEO = new Set(["but", "duong-thang", "mui-ten", "chu-nhat", "tron"]);  // kéo chuột để vẽ
 const NHOM_BAM = new Set(["hop-chu", "ghi-chu"]);  // bấm một điểm rồi gõ chữ
-const NET_DS = [1, 2, 4];
+// Kiểu nét: mảng nét đứt theo độ dày w (pt). Nét tròn đầu nên đoạn đặc dài thêm w, khoảng hở ngắn đi w.
+const KIEU_GACH = {lien: () => [], gach: w => [3 * w + 2, 2 * w + 4], cham: w => [0.01, 2 * w + 2], "gach-cham": w => [3 * w + 2, 2 * w + 2, 0.01, 2 * w + 2]};
 const CO_CHU = 12, CO_DAU_GHI_CHU = 14, DO_NET_LOP = 3;
 const PHONG_CT = '"Be Vietnam Pro","Segoe UI",sans-serif';
 
-let mauCt = "#c0262d", netCt = 2;
+let mauCt = "#c0262d";  // màu chung cho chữ; màu nét vẽ từng công cụ nằm ở net-ve.js
 const lichCt = [];  // các thay đổi để Ctrl+Z bỏ lại: {m, ct cũ, v}
 
 function veMuiTen(ctx, [x0, y0], [x1, y1], net) {
@@ -25,25 +26,38 @@ function veMot1(ctx, c) {
   ctx.strokeStyle = ctx.fillStyle = c.mau;
   ctx.lineWidth = c.net || 1;
   ctx.lineCap = ctx.lineJoin = "round";
+  ctx.setLineDash(KIEU_GACH[c.kieu]?.(ctx.lineWidth) ?? []);  // chú thích cũ không có kieu thì nét liền
   ctx.beginPath();
   if (c.loai === "to-sang") {
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = c.trong ?? 0.35;
     c.khung.forEach(k => ctx.rect(...k));  // gộp một đường để chỗ chồng nhau không đậm lên
     ctx.fill();
   } else if (c.loai === "gach-chan" || c.loai === "gach-ngang") {
     const he = c.loai === "gach-chan" ? 0.95 : 0.55;
     c.khung.forEach(([x, y, w, h]) => { ctx.moveTo(x, y + h * he); ctx.lineTo(x + w, y + h * he); });
-    ctx.lineWidth = 1;
+    ctx.lineWidth = c.net ?? 1;
+    ctx.setLineDash(KIEU_GACH[c.kieu]?.(ctx.lineWidth) ?? []);
     ctx.stroke();
   } else if (c.loai === "chu-nhat" || c.loai === "tron") {
     const [[x0, y0], [x1, y1]] = c.d, w = x1 - x0, h = y1 - y0;
     if (c.loai === "chu-nhat") ctx.rect(x0, y0, w, h);
     else ctx.ellipse(x0 + w / 2, y0 + h / 2, Math.abs(w / 2), Math.abs(h / 2), 0, 0, 2 * Math.PI);
+    if (c.nen) {  // tô nền cùng màu, nhạt
+      ctx.globalAlpha = 0.18;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
     ctx.stroke();
   } else if (c.d) {
     c.d.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-    if (c.loai === "mui-ten") veMuiTen(ctx, c.d[0], c.d[1], c.net);
     ctx.stroke();
+    if (c.loai === "mui-ten") {  // đầu mũi tên luôn là nét liền dù thân đứt
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      veMuiTen(ctx, c.d[0], c.d[1], c.net);
+      if (c.dau === 2) veMuiTen(ctx, c.d[1], c.d[0], c.net);
+      ctx.stroke();
+    }
   } else if (c.loai === "hop-chu") {
     veHopChu(ctx, c);
   } else if (c.loai === "ghi-chu") {
@@ -158,6 +172,7 @@ function hoanTacCt() {
   if (!x) return false;
   boChonHc(true);
   huySuaChu();
+  chonNet = x.chonI !== undefined && x.ct[x.chonI] ? {v: x.v, t: x.t, c: x.ct[x.chonI]} : null;  // hoàn tác đổi thuộc tính vẫn giữ nét đang chọn
   x.t.m.ct = x.ct;
   x.v.veLop(x.t);
   daDoiCt(x.v);
@@ -225,17 +240,12 @@ function danhDauChu(v, dau, loai) {
     .filter(r => r.width > 0.5 && r.height > 0.5 && r.top < g.bottom && r.bottom > g.top)
     .map(r => [(r.left - g.left) / v.daVe, (r.top - g.top) / v.daVe, r.width / v.daVe, r.height / v.daVe]);
   chon.removeAllRanges();
-  if (khung.length) themCt(v, t, {loai, mau: loai === "to-sang" ? "#f2c400" : mauCt, khung});
+  if (khung.length) themCt(v, t, {loai, ...thuocTinhMoi(loai), khung});
 }
 
 function datMauCt(mau) {
   mauCt = mau;
   capNhatRibbon();
-}
-
-function doiNetCt() {
-  netCt = NET_DS[(NET_DS.indexOf(netCt) + 1) % NET_DS.length];
-  bao(`Độ dày nét: ${netCt} pt`);
 }
 
 // ---------- Hộp đầu trang, chân trang, số trang, dấu mờ ----------

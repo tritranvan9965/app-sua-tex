@@ -141,8 +141,10 @@ class TrinhXem {
     t.lop.height = Math.round(t.h * he);
     ctx.scale(he, he);
     veCt(ctx, t.m.ct);
+    veChonNet(ctx, t, this.daVe);
     veTrinhBay(ctx, this.tb, this.trang.indexOf(t), this.trang.length, t.w, t.h);
     capNhatKhungHc(this, t);
+    if (this.daVe !== daVeConTro) capNhatConTroNet();
     if (hc.t === t) capNhatThanhHc();
   }
 
@@ -239,10 +241,11 @@ class TrinhXem {
   keoVe(e, dau, t, goc) {
     e.preventDefault();
     const toa = ev => [Math.max(0, Math.min(t.w, (ev.clientX - goc.left) / this.daVe)), Math.max(0, Math.min(t.h, (ev.clientY - goc.top) / this.daVe))];
-    const dau0 = toa(e), c = {loai: congCu, mau: mauCt, net: netCt, d: [dau0, dau0]};
+    const dau0 = toa(e), c = {loai: congCu, ...thuocTinhMoi(congCu), d: [dau0, dau0]};
     const cu = [...t.m.ct];
     t.m.ct.push(c);
     const di = ev => {
+      if (chonNet) boChonNet();
       if (c.loai === "but") c.d.push(toa(ev)); else c.d = [dau0, toa(ev)];
       this.veLop(t);
     };
@@ -253,7 +256,8 @@ class TrinhXem {
       const [x, y] = toa(ev);
       if (c.d.length < 3 && Math.hypot(x - dau0[0], y - dau0[1]) < 2) {  // chỉ bấm chứ không kéo
         t.m.ct = cu;
-        return this.veLop(t);
+        this.veLop(t);
+        return chonNetTai(this, t, x, y);  // bấm không kéo: chọn nét đã vẽ ở đó để sửa thuộc tính
       }
       lichCt.push({v: this, t, ct: cu});
       daDoiCt(this);
@@ -264,7 +268,11 @@ class TrinhXem {
   bam(e) {
     const dau = e.target.closest?.(".to-trang"), tu = this.bamTai;
     this.bamTai = null;
-    if (NHOM_CHU.has(congCu) && dau) return danhDauChu(this, dau, congCu);
+    if (NHOM_CHU.has(congCu) && dau) {
+      if (!getSelection().isCollapsed) return danhDauChu(this, dau, congCu);
+      const g = dau.getBoundingClientRect();
+      return chonNetTai(this, this.trang[+dau.dataset.trang - 1], (e.clientX - g.left) / this.daVe, (e.clientY - g.top) / this.daVe);
+    }
     if (!this.khiBam || congCu !== "chu" || !dau || !tu) return;
     if (Math.hypot(e.clientX - tu.x, e.clientY - tu.y) > 4 || !getSelection().isCollapsed) return;
     const g = dau.getBoundingClientRect();
@@ -346,6 +354,7 @@ function datCongCu(c) {
   xoaVung();
   getSelection().removeAllRanges();
   boChonHc();
+  boChonNet();
   huySuaChu();
   document.querySelector(".o-nhap")?.remove();
   document.querySelector(".vien-sc")?.remove();

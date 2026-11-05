@@ -143,7 +143,7 @@ function doiCoChu(buoc) {
 }
 
 function datLaiBoCuc() {
-  bc = {...BO_CUC_GOC, cheDo: bc.cheDo};
+  bc = {...BO_CUC_GOC, cheDo: bc.cheDo, net: bc.net};  // thuộc tính nét vẽ không phải bố cục
   apBoCuc();
   luuBoCuc();
   capNhatVungPdf();
@@ -194,6 +194,7 @@ apBoCuc();
 goi("/api/cai-dat").then(cd => {
   bc = {...BO_CUC_GOC, ...cd};
   if (!(bc.tiLe > 0 && bc.tiLe < 1)) bc.tiLe = BO_CUC_GOC.tiLe;
+  napThuocTinhNet(bc.net);
   apThuGon();
   apBoCuc();
   if (bc.cheDo !== tt.cheDo) {

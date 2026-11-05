@@ -466,3 +466,40 @@ dialog h2{font-size:17px;margin:0}
   .soan{height:60vh;border-right:0}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Thanh thuộc tính nét vẽ (net-ve.js) */
+.cc-ve .to-trang{cursor:var(--con-tro,crosshair)}
+#thanh-net{position:fixed;z-index:9;display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 14px;padding:6px 10px;background:var(--giay);border:1px solid var(--ke);border-radius:10px;box-shadow:0 4px 14px #17302a33;font-family:var(--phong);font-size:13px;color:var(--muc)}
+#thanh-net.dang-sua{border-color:#1f5fbf;box-shadow:0 0 0 2px #1f5fbf66,0 4px 14px #17302a33}
+#thanh-net button{font-family:var(--phong);font-size:12.5px;height:28px;min-width:28px;padding:0 4px;border:1px solid var(--ke);border-radius:6px;background:#fff;color:var(--muc);display:inline-flex;align-items:center;justify-content:center;gap:4px}
+#thanh-net button:hover{background:var(--phan)}
+#thanh-net button[aria-pressed=true]{background:var(--bang);border-color:var(--bang);color:#fff}
+.tn-dau{display:flex;flex-direction:column;justify-content:center;min-width:92px;height:46px}
+.tn-tieu{font-weight:700;line-height:1.3}
+.tn-phu{font-size:11.5px;line-height:1.3;color:var(--muc-mo)}
+.dang-sua .tn-phu{color:#1b4f9c;font-weight:600}
+.tn-muc{display:flex;flex-direction:column;gap:2px}
+.tn-nhan{font-size:11.5px;line-height:14px;color:var(--muc-mo);white-space:nowrap}
+.tn-hang{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
+.tn-mau{max-width:430px}
+#thanh-net .tn-o-mau{width:28px;padding:0;border:1px solid #17302a59;color:transparent}
+#thanh-net .tn-o-mau svg{opacity:0}
+#thanh-net .tn-o-mau:hover{background-blend-mode:normal;filter:brightness(1.08)}
+#thanh-net .tn-o-mau[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 2px var(--muc);color:inherit}
+#thanh-net .tn-o-mau[aria-pressed=true] svg{opacity:1}
+#thanh-net .tn-khac{padding:0 8px}
+#thanh-net .tn-khac.dang-chon{box-shadow:0 0 0 2px var(--muc)}
+.tn-gan{display:contents}
+.tn-gan .tn-nhan{margin-left:4px}
+#thanh-net .tn-day{flex-direction:column;gap:3px;width:36px;padding:0}
+.tn-day i{display:block;width:24px;background:currentColor;border-radius:3px}
+.tn-day small{font-size:11px;line-height:1;font-variant-numeric:tabular-nums}
+#thanh-net .tn-trong{padding:0 8px 0 5px}
+.tn-trong i{display:block;width:14px;height:14px;border-radius:3px;background:var(--mau-tn,#f2c400);border:1px solid #17302a40}
+#tn-mau-thu{border:1px solid var(--ke);border-radius:6px;background:#fff}
+.tn-cuoi{display:flex;align-items:center;gap:6px;margin-left:auto;height:46px}
+.tn-hanh{display:flex;flex-direction:column;gap:2px;align-items:stretch;justify-content:center}
+.tn-cuoi{flex-wrap:nowrap}
+#thanh-net .tn-chu{padding:0 8px;height:22px;min-width:0;font-weight:600}
+#thanh-net .tn-vitri{height:22px;width:28px}
+#thanh-net .tn-vitri .bt{width:14px;height:14px}

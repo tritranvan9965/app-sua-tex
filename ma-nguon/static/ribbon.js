@@ -130,10 +130,6 @@ function dsRibbon() {
         lenhCt("Ghi chú", "ghi-chu", "ghi-chu", true, "Bấm vào trang để ghi. Enter để xong"),
         lenhCt("Hộp chữ", "hop-chu", "hop-chu", false, "Bấm vào trang để gõ, chọn phông, cỡ, màu ở thanh hiện ra. Enter để xong, Shift+Enter xuống dòng. Bấm hộp chữ có sẵn để kéo, nhấp đúp để sửa, Delete để xóa"), sapCo("Đóng dấu", "dong-dau"), sapCo("Chữ ký", "chu-ky"),
       ]],
-      ["Kiểu nét", [
-        {ten: "Màu", ic: "mau", goiY: "Màu của nét vẽ và chữ", lam: () => $("o-mau").click()},
-        {ten: "Độ dày nét", ic: "net", goiY: "Bấm để đổi 1, 2, 4 pt", lam: doiNetCt},
-      ]],
       ["Quản lý", [
         sapCo("Danh sách ghi chú", "ds-ghi-chu", false, "Các ghi chú"), {ten: "Xóa hết chú thích", tenNgan: "Xóa hết", ic: "xoa", lam: xoaHetCt, bat: coXem},
       ]],
@@ -396,6 +392,7 @@ function capNhatRibbon() {
   capNhatTen();
   capNhatNav();
   capNhatThe();
+  capNhatThanhNet();
 }
 
 // Tên file trên đầu mỗi vùng: chữ nghiêng là bản chưa lưu. PDF biên dịch ra chỉ là bản nháp nên nghiêng đến khi được lưu.
