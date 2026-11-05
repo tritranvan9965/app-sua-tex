@@ -124,7 +124,7 @@ function dsRibbon() {
       ]],
       ["Ghi chú", [
         lenhCt("Ghi chú", "ghi-chu", "ghi-chu", true, "Bấm vào trang để ghi. Enter để xong"),
-        lenhCt("Hộp chữ", "hop-chu", "hop-chu", false, "Bấm vào trang để gõ. Enter để xong"), sapCo("Đóng dấu", "dong-dau"), sapCo("Chữ ký", "chu-ky"),
+        lenhCt("Hộp chữ", "hop-chu", "hop-chu", false, "Bấm vào trang để gõ, chọn phông, cỡ, màu ở thanh hiện ra. Enter để xong, Shift+Enter xuống dòng. Bấm hộp chữ có sẵn để kéo, nhấp đúp để sửa, Delete để xóa"), sapCo("Đóng dấu", "dong-dau"), sapCo("Chữ ký", "chu-ky"),
       ]],
       ["Kiểu nét", [
         {ten: "Màu", ic: "mau", goiY: "Màu của nét vẽ và chữ", lam: () => $("o-mau").click()},

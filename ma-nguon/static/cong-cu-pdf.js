@@ -17,7 +17,12 @@ async function napTep(t) {
   if (pt.tep.has(t.duong)) return;
   const tl = await fetch(`/api/pdf-tep?duong=${encodeURIComponent(t.duong)}`);
   if (!tl.ok) throw new Error(`Không đọc được ${t.ten}.`);
-  pt.tep.set(t.duong, {ten: t.ten, doc: await pdfjsLib.getDocument({data: await tl.arrayBuffer()}).promise});
+  const doc = await pdfjsLib.getDocument({data: await tl.arrayBuffer()}).promise;
+  // Chữ đã thêm bằng app lần trước: máy chủ đã bỏ khỏi bản gửi cho trình xem, giao diện vẽ lại và cho sửa như hộp chữ mới.
+  let chu = [];
+  try { chu = (await goi("/api/chu-da-them", {duong: t.duong})).ds; } catch { /* không đọc được thì coi như không có */ }
+  await napPhongHc(chu);
+  pt.tep.set(t.duong, {ten: t.ten, doc, chu});
 }
 
 // File đã có trong dãy thì chỉ nhảy đến trang đầu của nó, chưa có thì thêm vào cuối dãy.
@@ -29,7 +34,8 @@ async function nhanTep(tep) {
     if (cu) { dau = cu; continue; }
     await napTep(t);
     for (let so = 1; so <= t.so_trang; so++) {
-      pt.ds.push({id: ++pt.soId, duong: t.duong, so, chon: false});
+      const chuTrang = pt.tep.get(t.duong).chu.filter(c => c.trang === so);
+      pt.ds.push({id: ++pt.soId, duong: t.duong, so, chon: false, ct: chuTrang.map(hopChuTuFile), chuCu: chuTrang.map(c => c.id)});
       if (so === 1) dau = pt.ds[pt.ds.length - 1];
     }
   }

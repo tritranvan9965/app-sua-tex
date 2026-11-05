@@ -13,6 +13,7 @@ import json
 import mimetypes
 import os
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -663,7 +664,13 @@ def chu_tim_phong(d: dict) -> dict:
     m = phong_chu.tim_phong(d.get("ho", ""), bool(d.get("dam")), bool(d.get("nghieng")))
     if not m:
         raise LoiApp(404, f"Máy không có phông {d.get('ho', '')}.")
-    return {"ho": m["ho"], "kieu": m["kieu"], "du_dau": m["du_dau"], "dam_gia": m["dam_gia"], "nghieng_gia": m["nghieng_gia"]}
+    try:  # độ cao phần trên/dưới đường cơ sở (theo em), để hộp chữ trên màn hình đặt dòng đúng chỗ như trong file
+        sf = phong_chu.Sfnt(m["duong"], m["chi_so"])
+        (asc, desc, _), _ = sf.hhea()
+        asc, desc = asc / sf.upm, -desc / sf.upm
+    except (ValueError, OSError, KeyError, struct.error, ZeroDivisionError):
+        asc, desc = 0.9, 0.25
+    return {"ho": m["ho"], "kieu": m["kieu"], "du_dau": m["du_dau"], "dam_gia": m["dam_gia"], "nghieng_gia": m["nghieng_gia"], "asc": asc, "desc": desc}
 
 
 def pdf_da_chon(duong) -> str:
@@ -680,10 +687,28 @@ def chu_tim_dong(d: dict) -> dict:
         raise LoiApp(400, str(e))
 
 
+BAN_XEM = {}  # (đường dẫn, mtime, cỡ) -> nội dung PDF đã bỏ chữ do app thêm
+
+
+def pdf_de_xem(duong: str) -> bytes:
+    """Nội dung gửi cho trình xem. Chữ do app thêm trước đó được bỏ ra, vì giao diện đã nạp chúng thành hộp chữ sửa được và tự vẽ."""
+    p = Path(duong)
+    st = p.stat()
+    khoa = (duong, st.st_mtime_ns, st.st_size)
+    if khoa not in BAN_XEM:
+        try:
+            bo = chu_pdf.ban_xem_khong_chu_da_them(duong)[1]
+        except ValueError:
+            bo = None
+        BAN_XEM.clear()  # chỉ nhớ lần gần nhất, tránh giữ nhiều bản lớn
+        BAN_XEM[khoa] = bo or p.read_bytes()
+    return BAN_XEM[khoa]
+
+
 def chu_da_them(d: dict) -> dict:
     """Chữ đã thêm bằng app trong file PDF đã mở: [{id, trang, x, y, chu, phong, co, mau, dam, nghieng, gach_chan, gian_dong, rong, cao}]."""
     try:
-        return {"ds": chu_pdf.doc_chu_da_them(pdf_da_chon(d.get("duong")))}
+        return {"ds": chu_pdf.ban_xem_khong_chu_da_them(pdf_da_chon(d.get("duong")))[0]}
     except ValueError as e:
         raise LoiApp(400, str(e))
 
@@ -757,7 +782,7 @@ class XuLy(BaseHTTPRequestHandler):
         elif url.path == "/api/pdf-tep":
             if hoi.get("duong") not in PDF_DA_CHON:
                 raise LoiApp(403, "File này chưa được chọn.")
-            self._gui(200, Path(hoi["duong"]).read_bytes(), "application/pdf")
+            self._gui(200, pdf_de_xem(hoi["duong"]), "application/pdf")
         elif url.path == "/api/gan-day":
             self._json(200, gan_day())
         elif url.path == "/api/thu-vien":

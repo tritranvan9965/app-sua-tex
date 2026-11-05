@@ -142,6 +142,8 @@ class TrinhXem {
     ctx.scale(he, he);
     veCt(ctx, t.m.ct);
     veTrinhBay(ctx, this.tb, this.trang.indexOf(t), this.trang.length, t.w, t.h);
+    capNhatKhungHc(this, t);
+    if (hc.t === t) capNhatThanhHc();
   }
 
   den(i) {
@@ -192,6 +194,8 @@ class TrinhXem {
     if (!dau || e.button || e.target.closest(".thanh-vung, .o-nhap")) return;
     const t = this.trang[+dau.dataset.trang - 1], goc = dau.getBoundingClientRect();
     const px = (e.clientX - goc.left) / this.daVe, py = (e.clientY - goc.top) / this.daVe;
+    boChonHc();
+    if (congCu === "hop-chu") { e.preventDefault(); return batDauHc(this, t, px, py); }
     if (NHOM_BAM.has(congCu)) { e.preventDefault(); return moNhapChu(this, t, px, py, congCu); }
     if (congCu === "tay") {
       const i = ctTai(t.m.ct, px, py);
@@ -337,7 +341,9 @@ function datCongCu(c) {
   congCu = c;
   xoaVung();
   getSelection().removeAllRanges();
+  boChonHc();
   document.querySelector(".o-nhap")?.remove();
+  document.body.dataset.cc = c;
   document.body.classList.toggle("cc-vung", c === "vung" || NHOM_KEO.has(c) || NHOM_BAM.has(c) || c === "tay");
   capNhatRibbon();
 }

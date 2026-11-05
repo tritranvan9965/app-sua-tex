@@ -45,9 +45,7 @@ function veMot1(ctx, c) {
     if (c.loai === "mui-ten") veMuiTen(ctx, c.d[0], c.d[1], c.net);
     ctx.stroke();
   } else if (c.loai === "hop-chu") {
-    ctx.font = `${CO_CHU}px ${PHONG_CT}`;
-    ctx.textBaseline = "top";
-    c.chu.split("\n").forEach((dong, i) => ctx.fillText(dong, c.x, c.y + i * CO_CHU * 1.3));
+    veHopChu(ctx, c);
   } else if (c.loai === "ghi-chu") {
     const s = CO_DAU_GHI_CHU;
     ctx.fillStyle = "#f2c86b";
@@ -66,7 +64,8 @@ function veMot1(ctx, c) {
   ctx.restore();
 }
 
-const veCt = (ctx, ct) => ct?.forEach(c => veMot1(ctx, c));
+// boChu: bỏ hộp chữ, vì lúc lưu hộp chữ thành chữ thật trong file chứ không vào ảnh.
+const veCt = (ctx, ct, boChu = false) => ct?.forEach(c => { if (!(boChu && c.loai === "hop-chu")) veMot1(ctx, c); });
 
 // Đầu trang, chân trang, số trang, dấu mờ áp cho cả tài liệu. i tính từ 0.
 function veTrinhBay(ctx, tb, i, n, w, h) {
@@ -99,7 +98,7 @@ function lopPng(v, t, i) {
   cv.width = Math.round(t.w * DO_NET_LOP);
   cv.height = Math.round(t.h * DO_NET_LOP);
   ctx.scale(DO_NET_LOP, DO_NET_LOP);
-  veCt(ctx, t.m.ct);
+  veCt(ctx, t.m.ct, true);
   veTrinhBay(ctx, v.tb, i, v.trang.length, t.w, t.h);
   return new Promise(xong => xong(cv.toDataURL("image/png").split(",")[1]));
 }
@@ -111,8 +110,9 @@ async function gomTrang(v, loc = () => true, duong) {
     if (!loc(t.m)) continue;
     const ct = t.m.ct || [];
     ra.push({duong: duong || t.m.duong, so: t.m.so, xoay: t.m.xoay || 0,
-      anh: ct.length || v.tb ? await lopPng(v, t, i) : null,
-      ghi_chu: ct.filter(c => c.loai === "ghi-chu").map(c => ({x: c.x, y: c.y, chu: c.chu}))});
+      anh: ct.some(c => c.loai !== "hop-chu") || v.tb ? await lopPng(v, t, i) : null,
+      ghi_chu: ct.filter(c => c.loai === "ghi-chu").map(c => ({x: c.x, y: c.y, chu: c.chu})),
+      chu: ct.filter(c => c.loai === "hop-chu" && c.chu.trim()).map(mucHc), xoa_chu: t.m.chuCu || []});
   }
   return ra;
 }
@@ -127,7 +127,10 @@ function xoayCt(ct, cw, w, h) {
       const [a, b] = moi([x, y]), [e, f] = moi([x + kw, y + kh]);
       return [Math.min(a, e), Math.min(b, f), Math.abs(e - a), Math.abs(f - b)];
     });
-    if (c.x !== undefined) [c.x, c.y] = moi([c.x, c.y]);
+    if (c.loai === "hop-chu") {  // chữ vẫn đứng thẳng, nên xoay cả khung rồi lấy góc trên-trái mới
+      const k = khungHc(c), [a, b] = moi([k.x, k.y]), [e, f] = moi([k.x + k.w, k.y + k.h]);
+      [c.x, c.y] = [Math.min(a, e), Math.min(b, f)];
+    } else if (c.x !== undefined) [c.x, c.y] = moi([c.x, c.y]);
   }
 }
 
@@ -148,6 +151,7 @@ function themCt(v, t, c) {
 function hoanTacCt() {
   const x = lichCt.pop();
   if (!x) return false;
+  boChonHc(true);
   x.t.m.ct = x.ct;
   x.v.veLop(x.t);
   daDoiCt(x.v);
@@ -172,7 +176,8 @@ function ctTai(ct, x, y) {
     const c = ct[i];
     const trung = c.khung ? c.khung.some(([a, b, w, h]) => trong(a, b, a + w, b + h))
       : c.d ? trong(Math.min(...c.d.map(p => p[0])), Math.min(...c.d.map(p => p[1])), Math.max(...c.d.map(p => p[0])), Math.max(...c.d.map(p => p[1])))
-      : trong(c.x, c.y, c.x + (c.loai === "ghi-chu" ? CO_DAU_GHI_CHU : c.chu.length * CO_CHU * 0.6), c.y + CO_CHU * 1.3 * (c.loai === "ghi-chu" ? 1 : c.chu.split("\n").length));
+      : c.loai === "hop-chu" ? (k => trong(k.x, k.y, k.x + k.w, k.y + k.h))(khungHc(c))
+      : trong(c.x, c.y, c.x + CO_DAU_GHI_CHU, c.y + CO_CHU * 1.3);
     if (trung) return i;
   }
   return -1;

@@ -277,6 +277,27 @@ body{user-select:none}
 .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
 .textLayer .endOfContent.active{top:0}
 .lop-ct{position:absolute;inset:0;z-index:1;pointer-events:none}
+/* Hộp chữ: phần tử trong suốt phủ lên chữ để bấm, kéo; chỉ nhận chuột khi đang dùng Chọn chữ hoặc Hộp chữ */
+.khung-hc{position:absolute;z-index:3;pointer-events:none;border-radius:2px;outline:1px dashed transparent;outline-offset:2px}
+body[data-cc="chu"] .khung-hc,body[data-cc="hop-chu"] .khung-hc{pointer-events:auto;cursor:move;touch-action:none}
+body[data-cc="chu"] .khung-hc:hover,body[data-cc="hop-chu"] .khung-hc:hover{outline-color:var(--phan-mo)}
+.khung-hc.chon,body[data-cc] .khung-hc.chon:hover{outline:1.5px solid var(--bang);background:#2b7a6514}
+.o-nhap.o-nhap-hc{min-width:0;padding:0;border:0;border-radius:0;resize:none;overflow:hidden;white-space:pre;background:#fffd;outline:1.5px solid var(--bang);outline-offset:2px;box-shadow:none;font-variant-numeric:normal}
+.o-nhap-hc::placeholder{color:var(--muc-mo);font-family:var(--phong)}
+#thanh-chu{position:fixed;z-index:9;display:flex;align-items:center;gap:4px;padding:4px 6px;background:var(--giay);border:1px solid var(--ke);border-radius:8px;box-shadow:0 4px 14px #17302a33;font-family:var(--phong);font-size:13px;white-space:nowrap}
+#thanh-chu button,#thanh-chu input,#thanh-chu select{height:28px;border:1px solid var(--ke);border-radius:5px;background:#fff;color:var(--muc);font-family:var(--phong);font-size:13px}
+#thanh-chu button{min-width:28px;padding:0 6px}
+#thanh-chu button:hover{background:var(--phan)}
+#thanh-chu button[aria-pressed="true"]{background:var(--bang);color:#fff;border-color:var(--bang)}
+#thanh-chu select{width:168px;padding:0 4px;font-size:14px}
+.tc-co{display:inline-flex;gap:0}
+.tc-co button{min-width:24px;padding:0}
+.tc-co button:first-child{border-radius:5px 0 0 5px}
+.tc-co button:last-child{border-radius:0 5px 5px 0}
+#tc-co{width:48px;border-radius:0;border-left:0;border-right:0;text-align:center;-moz-appearance:textfield}
+#tc-co::-webkit-inner-spin-button{display:none}
+#tc-mau i{display:block;width:16px;height:16px;border-radius:3px;border:1px solid #17302a55}
+#tc-ghi{padding:0 4px;color:var(--muc-mo);font-size:12px}
 .to-trang canvas.lop-ct{width:100%;height:100%}
 .o-nhap{position:absolute;z-index:4;width:200px;height:56px;padding:4px 6px;border:1px solid var(--bang);border-radius:4px;background:#fff;color:var(--muc);font:inherit;font-size:13px;resize:both;box-shadow:0 4px 12px #17302a33}
 .dong-phong{display:grid;grid-template-columns:96px minmax(0,1fr) 72px;align-items:center;gap:8px}

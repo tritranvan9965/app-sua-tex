@@ -10,6 +10,7 @@ Cách làm, để phần không sửa giữ nguyên từng byte:
 - Mọi lần ghi đều dựng ảnh trang trước/sau bằng pdfium và so: ngoài vùng sửa phải giống nhau, nếu không thì hủy, không ghi file."""
 import ctypes
 import os
+from io import BytesIO
 import re
 import secrets
 from pathlib import Path
@@ -299,6 +300,21 @@ def doc_chu_da_them(pdf) -> list:
                            "co": float(m.Co), "mau": str(m.Mau), "dam": bool(m.Dam), "nghieng": bool(m.Nghieng), "gach_chan": bool(m.GachChan),
                            "gian_dong": float(m.GianDong), "rong": float(m.Rong), "cao": float(m.Cao), "xoay_chu": lech})
     return ra
+
+
+def ban_xem_khong_chu_da_them(pdf) -> tuple:
+    """(ds, bytes): ds = chữ đã thêm bằng app còn sửa được (không bị xoay lệch so với trang), bytes = nội dung file đã bỏ những chữ đó
+    (để trình xem chỉ vẽ chữ một lần, phần còn lại do lớp chú thích vẽ). bytes = None nếu file không có chữ nào như vậy."""
+    ds = [c for c in doc_chu_da_them(pdf) if not c["xoay_chu"]]
+    if not ds:
+        return [], None
+    ids = {c["id"] for c in ds}
+    with _mo_pdf(pdf) as p:
+        for tr in p.pages:
+            _go_luong(tr, ids)
+        bo = BytesIO()
+        p.save(bo)
+    return ds, bo.getvalue()
 
 
 def xoa_chu_da_them(pdf_vao, pdf_ra, ids: list, kiem_tra: bool = True) -> dict:
