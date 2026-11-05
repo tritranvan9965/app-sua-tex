@@ -297,6 +297,13 @@ body[data-cc="chu"] .khung-hc:hover,body[data-cc="hop-chu"] .khung-hc:hover{outl
 #tc-co{width:48px;border-radius:0;border-left:0;border-right:0;text-align:center;-moz-appearance:textfield}
 #tc-co::-webkit-inner-spin-button{display:none}
 #tc-mau i{display:block;width:16px;height:16px;border-radius:3px;border:1px solid #17302a55}
+#thanh-chu.sua-chu #tc-gach{display:none}
+/* Sửa chữ có sẵn */
+body[data-cc="sua-chu"] .to-trang{cursor:text}
+body.dang-hoi .to-trang{cursor:progress}
+.vien-sc{position:absolute;z-index:3;pointer-events:none;border:1.5px solid var(--bang);border-radius:2px;background:#2b7a6512}
+.o-nhap-sc{z-index:5}
+.ghi-chu-sc{position:absolute;z-index:6;max-width:min(420px,90%);padding:5px 9px;border-radius:6px;background:#fff6dd;border:1px solid #e3c36a;color:#4a3a05;font-size:12.5px;line-height:1.35;box-shadow:0 3px 10px #17302a33;pointer-events:none}
 #tc-ghi{padding:0 4px;color:var(--muc-mo);font-size:12px}
 .to-trang canvas.lop-ct{width:100%;height:100%}
 .o-nhap{position:absolute;z-index:4;width:200px;height:56px;padding:4px 6px;border:1px solid var(--bang);border-radius:4px;background:#fff;color:var(--muc);font:inherit;font-size:13px;resize:both;box-shadow:0 4px 12px #17302a33}

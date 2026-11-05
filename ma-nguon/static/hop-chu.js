@@ -13,6 +13,8 @@ const luuCtChu = () => { try { localStorage.setItem("suaTexHopChu", JSON.stringi
 
 // hc.c: hộp đang chọn (đã nằm trong t.m.ct). hc.sua: đang gõ {o: ô gõ, nhap: bản đang sửa, goc: hộp cũ hoặc null nếu là hộp mới}.
 const hc = {v: null, t: null, c: null, sua: null};
+// sc: ô sửa chữ có sẵn (sua-chu.js) {o, nhap, doi, dong, g, t, v, truoc, cu}. Thanh định dạng dùng chung với hộp chữ.
+const sc = {sua: null, dangHoi: false, henGhiChu: 0};
 
 const moDo = document.createElement("canvas").getContext("2d");
 const fontHc = (c, px = c.co) => `${c.nghieng ? "italic " : ""}${c.dam ? "700 " : "400 "}${px}px "${c.phong}", sans-serif`;
@@ -312,9 +314,10 @@ async function napDsPhong() {
 }
 
 // Đối tượng đang được định dạng: ô đang gõ, hộp đang chọn, hoặc (công cụ Hộp chữ chưa chọn gì) lựa chọn mặc định cho hộp mới.
-const doiTuongHc = () => hc.sua?.nhap ?? hc.c ?? ctChu;
+const doiTuongHc = () => sc.sua?.nhap ?? hc.sua?.nhap ?? hc.c ?? ctChu;
 
 function datDinhDangHc(thay) {
+  if (sc.sua) return datDinhDangSc(thay);  // sửa chữ có sẵn: không đổi lựa chọn mặc định của hộp chữ mới
   const dt = doiTuongHc();
   if (thay.co !== undefined) thay.co = Math.min(CO_CHU_MAX, Math.max(CO_CHU_MIN, Math.round(thay.co * 2) / 2));
   if (!hc.sua && hc.c) {
@@ -354,15 +357,16 @@ thanh.addEventListener("pointerdown", e => e.stopPropagation());
 
 // Đổi màu bằng ô màu chung: hộp đang chọn hoặc đang gõ đổi theo.
 $("o-mau").addEventListener("change", e => {
-  if (hc.sua || hc.c) datDinhDangHc({mau: e.target.value});
+  if (sc.sua || hc.sua || hc.c) datDinhDangHc({mau: e.target.value});
 });
 
 function capNhatThanhHc() {
-  const hien = (hc.sua || hc.c) && hc.t?.o.isConnected || (congCu === "hop-chu" && xv().trang.length);
+  const hien = sc.sua?.t.o.isConnected || (hc.sua || hc.c) && hc.t?.o.isConnected || (congCu === "hop-chu" && xv().trang.length);
   if (hc.t && !hc.t.o.isConnected && !hc.sua) { hc.c = null; hc.t = null; }
   thanh.hidden = !hien;
   if (!hien) return;
   napDsPhong();
+  thanh.classList.toggle("sua-chu", !!sc.sua);  // lõi sửa chữ có sẵn chưa gạch chân
   const dt = doiTuongHc();
   const o = tc("tc-phong");
   if (!dsPhongViet?.some(p => p.ho === dt.phong) && dt.phong) {  // phông không còn trong danh sách: vẫn hiện để biết
@@ -393,22 +397,16 @@ async function ghiChuGiaLap(dt) {
   g.textContent = ds.length ? `${ds.join(", ")} giả lập` : "";
 }
 
+// Thanh nằm sát mép trên khung xem, ở giữa, nên không che dòng chữ nào quanh chỗ đang sửa. Nếu chỗ đang sửa ở sát mép trên (thanh sẽ đè lên) thì chuyển xuống mép dưới.
 function datViTriThanh() {
   if (thanh.hidden) return;
-  const v = hc.sua?.v ?? hc.v ?? xv(), kv = v.o.getBoundingClientRect(), tr = thanh.getBoundingClientRect();
-  const nguon = hc.sua ? hc.sua.o : hc.c ? hc.t?.khungHc?.get(hc.c) : null;
-  const k = nguon?.getBoundingClientRect();
-  let x, y;
-  if (k && k.width) {
-    x = k.left;
-    y = k.top - tr.height - 8;
-    if (y < kv.top + 2) y = k.bottom + 8;
-  } else {
-    x = kv.left + (kv.width - tr.width) / 2;
-    y = kv.top + 8;
-  }
-  x = Math.max(4, Math.min(innerWidth - tr.width - 4, x));
-  y = Math.max(4, Math.min(innerHeight - tr.height - 4, y));
+  const v = sc.sua?.v ?? hc.sua?.v ?? hc.v ?? xv(), kv = v.o.getBoundingClientRect(), tr = thanh.getBoundingClientRect();
+  const nguon = sc.sua ? sc.sua.o : hc.sua ? hc.sua.o : hc.c ? hc.t?.khungHc?.get(hc.c) : null;
+  const k = nguon?.getBoundingClientRect(), le = 8, cach = 10;
+  const tren = Math.max(4, kv.top + le), duoi = Math.min(innerHeight - tr.height - 4, kv.bottom - tr.height - le - 36);  // 36: thanh điều hướng đáy
+  const dung = y => !k || !k.width || k.bottom < y - cach || k.top > y + tr.height + cach;
+  const y = dung(tren) || !dung(duoi) ? tren : duoi;
+  const x = Math.max(4, Math.min(innerWidth - tr.width - 4, kv.left + (kv.width - tr.width) / 2));
   Object.assign(thanh.style, {left: `${x}px`, top: `${y}px`});
 }
 

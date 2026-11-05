@@ -196,6 +196,10 @@ class TrinhXem {
     const px = (e.clientX - goc.left) / this.daVe, py = (e.clientY - goc.top) / this.daVe;
     boChonHc();
     if (congCu === "hop-chu") { e.preventDefault(); return batDauHc(this, t, px, py); }
+    if (congCu === "sua-chu") {
+      e.preventDefault();
+      return this === xvPdf ? batDauSuaChu(this, t, px, py) : bao("Sửa chữ chỉ dùng khi mở file PDF.", true);
+    }
     if (NHOM_BAM.has(congCu)) { e.preventDefault(); return moNhapChu(this, t, px, py, congCu); }
     if (congCu === "tay") {
       const i = ctTai(t.m.ct, px, py);
@@ -342,9 +346,11 @@ function datCongCu(c) {
   xoaVung();
   getSelection().removeAllRanges();
   boChonHc();
+  huySuaChu();
   document.querySelector(".o-nhap")?.remove();
+  document.querySelector(".vien-sc")?.remove();
   document.body.dataset.cc = c;
-  document.body.classList.toggle("cc-vung", c === "vung" || NHOM_KEO.has(c) || NHOM_BAM.has(c) || c === "tay");
+  document.body.classList.toggle("cc-vung", c === "vung" || NHOM_KEO.has(c) || NHOM_BAM.has(c) || c === "tay" || c === "sua-chu");
   capNhatRibbon();
 }
 
@@ -471,6 +477,7 @@ addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.target.closest?.("textarea, input, .CodeMirror") && hoanTacCt()) e.preventDefault();
   if (e.altKey && e.key === "1") { e.preventDefault(); datCongCu("chu"); }
   if (e.altKey && e.key === "2") { e.preventDefault(); datCongCu("vung"); }
+  if (e.altKey && e.key === "3" && coSuaChu()) { e.preventDefault(); datCongCu("sua-chu"); }
 });
 // Khi đang bôi đen, lớp chữ phải phủ kín trang để kéo qua chỗ trống không làm nhảy vùng chọn.
 addEventListener("pointerdown", e => e.target.closest?.(".textLayer")?.querySelector(".endOfContent")?.classList.add("active"));

@@ -65,7 +65,11 @@ function veMot1(ctx, c) {
 }
 
 // boChu: bỏ hộp chữ, vì lúc lưu hộp chữ thành chữ thật trong file chứ không vào ảnh.
-const veCt = (ctx, ct, boChu = false) => ct?.forEach(c => { if (!(boChu && c.loai === "hop-chu")) veMot1(ctx, c); });
+// Chỗ sửa chữ có sẵn (nền trắng che chữ cũ + chữ mới) vẽ trước, để chú thích khác nằm lên trên. boChu cũng bỏ chúng vì lõi ghi chữ thật.
+const veCt = (ctx, ct, boChu = false) => {
+  if (!boChu) ct?.forEach(c => { if (c.loai === "sua-dong") veSuaDong(ctx, c); });
+  ct?.forEach(c => { if (c.loai !== "sua-dong" && !(boChu && c.loai === "hop-chu")) veMot1(ctx, c); });
+};
 
 // Đầu trang, chân trang, số trang, dấu mờ áp cho cả tài liệu. i tính từ 0.
 function veTrinhBay(ctx, tb, i, n, w, h) {
@@ -110,9 +114,10 @@ async function gomTrang(v, loc = () => true, duong) {
     if (!loc(t.m)) continue;
     const ct = t.m.ct || [];
     ra.push({duong: duong || t.m.duong, so: t.m.so, xoay: t.m.xoay || 0,
-      anh: ct.some(c => c.loai !== "hop-chu") || v.tb ? await lopPng(v, t, i) : null,
+      anh: ct.some(c => c.loai !== "hop-chu" && c.loai !== "sua-dong") || v.tb ? await lopPng(v, t, i) : null,
       ghi_chu: ct.filter(c => c.loai === "ghi-chu").map(c => ({x: c.x, y: c.y, chu: c.chu})),
-      chu: ct.filter(c => c.loai === "hop-chu" && c.chu.trim()).map(mucHc), xoa_chu: t.m.chuCu || []});
+      chu: ct.filter(c => c.loai === "hop-chu" && c.chu.trim()).map(mucHc), xoa_chu: t.m.chuCu || [],
+      sua_dong: ct.filter(c => c.loai === "sua-dong" && !c.an).map(c => ({dong_id: c.dong_id, chu_moi: c.chu, thuoc_tinh: c.tt}))});
   }
   return ra;
 }
@@ -152,6 +157,7 @@ function hoanTacCt() {
   const x = lichCt.pop();
   if (!x) return false;
   boChonHc(true);
+  huySuaChu();
   x.t.m.ct = x.ct;
   x.v.veLop(x.t);
   daDoiCt(x.v);

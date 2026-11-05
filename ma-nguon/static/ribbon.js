@@ -7,6 +7,7 @@ const coTrang = () => dangPdf() && pt.ds.length > 0;
 const coChon = () => dangPdf() && pt.ds.some(x => x.chon);
 const ranh = () => !tt.viec;
 const coXem = () => xv().trang.length > 0;
+const coSuaChu = () => dangPdf() && coXem();
 
 // Lý do khi nút bị khoá, hiện ở dòng cuối gợi ý. Lệnh có điều kiện riêng thì khai khoa (chuỗi hoặc hàm trả chuỗi),
 // không thì lấy theo hàm bat ở LY_DO_CHUNG.
@@ -20,7 +21,7 @@ const LY_DO_CHUNG = new Map([[coTex, LD_TEX], [coChon, LD_CHON], [coTrang, LD_TR
 // Khai theo thứ tự kiểm tra: điều kiện nào chưa đạt thì báo lý do của nó.
 const khoaTheo = (...ds) => () => ds.find(([ok]) => !ok())?.[1]();
 
-const TEN_CT = {chu: "Chọn chữ", vung: "Chọn vùng"};  // tên công cụ đang dùng, hiện ở thanh dưới
+const TEN_CT = {chu: "Chọn chữ", vung: "Chọn vùng", "sua-chu": "Sửa chữ"};  // tên công cụ đang dùng, hiện ở thanh dưới
 const sapCo = (ten, ic, to = false, tenNgan) => ({ten, ic, to, tenNgan, sapCo: true});
 const lenhCt = (ten, ic, ma, to = false, goiY, tenNgan) => {
   TEN_CT[ma] = ten;
@@ -112,6 +113,9 @@ function dsRibbon() {
       ["Công cụ", [
         {ten: "Chọn chữ", ic: "chon-chu", phim: "Alt+1", goiY: "Bôi đen chữ trên PDF để sao chép", lam: () => datCongCu("chu"), tich: () => coXem() && congCu === "chu", bat: coXem},
         {ten: "Chọn vùng", ic: "chon-vung", phim: "Alt+2", goiY: "Kéo một khung trên PDF để sao chép thành ảnh", lam: () => datCongCu("vung"), tich: () => coXem() && congCu === "vung", bat: coXem},
+        {ten: "Sửa chữ", ic: "sua-chu", to: true, phim: "Alt+3", goiY: "Bấm vào một dòng chữ trong PDF để sửa tại chỗ. Enter để xong, Esc để hủy. Chữ cũ bị xóa hẳn, chữ mới là chữ thật. Thiếu dấu tiếng Việt thì dòng đó đổi sang phông gần giống",
+          lam: () => datCongCu("sua-chu"), tich: () => coSuaChu() && congCu === "sua-chu", bat: coSuaChu,
+          khoa: () => (!coXem() ? LD_XEM() : "Chỉ sửa chữ được khi mở file PDF. Mở một file PDF, hoặc bấm Tách, gộp trang để đưa PDF vừa biên dịch sang dải trang.")},
         sapCo("Kéo trang", "ban-tay"), lenhCt("Tẩy", "tay", "tay", false, "Bấm vào chú thích để xóa"),
       ]],
       ["Đánh dấu", [

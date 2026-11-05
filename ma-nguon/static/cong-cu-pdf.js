@@ -228,6 +228,7 @@ function boTrang(ds = pt.ds.filter(x => x.chon)) {
 }
 
 async function luuTrang(chiChon, dich, loc = m => m.chon) {
+  if (!xacNhanSuaChu(pt.ds.filter(m => !chiChon || loc(m)))) return;
   datViec("Đang lưu PDF...");
   try {
     const trang = await gomTrang(xvPdf, m => !chiChon || loc(m));
@@ -261,6 +262,7 @@ function daDoiDay() {
 }
 
 async function xoayTrang(cw, ds = trangTacDong()) {
+  if (ds.some(m => m.ct?.some(c => c.loai === "sua-dong"))) return bao("Trang có chữ đã sửa. Lưu file rồi mở lại mới xoay được trang đó.", true);
   for (const m of ds) {
     const t = xvPdf.trang.find(x => x.m === m);
     xoayCt(m.ct, cw, t.w, t.h);

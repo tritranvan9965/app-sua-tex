@@ -423,10 +423,43 @@ def anh_ghi(d: dict) -> dict:
     return {"ten": p.name}
 
 
+def ap_sua_dong(trang: list, thu_muc: Path) -> set:
+    """Các trang có sua_dong: chạy sua_nhieu_dong trên file nguồn ra bản tạm rồi đổi đường dẫn trang sang bản tạm (số trang giữ nguyên).
+    Trả tập file nguồn gốc để ghep() vẫn chặn ghi đè lên chúng."""
+    theo_tep, goc = {}, set()
+    for x in trang:
+        if not x.get("sua_dong"):
+            continue
+        viec = theo_tep.setdefault(x["duong"], {})
+        for s in x["sua_dong"]:
+            k = (x["so"], str(s["dong_id"]))
+            mot = {"trang": x["so"], "dong_id": str(s["dong_id"]), "chu_moi": str(s.get("chu_moi", "")), "thuoc_tinh": s.get("thuoc_tinh") or {}}
+            if k in viec and viec[k] != mot:
+                raise LoiApp(400, f"Trang {x['so']} được nhân bản nhưng hai bản sửa dòng chữ khác nhau. Sửa lại cho giống nhau rồi lưu.")
+            viec[k] = mot
+    for n, (duong, viec) in enumerate(theo_tep.items()):
+        goc.add(str(Path(duong).resolve()))
+        tam = thu_muc / f"sua-{n}.pdf"
+        try:
+            chu_pdf.sua_nhieu_dong(duong, tam, list(viec.values()))
+        except ValueError as e:
+            raise LoiApp(400, str(e))
+        for x in trang:
+            if x["duong"] == duong:
+                x["duong"] = str(tam)
+    return goc
+
+
 def pdf_ghi(d: dict) -> dict:
     trang = [{**x, "so": int(x["so"]), "anh": base64.b64decode(x["anh"]) if x.get("anh") else None} for x in d.get("trang", [])]
     if any(x["duong"] not in PDF_DA_CHON for x in trang):
         raise LoiApp(403, "Trang này không thuộc file đã mở.")
+    with tempfile.TemporaryDirectory(prefix="sua-ghi-") as t:
+        goc = ap_sua_dong(trang, Path(t))
+        return pdf_ghi_xong(d, trang, goc)
+
+
+def pdf_ghi_xong(d: dict, trang: list, goc: set) -> dict:
     dich = d.get("dich")
     nguon = d.get("nguon")
     if nguon:  # PDF biên dịch từ .tex: lưu thẳng vào vị trí đã định, không hỏi
@@ -440,7 +473,10 @@ def pdf_ghi(d: dict) -> dict:
             return {"huy": True}
         dich = ds if isinstance(ds, str) else ds[0]
     try:
-        return cong_cu_pdf.ghep(trang, Path(dich).resolve().with_suffix(".pdf"))
+        dich = Path(dich).resolve().with_suffix(".pdf")
+        if dich in {Path(g) for g in goc}:
+            raise LoiApp(400, f"{dich.name} đang là file nguồn. Chọn tên khác để không ghi đè file gốc.")
+        return cong_cu_pdf.ghep(trang, dich)
     except ValueError as e:
         raise LoiApp(400, str(e))
     except PermissionError:
@@ -456,7 +492,9 @@ def pdf_in(d: dict) -> dict:
     thu_muc.mkdir(exist_ok=True)
     ten = Path(str(d.get("ten") or "in")).stem[:60] or "in"
     try:
-        p = Path(cong_cu_pdf.ghep(trang, thu_muc / f"{ten}-{time.time_ns()}.pdf")["duong"])
+        with tempfile.TemporaryDirectory(prefix="sua-in-") as t:
+            ap_sua_dong(trang, Path(t))
+            p = Path(cong_cu_pdf.ghep(trang, thu_muc / f"{ten}-{time.time_ns()}.pdf")["duong"])
     except ValueError as e:
         raise LoiApp(400, str(e))
     try:
@@ -680,11 +718,27 @@ def pdf_da_chon(duong) -> str:
 
 
 def chu_tim_dong(d: dict) -> dict:
-    """Dòng chữ có sẵn ở điểm (x, y) pt, gốc trên-trái, trên trang `trang` (từ 1) đang nhìn thấy của file PDF đã mở. dong = None nếu không có chữ."""
+    """Dòng chữ có sẵn ở điểm (x, y) pt, gốc trên-trái, trên trang `trang` (từ 1) đang nhìn thấy của file PDF đã mở. dong = None nếu không có chữ.
+    Thêm goi_y_phong: họ phông máy gần giống nhất để ô sửa hiện chữ cũ (chỉ để xem, file vẫn dùng lại phông gốc nếu được)."""
     try:
-        return {"dong": chu_pdf.tim_dong(pdf_da_chon(d.get("duong")), int(d["trang"]), float(d["x"]), float(d["y"]))}
+        dong = chu_pdf.tim_dong(pdf_da_chon(d.get("duong")), int(d["trang"]), float(d["x"]), float(d["y"]))
     except ValueError as e:
         raise LoiApp(400, str(e))
+    if dong and dong.get("loai") == "chu-co-san":
+        dong["goi_y_phong"] = next((m["ho"] for m in (phong_chu.tim_phong(h, dong["dam"], dong["nghieng"]) for h in chu_pdf._ung_vien_phong(dong["phong"])) if m), "Times New Roman")
+    return {"dong": dong}
+
+
+def chu_sua_thu(d: dict) -> dict:
+    """Chạy thử sửa một dòng ra bản tạm (không giữ) để biết phông sẽ dùng, khung chữ mới và cũ. Lỗi lõi thành lỗi 400 với câu tiếng Việt."""
+    nguon = pdf_da_chon(d.get("duong"))
+    with tempfile.TemporaryDirectory(prefix="sua-thu-") as t:
+        try:
+            kq = chu_pdf.sua_dong(nguon, Path(t) / "thu.pdf", int(d["trang"]), str(d["dong_id"]), str(d.get("chu_moi", "")), d.get("thuoc_tinh") or {}, kiem_tra=False)
+        except ValueError as e:
+            raise LoiApp(400, str(e))
+    kq.pop("duong", None)
+    return kq
 
 
 BAN_XEM = {}  # (đường dẫn, mtime, cỡ) -> nội dung PDF đã bỏ chữ do app thêm
@@ -822,7 +876,7 @@ class XuLy(BaseHTTPRequestHandler):
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
-                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
+                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-sua-thu": chu_sua_thu, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
         if not viec:
             raise LoiApp(404, "Không có việc này.")
         self._json(200, viec(d))
