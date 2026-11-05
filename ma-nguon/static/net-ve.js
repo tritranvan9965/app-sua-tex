@@ -353,21 +353,38 @@ function veMauThu() {
 
 // ---------- Con trỏ ----------
 
+// Ảnh con trỏ vẽ bằng canvas ở hai độ phân giải (1x, 2x) rồi cho image-set chọn, để màn hình phóng to 125%, 150% không bị làm mờ
+// (ảnh SVG bị co giãn khiến viền tối nhòe vào màu, đỏ thành hồng, đen thành xám).
+function anhConTro(k, W, cx, cy, r, mau) {
+  const cv = document.createElement("canvas"), ctx = cv.getContext("2d");
+  cv.width = cv.height = Math.round(W * k);
+  ctx.scale(k, k);
+  const vong = (rr, kieu, day) => { ctx.beginPath(); ctx.arc(cx, cy, rr, 0, 2 * Math.PI); ctx[kieu === "to" ? "fillStyle" : "strokeStyle"] = day[0]; if (kieu === "to") ctx.fill(); else { ctx.lineWidth = day[1]; ctx.stroke(); } };
+  vong(r + 1.6, "ve", ["#fff", 1.6]);
+  vong(r + 0.4, "ve", ["#17302a", 1]);
+  vong(r, "to", [mau]);
+  ctx.translate(cx, cy);
+  ctx.rotate(-Math.PI / 4);
+  const than = () => { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(8, -3.6); ctx.lineTo(28, -3.6); ctx.lineTo(28, 3.6); ctx.lineTo(8, 3.6); ctx.closePath(); };
+  ctx.lineJoin = "round";
+  than(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.stroke();
+  ctx.fillStyle = mau; ctx.fillRect(8, -3.6, 20, 7.2);
+  ctx.fillStyle = "#17302a"; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(8, -3.6); ctx.lineTo(8, 3.6); ctx.closePath(); ctx.fill();
+  than(); ctx.strokeStyle = "#17302a"; ctx.lineWidth = 1.2; ctx.stroke();
+  return cv.toDataURL("image/png");
+}
+
 function capNhatConTroNet() {
   const v = xv(), loai = congCu, ve = !!MUC_NET[loai] && NHOM_KEO.has(loai);
   daVeConTro = v.daVe;
   document.body.classList.toggle("cc-ve", ve);
   if (!ve) return document.body.style.removeProperty("--con-tro");
-  // Chấm tròn đúng cỡ nét trên trang (đổi theo thanh trượt), có viền sáng và viền tối nên màu trắng hay đen đều thấy.
-  // Thêm hình cây bút chĩa lên phải, đầu bút trùng tâm chấm.
-  const p = tn[loai], d = Math.max(4, Math.min(80, p.net * v.daVe)), r = d / 2, mau = p.mau, o = 3;
-  const W = Math.ceil(d + 38), H = W, cx = r + o, cy = H - r - o;
-  const thanBut = `<path d="M8 -3.6H28V3.6H8Z" fill="${mau}"/><path d="M0 0L8 -3.6V3.6Z" fill="#17302a"/>`;
-  const vien = c => `<path d="M0 0L8 -3.6H28V3.6H8Z" fill="none" stroke="${c[0]}" stroke-width="${c[1]}" stroke-linejoin="round"/>`;
-  const but = `<g transform="translate(${cx} ${cy}) rotate(-45)">${vien(["#fff", 4])}${thanBut}${vien(["#17302a", 1.2])}</g>`;
-  const cham = `<circle cx="${cx}" cy="${cy}" r="${r + 1.6}" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="${cx}" cy="${cy}" r="${r + 0.4}" fill="none" stroke="#17302a" stroke-width="1"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="${mau}"/>`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${cham}${but}</svg>`;
-  document.body.style.setProperty("--con-tro", `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${Math.round(cx)} ${Math.round(cy)}, crosshair`);
+  // Chấm tròn đúng cỡ nét trên trang (đổi theo thanh trượt), có viền sáng và viền tối nên màu trắng hay đen đều thấy,
+  // kèm hình cây bút chĩa lên phải, đầu bút trùng tâm chấm.
+  const p = tn[loai], d = Math.max(6, Math.min(80, p.net * v.daVe)), r = d / 2, o = 3;
+  const W = Math.ceil(d + 38), cx = r + o, cy = W - r - o;
+  const u1 = anhConTro(1, W, cx, cy, r, p.mau), u2 = anhConTro(2, W, cx, cy, r, p.mau);
+  document.body.style.setProperty("--con-tro", `image-set(url("${u1}") 1x, url("${u2}") 2x) ${Math.round(cx)} ${Math.round(cy)}, crosshair`);
 }
 
 // ---------- Cập nhật thanh ----------
