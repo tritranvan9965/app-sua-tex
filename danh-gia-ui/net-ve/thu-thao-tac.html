@@ -141,6 +141,7 @@ addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); hoanTacCt(); }
 });
 
+xvTex.veLop(t);  // đặt kích thước lớp vẽ phủ cả trang ngay từ đầu
 try { napThuocTinhNet(JSON.parse(localStorage.getItem("thu-net") || "null")); } catch {}
 datCongCuThu("but");
 document.fonts?.ready.then(() => capNhatThanhNet());
