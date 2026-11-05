@@ -288,7 +288,9 @@ function nutMuc(ma, gia, b) {
   let dangKeo = false;
   oDay.oninput = () => { datThuocTinhNet("net", +oDay.value, dangKeo); dangKeo = true; };
   oDay.onchange = () => { dangKeo = false; };
-  taoMuc("net", oDay, soDay);
+  const cuon = el("span", "tn-cuon");
+  cuon.append(oDay);
+  taoMuc("net", cuon, soDay);
 
   // Kiểu nét: một nút thả xuống, hiện luôn mẫu của kiểu đang dùng.
   const mk = taoMuc("kieu", nutKieu);
@@ -419,7 +421,11 @@ function capNhatThanhNet() {
   nutMau4.setAttribute("aria-pressed", cungMau(mauBon, mau));
   thanhNet.style.setProperty("--mau-tn", mau);
   const dd = giaTriHienNet("net");
-  if (coMuc.includes("net")) { oDay.value = dd; soDay.textContent = `${soPt(dd)} pt`; }
+  if (coMuc.includes("net")) {
+    oDay.value = dd;
+    soDay.textContent = `${soPt(dd)} pt`;
+    thanhNet.style.setProperty("--d-day", `${(10 + dd * 1.5).toFixed(1)}px`);  // núm kéo to dần theo độ dày, mang màu nét
+  }
   nutKieu.innerHTML = `${svgKieu(giaTriHienNet("kieu") ?? "lien")}<svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M1 2.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
   thanhNet.classList.toggle("dang-sua", !!chonNet);
   tieuNet.textContent = chonNet ? `${TEN_NET[loai]} đã chọn` : TEN_NET[loai];

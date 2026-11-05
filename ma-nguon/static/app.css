@@ -483,7 +483,13 @@ dialog h2{font-size:17px;margin:0}
 #thanh-net .tn-o-mau[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 2px var(--muc)}
 #thanh-net .tn-o-mau[aria-pressed=true] svg{opacity:1}
 #thanh-net .tn-khac{padding:0 7px}
-.tn-truot{width:96px;height:28px;margin:0;accent-color:var(--bang);cursor:pointer}
+.tn-cuon{position:relative;width:116px;height:28px}
+.tn-cuon::before{content:"";position:absolute;left:8px;right:8px;top:6px;bottom:6px;background:#b9c7bf;clip-path:polygon(0 50%,100% 0,100% 100%)}
+.tn-truot{position:relative;width:100%;height:28px;margin:0;background:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.tn-truot::-webkit-slider-runnable-track{height:28px;background:none}
+.tn-truot::-webkit-slider-thumb{-webkit-appearance:none;width:var(--d-day,16px);height:var(--d-day,16px);margin-top:calc((28px - var(--d-day,16px)) / 2);border-radius:50%;background:var(--mau-tn,#c0262d);border:2px solid #17302a;box-shadow:0 0 0 1.5px #fff}
+.tn-truot::-moz-range-track{height:28px;background:none}
+.tn-truot::-moz-range-thumb{width:var(--d-day,16px);height:var(--d-day,16px);border-radius:50%;background:var(--mau-tn,#c0262d);border:2px solid #17302a;box-sizing:border-box}
 .tn-so{min-width:38px;font-variant-numeric:tabular-nums}
 .tn-menu{position:absolute;left:6px;z-index:2;display:flex;flex-direction:column;gap:2px;padding:4px;background:var(--giay);border:1px solid var(--ke);border-radius:8px;box-shadow:0 4px 14px #17302a33}
 #thanh-net .tn-muc-kieu{white-space:nowrap;justify-content:flex-start;gap:8px;padding:0 8px;min-width:112px}
