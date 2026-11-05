@@ -473,16 +473,25 @@ def tim_dong(pdf, trang: int, x: float, y: float, dung_sai: float = 1.5):
             if dau <= goc["k"] < dau + so:
                 return {"loai": "chu-da-them", "id_chu_da_them": id_, "chu": goc["chu"], "khung": list(goc["khung"])}
             dau += so
+    return _dong_tu_nhom(trang, _nhom_cua(goc, [o for o in ds[:n_chinh] if o["ten"] == goc["ten"]]))
+
+
+def _nhom_cua(goc, cung_ten) -> list:
+    """Các đoạn chữ liền nhau cùng đường cơ sở, phông, cỡ với đoạn `goc`, theo thứ tự trái sang phải. cung_ten: các đoạn cùng tên phông."""
     co = goc["co"]
-    cung = sorted((o for o in ds[:n_chinh] if o["ten"] == goc["ten"] and abs(o["co"] - co) < 0.05 and abs(o["goc"][1] - goc["goc"][1]) <= 0.12 * co),
-                  key=lambda o: o["goc"][0])
+    cung = sorted((o for o in cung_ten if abs(o["co"] - co) < 0.05 and abs(o["goc"][1] - goc["goc"][1]) <= 0.12 * co), key=lambda o: o["goc"][0])
     i = next(i for i, o in enumerate(cung) if o["k"] == goc["k"])
     a = b = i
     while a > 0 and cung[a]["khung"][0] - cung[a - 1]["khung"][2] <= 0.9 * co:
         a -= 1
     while b < len(cung) - 1 and cung[b + 1]["khung"][0] - cung[b]["khung"][2] <= 0.9 * co:
         b += 1
-    nhom = cung[a:b + 1]
+    return cung[a:b + 1]
+
+
+def _dong_tu_nhom(trang: int, nhom: list) -> dict:
+    goc = nhom[0]
+    co = goc["co"]
     chu, mep_phai = "", None
     for o in nhom:
         if chu and o["chu"].strip() and not chu[-1].isspace() and not o["chu"][0].isspace() and o["khung"][0] - mep_phai > 0.12 * co:
@@ -491,10 +500,85 @@ def tim_dong(pdf, trang: int, x: float, y: float, dung_sai: float = 1.5):
         if o["chu"].strip():
             mep_phai = o["khung"][2]
     kh = [min(o["khung"][0] for o in nhom), min(o["khung"][1] for o in nhom), max(o["khung"][2] for o in nhom), max(o["khung"][3] for o in nhom)]
-    return {"loai": "chu-co-san", "id": f"{trang}:" + ".".join(str(o["k"]) for o in nhom), "chu": chu, "khung": kh,
-            "phong": goc["ten"], "phong_sach": goc["ten_sach"], "co": co, "mau": _hex_mau(*goc["mau"]), "tap_con": goc["tap_con"],
-            "nhung": goc["nhung"], "dam": goc["dam"], "nghieng": goc["nghieng"],
+    return {"loai": "chu-co-san", "dong_id": f"{trang}:" + ".".join(str(o["k"]) for o in nhom), "id": f"{trang}:" + ".".join(str(o["k"]) for o in nhom),
+            "chu": chu, "khung": kh, "phong": goc["ten"], "phong_sach": goc["ten_sach"], "co": co, "mau": _hex_mau(*goc["mau"]),
+            "tap_con": goc["tap_con"], "nhung": goc["nhung"], "dam": goc["dam"], "nghieng": goc["nghieng"],
             "doi_tuong": [{"chi_so": o["k"], "chu": o["chu"], "khung": list(o["khung"])} for o in nhom]}
+
+
+_DEM_TRANG = {}  # (đường dẫn, mtime, kích thước, trang) -> kết quả đã tính; chỉ giữ vài mục gần nhất
+_DEM_TOI_DA = 24
+
+
+def khoa_dem(pdf, trang) -> tuple:
+    """Khóa bộ đệm của một trang: đổi khi file bị ghi lại."""
+    p = Path(pdf)
+    st = p.stat()
+    return (str(p.resolve()), st.st_mtime_ns, st.st_size, int(trang))
+
+
+def nho_dem(loai: str, khoa: tuple, gia_tri):
+    if len(_DEM_TRANG) >= _DEM_TOI_DA:
+        _DEM_TRANG.pop(next(iter(_DEM_TRANG)))
+    _DEM_TRANG[(loai, *khoa)] = gia_tri
+    return gia_tri
+
+
+def _ly_do_khong_sua(pt, vi_tri: dict, nhom: list) -> str:
+    """None nếu sửa được dòng gồm các đoạn `nhom` bằng sua_dong, không thì câu tiếng Việt nói vì sao không."""
+    if pt.loi:
+        return pt.loi
+    for o in nhom:
+        g = pt.ops_chu[o["k"]]["goc"]
+        if g is not None and (abs(g[0] - o["m"][4]) > 0.6 or abs(g[1] - o["m"][5]) > 0.6):
+            return "Không khớp được dòng chữ với nội dung trang nên không sửa được."
+        n = vi_tri[id(pt.ops_chu[o["k"]])]
+        rec = pt.ops[n]
+        tiep = pt.ops[n + 1]["noi_tiep"] if n + 1 < len(pt.ops) else False
+        if tiep and rec["adv"] is None:
+            return "Không đo được độ rộng chữ cũ nên không xóa gọn được dòng này."
+        if tiep and rec["fs"] * rec["tz"] == 0:
+            return "Cỡ chữ bằng 0, không sửa được dòng này."
+    return None
+
+
+def ds_dong(pdf, trang: int) -> list:
+    """Mọi dòng chữ có sẵn của trang `trang` (từ 1), cùng cấu trúc với tim_dong (loai "chu-co-san") cộng:
+    dong_id (= id, dùng cho sua_dong / sua_nhieu_dong), trang, sua_duoc (bool), ly_do (câu tiếng Việt nếu sua_duoc = False, không thì None).
+    Theo thứ tự đọc (trên xuống dưới, trái sang phải). Chữ đã thêm bằng app không có trong danh sách (đã có doc_chu_da_them).
+    Một dòng bị cắt thành nhiều ô khi đổi phông, đậm, nghiêng hay cỡ giữa câu. Có bộ đệm theo (file, thời điểm sửa, trang)."""
+    from bisect import bisect_left, bisect_right
+    khoa = khoa_dem(pdf, trang)
+    if ("dong", *khoa) in _DEM_TRANG:
+        return [dict(d) for d in _DEM_TRANG[("dong", *khoa)]]
+    with _mo_pdf(pdf) as k:
+        if not 1 <= trang <= len(k.pages):
+            raise LoiChu(f"File không có trang {trang}.")
+        pt = _phan_tich_trang(k, pdf, trang)
+    chinh = pt.ds[:len(pt.ds) - pt.n_them]  # chữ thêm bằng app luôn nằm sau cùng
+    theo_ten = {}
+    for o in chinh:
+        theo_ten.setdefault(o["ten"], []).append(o)
+    chi_so_y = {}
+    for t, v in theo_ten.items():
+        v.sort(key=lambda o: o["goc"][1])
+        chi_so_y[t] = [o["goc"][1] for o in v]
+    vi_tri = {id(o): n for n, o in enumerate(pt.ops)}
+    da, ra = set(), []
+    for o in chinh:
+        if o["khung"][2] - o["khung"][0] <= 0.01 or not o["chu"].strip() or o["k"] in da:
+            continue
+        v, ys, y, dung_sai = theo_ten[o["ten"]], chi_so_y[o["ten"]], o["goc"][1], 0.12 * o["co"]
+        nhom = _nhom_cua(o, v[bisect_left(ys, y - dung_sai - 1e-9):bisect_right(ys, y + dung_sai + 1e-9)])
+        da.update(x["k"] for x in nhom)
+        dong = _dong_tu_nhom(trang, nhom)
+        dong["trang"] = trang
+        dong["ly_do"] = _ly_do_khong_sua(pt, vi_tri, nhom)
+        dong["sua_duoc"] = dong["ly_do"] is None
+        ra.append(dong)
+    ra.sort(key=lambda d: (round(d["khung"][1] / 2), d["khung"][0]))
+    nho_dem("dong", khoa, ra)
+    return [dict(d) for d in ra]
 
 
 # --- Đọc content stream: tìm lệnh hiện chữ ---
@@ -706,8 +790,14 @@ class _PhongGoc:
         tu = _doc_tounicode(f)
         self.dung_duoc = bool(nhung and tu and self.tt.nb and self.tt.rong_ma)
         self.nguoc = {}
+        self.rong_cach = None  # độ rộng dấu cách khi mã của nó là glyph 0 (xem dưới)
         if self.dung_duoc:
             for ma, c in tu.items():
+                if ma == 0 and self.tt.nb == 2:
+                    # Word ghi ToUnicode của glyph 0 (.notdef, vẽ ra ô vuông) là dấu cách; không dùng mã này, dấu cách thành khoảng dịch
+                    if c == " ":
+                        self.rong_cach = self.tt.rong_ma(0)
+                    continue
                 if len(c) == 1 and c not in self.nguoc and self.tt.rong_ma(ma) > 0:
                     self.nguoc[c] = ma
 
@@ -720,6 +810,8 @@ class _PhongGoc:
     def rong1000(self, c: str) -> float:
         if c in self.nguoc:
             return self.tt.rong_ma(self.nguoc[c])
+        if c == " " and self.rong_cach:
+            return self.rong_cach
         return 250.0  # dấu cách LaTeX thường không nằm trong tập con nên bù bằng khoảng dịch
 
 
@@ -813,6 +905,107 @@ def _khoi_chu_moi(pdf, tr, ops_chu, ks, ds, chu_moi, tt_in, giu_do_rong, phong_t
     return ("\n".join(ra) + "\n").encode("latin1"), tt, kh
 
 
+class _PhanTich:
+    """Kết quả đọc một trang: chữ theo pdfium (ds) và các lệnh hiện chữ theo content stream (ops_chu), để đối chiếu và sửa."""
+
+
+def _trang_nhe(pdf, trang: int) -> _PhanTich:
+    """Chỉ đọc content stream chính của trang (bỏ stream chữ thêm bằng app): tr, hop, r, luong_them, luong_chinh, lenh, tai_nguyen."""
+    tr = pdf.pages[trang - 1]
+    pt = _PhanTich()
+    pt.tr, pt.hop, pt.r = tr, _hop(tr), _xoay(tr)
+    pt.luong_them = [s for s in _ds_luong(tr) if KHOA_ID in s]
+    pt.luong_chinh = [s for s in _ds_luong(tr) if KHOA_ID not in s]
+    pt.lenh = pikepdf.parse_content_stream(pdf.make_stream(b"\n".join(s.read_bytes() for s in pt.luong_chinh)))
+    pt.tai_nguyen = _thuoc_tinh_ke_thua(tr, "/Resources")
+    return pt
+
+
+def _phan_tich_trang(pdf, pdf_vao, trang: int) -> _PhanTich:
+    """Đọc trang `trang` (từ 1) của pdf (pikepdf đã mở từ pdf_vao). Không ném lỗi vì nội dung lạ: ghi vào .loi (câu tiếng Việt) và .khop."""
+    return _bo_sung_chu(_trang_nhe(pdf, trang), pdf_vao, trang)
+
+
+def _bo_sung_chu(pt: _PhanTich, pdf_vao, trang: int) -> _PhanTich:
+    """Thêm vào bản đọc nhẹ `pt` phần chữ: ds (pdfium), ops, ops_chu, khop, loi."""
+    d, pg = _mo_pdfium(pdf_vao, trang)
+    try:
+        pt.ds = _doc_doi_tuong(pg, pt.hop, pt.r)
+    finally:
+        d.close()
+    tl = pt.tai_nguyen
+    pt.phong_trang = tl.get("/Font") if tl is not None else None
+    pt.loi, pt.ops = None, []
+    try:
+        pt.ops = _quet_lenh(pt.lenh, pt.phong_trang)
+    except LoiChu as e:
+        pt.loi = str(e)
+    pt.ops_chu = [o for o in pt.ops if o["co_chu"]]
+    pt.n_them = sum(n for _, n in _luong_chu_da_them(pt.tr))
+    pt.khop = pt.loi is None and len(pt.ops_chu) == len(pt.ds) - pt.n_them
+    if pt.loi is None and not pt.khop:
+        pt.loi = "Trang này có chữ nằm trong khối con (XObject) hoặc cấu trúc lạ, app chưa sửa được chữ ở đây."
+    return pt
+
+
+def _lenh_moi_va_ghi(pdf, pt, thay: dict, khoi: bytes, chen_truoc: dict = None, chen_sau: dict = None, bo: set = ()) -> None:
+    """Dựng lại content stream chính của trang từ các lệnh gốc: thay[i] = lệnh thay cho lệnh i, bo = chỉ số lệnh bỏ hẳn,
+    chen_truoc/chen_sau[i] = lệnh chèn trước/sau lệnh i. khoi (bytes) nối cuối. Các stream chữ thêm bằng app giữ nguyên."""
+    chen_truoc, chen_sau = chen_truoc or {}, chen_sau or {}
+    moi = []
+    for i, l in enumerate(pt.lenh):
+        moi.extend(chen_truoc.get(i, ()))
+        if i in thay:
+            moi.extend(thay[i])
+        elif i not in bo:
+            moi.append(l)
+        moi.extend(chen_sau.get(i, ()))
+    nd_moi = pikepdf.unparse_content_stream(moi)
+    boc = not _co_bao_ve(pt.tr)
+    main = pdf.make_stream((b"q\n" if boc else b"") + nd_moi + (b"\nQ\n" if boc else b"\n") + khoi)
+    main[KHOA_BAO_VE] = True
+    pt.tr.obj.Contents = Array([main, *pt.luong_them])
+
+
+def _tinh_sua_dong(pdf, pt, ks: list, chu_moi: str, thuoc_tinh: dict, giu_do_rong: bool) -> dict:
+    """Tính một lần sửa dòng trên trang đã phân tích: trả {thay: {chỉ số lệnh: lệnh thay}, khoi: bytes chữ mới, tt, vung: [khung cũ, khung mới]}."""
+    ds, ops, ops_chu = pt.ds, pt.ops, pt.ops_chu
+    if any(k >= len(ops_chu) for k in ks):
+        raise LoiChu("Đây là chữ đã thêm bằng app, hãy sửa bằng sua_chu_da_them.")
+    muc_tieu = [ds[k] for k in ks]
+    for k in ks:  # đối chiếu vị trí lệnh đọc từ content stream với vị trí pdfium báo
+        g = ops_chu[k]["goc"]
+        if g is not None and (abs(g[0] - ds[k]["m"][4]) > 0.6 or abs(g[1] - ds[k]["m"][5]) > 0.6):
+            raise LoiChu("Không khớp được dòng chữ với nội dung trang, đã hủy để khỏi làm hỏng file.")
+    vi_tri = {id(o): n for n, o in enumerate(ops)}
+    thay = {}
+    for n in sorted(vi_tri[id(ops_chu[k])] for k in ks):
+        tiep = ops[n + 1]["noi_tiep"] if n + 1 < len(ops) else False
+        thay[ops[n]["i"]] = _thay_lenh(ops[n], tiep)
+    hop_dong = (min(o["khung"][0] for o in muc_tieu), min(o["khung"][1] for o in muc_tieu),
+                max(o["khung"][2] for o in muc_tieu), max(o["khung"][3] for o in muc_tieu))
+    chu_cu = "".join(o["chu"] for o in muc_tieu)
+    vung = [(hop_dong[0] - 2, hop_dong[1] - 2, hop_dong[2] + 2, hop_dong[3] + 2)]
+    khoi, tt = b"", {"phong_goc": ds[ks[0]]["ten_sach"], "phong_dung": None, "dung_lai_phong_goc": False, "dam_gia": False, "nghieng_gia": False}
+    if chu_moi.strip():
+        # giữ khoảng trắng đầu/cuối của chữ cũ (ví dụ "Điều kiện để " còn dấu cách trước công thức)
+        if chu_cu[:1].isspace() and not chu_moi[:1].isspace():
+            chu_moi = chu_cu[:len(chu_cu) - len(chu_cu.lstrip())] + chu_moi
+        if chu_cu[-1:].isspace() and not chu_moi[-1:].isspace():
+            chu_moi += chu_cu[len(chu_cu.rstrip()):]
+        khoi, tt, v2 = _khoi_chu_moi(pdf, pt.tr, ops_chu, ks, ds, chu_moi, thuoc_tinh, giu_do_rong, pt.phong_trang, tt)
+        vung.append(v2)
+    tt["khung"], tt["khung_cu"] = list(vung[-1]), list(vung[0])
+    return {"thay": thay, "khoi": khoi, "tt": tt, "vung": vung}
+
+
+def _doc_ma_dong(dong_id, trang: int) -> list:
+    m = re.fullmatch(r"(\d+):([\d.]+)", str(dong_id))
+    if not m or int(m.group(1)) != int(trang):
+        raise LoiChu("Mã dòng không đúng trang.")
+    return [int(v) for v in m.group(2).split(".")]
+
+
 def sua_dong(pdf_vao, pdf_ra, trang: int, dong_id: str, chu_moi: str, thuoc_tinh: dict = None, giu_do_rong: bool = True,
              kiem_tra: bool = True) -> dict:
     """Sửa một dòng do tim_dong() trả về: xóa hẳn các lệnh hiện chữ cũ của dòng, ghi chữ mới ở cùng vị trí, cùng cỡ và màu.
@@ -821,74 +1014,25 @@ def sua_dong(pdf_vao, pdf_ra, trang: int, dong_id: str, chu_moi: str, thuoc_tinh
     Trả {phong_dung, dung_lai_phong_goc, phong_goc, dam_gia, nghieng_gia, khung (chữ mới), khung_cu}."""
     thuoc_tinh = thuoc_tinh or {}
     ra = _mo_ra_an_toan(pdf_vao, pdf_ra)
-    m = re.fullmatch(r"(\d+):([\d.]+)", str(dong_id))
-    if not m or int(m.group(1)) != int(trang):
-        raise LoiChu("Mã dòng không đúng trang.")
-    ks = [int(v) for v in m.group(2).split(".")]
+    ks = _doc_ma_dong(dong_id, trang)
     chu_moi = str(chu_moi).replace("\r", "").replace("\n", " ")
     try:
         with _mo_pdf(pdf_vao) as pdf:
             if not 1 <= trang <= len(pdf.pages):
                 raise LoiChu(f"File không có trang {trang}.")
-            tr = pdf.pages[trang - 1]
-            hop, r = _hop(tr), _xoay(tr)
-            d, pg = _mo_pdfium(pdf_vao, trang)
-            try:
-                ds = _doc_doi_tuong(pg, hop, r)
-            finally:
-                d.close()
-            if any(k >= len(ds) for k in ks):
+            pt = _phan_tich_trang(pdf, pdf_vao, trang)
+            if any(k >= len(pt.ds) for k in ks):
                 raise LoiChu("Dòng này không còn trong trang (file đã đổi). Bấm chọn lại dòng.")
-            luong_them = [s for s in _ds_luong(tr) if KHOA_ID in s]
-            luong_chinh = [s for s in _ds_luong(tr) if KHOA_ID not in s]
-            lenh = pikepdf.parse_content_stream(pdf.make_stream(b"\n".join(s.read_bytes() for s in luong_chinh)))
-            tl = _thuoc_tinh_ke_thua(tr, "/Resources")
-            phong_trang = tl.get("/Font") if tl is not None else None
-            ops = _quet_lenh(lenh, phong_trang)
-            ops_chu = [o for o in ops if o["co_chu"]]
-            n_them = sum(n for _, n in _luong_chu_da_them(tr))
-            if len(ops_chu) != len(ds) - n_them:
-                raise LoiChu("Trang này có chữ nằm trong khối con (XObject) hoặc cấu trúc lạ, app chưa sửa được chữ ở đây.")
-            if any(k >= len(ops_chu) for k in ks):
-                raise LoiChu("Đây là chữ đã thêm bằng app, hãy sửa bằng sua_chu_da_them.")
-            muc_tieu = [ds[k] for k in ks]
-            for k in ks:  # đối chiếu vị trí lệnh đọc từ content stream với vị trí pdfium báo
-                g = ops_chu[k]["goc"]
-                if g is not None and (abs(g[0] - ds[k]["m"][4]) > 0.6 or abs(g[1] - ds[k]["m"][5]) > 0.6):
-                    raise LoiChu("Không khớp được dòng chữ với nội dung trang, đã hủy để khỏi làm hỏng file.")
-            vi_tri = {id(o): n for n, o in enumerate(ops)}
-            thay = {}
-            for n in sorted(vi_tri[id(ops_chu[k])] for k in ks):
-                tiep = ops[n + 1]["noi_tiep"] if n + 1 < len(ops) else False
-                thay[ops[n]["i"]] = _thay_lenh(ops[n], tiep)
-            moi = []
-            for i, l in enumerate(lenh):
-                moi.extend(thay[i] if i in thay else [l])
-            nd_moi = pikepdf.unparse_content_stream(moi)
-            hop_dong = (min(o["khung"][0] for o in muc_tieu), min(o["khung"][1] for o in muc_tieu),
-                        max(o["khung"][2] for o in muc_tieu), max(o["khung"][3] for o in muc_tieu))
-            chu_cu = "".join(o["chu"] for o in muc_tieu)
-            vung = [(hop_dong[0] - 2, hop_dong[1] - 2, hop_dong[2] + 2, hop_dong[3] + 2)]
-            khoi, tt = b"", {"phong_goc": ds[ks[0]]["ten_sach"], "phong_dung": None, "dung_lai_phong_goc": False, "dam_gia": False, "nghieng_gia": False}
-            if chu_moi.strip():
-                # giữ khoảng trắng đầu/cuối của chữ cũ (ví dụ "Điều kiện để " còn dấu cách trước công thức)
-                if chu_cu[:1].isspace() and not chu_moi[:1].isspace():
-                    chu_moi = chu_cu[:len(chu_cu) - len(chu_cu.lstrip())] + chu_moi
-                if chu_cu[-1:].isspace() and not chu_moi[-1:].isspace():
-                    chu_moi += chu_cu[len(chu_cu.rstrip()):]
-                khoi, tt, v2 = _khoi_chu_moi(pdf, tr, ops_chu, ks, ds, chu_moi, thuoc_tinh, giu_do_rong, phong_trang, tt)
-                vung.append(v2)
-            boc = not _co_bao_ve(tr)
-            main = pdf.make_stream((b"q\n" if boc else b"") + nd_moi + (b"\nQ\n" if boc else b"\n") + khoi)
-            main[KHOA_BAO_VE] = True
-            tr.obj.Contents = Array([main, *luong_them])
-            kt = (lambda tam: _so_anh(pdf_vao, tam, {trang: vung})) if kiem_tra else None
+            if pt.loi:
+                raise LoiChu(pt.loi)
+            kq = _tinh_sua_dong(pdf, pt, ks, chu_moi, thuoc_tinh, giu_do_rong)
+            _lenh_moi_va_ghi(pdf, pt, kq["thay"], kq["khoi"])
+            kt = (lambda tam: _so_anh(pdf_vao, tam, {trang: kq["vung"]})) if kiem_tra else None
             _luu_an_toan(pdf, ra, kt)
     except pikepdf.PdfError as e:
         raise LoiChu(f"Không ghi được PDF: {e}")
+    tt = kq["tt"]
     tt["duong"] = str(ra)
-    tt["khung"] = list(vung[-1])
-    tt["khung_cu"] = list(vung[0])
     return tt
 
 
