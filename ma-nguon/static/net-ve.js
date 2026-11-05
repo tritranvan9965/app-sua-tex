@@ -424,7 +424,7 @@ function capNhatThanhNet() {
   if (coMuc.includes("net")) {
     oDay.value = dd;
     soDay.textContent = `${soPt(dd)} pt`;
-    thanhNet.style.setProperty("--d-day", `${(10 + dd * 1.5).toFixed(1)}px`);  // núm kéo to dần theo độ dày, mang màu nét
+    thanhNet.style.setProperty("--d-day", `${Math.max(3, dd * (chonNet?.v ?? v).daVe).toFixed(1)}px`);  // chấm trong núm kéo đúng cỡ nét trên trang, mang màu nét
   }
   nutKieu.innerHTML = `${svgKieu(giaTriHienNet("kieu") ?? "lien")}<svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M1 2.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
   thanhNet.classList.toggle("dang-sua", !!chonNet);
