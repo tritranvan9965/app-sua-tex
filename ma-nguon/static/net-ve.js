@@ -247,7 +247,7 @@ const nutKhac = dung("Màu khác", "Khác…", "Mở bảng màu để chọn b�
 const oDay = el("input", "tn-truot"), soDay = el("span", "tn-so");
 const nutKieu = dung("Kiểu nét", "", "Liền, gạch, chấm hay gạch chấm"), menuKieu = el("div", "tn-menu");
 const nutXong = dung("Bỏ chọn", "Xong", "Thôi sửa nét này, trở lại vẽ nét mới"), nutXoa = dung("Xóa nét này", "Xóa", "Xóa nét đang chọn. Ctrl+Z để lấy lại");
-const nutDong = dung("Tắt công cụ", "×", "Tắt công cụ này, quay về Chọn chữ");
+const nutTatCongCu = dung("Tắt công cụ", "×", "Tắt công cụ này, quay về Chọn chữ");
 const nutViTri = dung("Đưa thanh này xuống dưới", "", "Chuyển thanh lên hoặc xuống mép trang cho khỏi che chỗ đang vẽ");
 let mauBon = "";  // màu đang nằm ở ô thứ tư
 
@@ -314,9 +314,9 @@ function nutMuc(ma, gia, b) {
   nutXong.onclick = () => boChonNet();
   nutXoa.onclick = xoaNetChon;
   nutViTri.onclick = () => { viTriNet = viTriNet === "tren" ? "duoi" : "tren"; luuNet(); capNhatThanhNet(); };
-  nutDong.className = "tn-dong";
-  nutDong.onclick = () => datCongCu("chu");
-  cuoi.append(veMau, nutXong, nutXoa, nutViTri, nutDong);
+  nutTatCongCu.className = "tn-dong";
+  nutTatCongCu.onclick = () => datCongCu("chu");
+  cuoi.append(veMau, nutXong, nutXoa, nutViTri, nutTatCongCu);
   thanhNet.append(cuoi);
   document.body.append(thanhNet);
 })();
