@@ -108,7 +108,9 @@ def _chep_dau_trang(moi, nguon: dict, vi_tri_moi: dict) -> None:
 
 
 def ghep(trang: list, dich: Path) -> dict:
-    """trang = [{duong, so, xoay, anh, ghi_chu}], so tính từ 1, xoay là số độ thêm vào, anh là PNG lớp chú thích.
+    """trang = [{duong, so, xoay, anh, ghi_chu, chu, xoa_chu}], so tính từ 1, xoay là số độ thêm vào, anh là PNG lớp chú thích.
+    chu = chữ thật thêm vào trang (xem chu_pdf.them_chu: x, y, chu, phong, co, mau, dam, nghieng, gach_chan, gian_dong, id?), tọa độ trên trang
+    đã xoay; xoa_chu = id các chữ đã thêm trước đó cần bỏ. Cả hai tùy chọn, không có thì hành vi như cũ.
     Ghi qua file tạm rồi đổi tên, để lỗi giữa chừng không để lại file hỏng."""
     if not trang:
         raise ValueError("Chưa có trang nào để lưu.")
@@ -135,6 +137,9 @@ def ghep(trang: list, dich: Path) -> dict:
         for tr, t in zip(moi.pages, trang):
             r = (int(tr.obj.get("/Rotate", 0)) + int(t.get("xoay") or 0)) % 360
             tr.obj.Rotate = r
+            if t.get("chu") or t.get("xoa_chu"):
+                import chu_pdf
+                chu_pdf.ap_dung_vao_trang(moi, tr, t.get("chu") or [], t.get("xoa_chu") or [], r)  # nằm dưới lớp chú thích vẽ tay
             if t.get("anh"):
                 _dong_anh(moi, tr, t["anh"], r)
             if t.get("ghi_chu"):

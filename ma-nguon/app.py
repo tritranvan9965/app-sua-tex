@@ -48,7 +48,19 @@ def _nap_in_pdf():
     return m
 
 
+def _nap_chu_pdf():
+    import chu_pdf as m
+    return m
+
+
+def _nap_phong_chu():
+    import phong_chu as m
+    return m
+
+
 cong_cu_pdf = NapKhiDung(_nap_cong_cu_pdf)
+chu_pdf = NapKhiDung(_nap_chu_pdf)
+phong_chu = NapKhiDung(_nap_phong_chu)
 in_pdf = NapKhiDung(_nap_in_pdf)
 
 STATIC = GOC_APP / "static"
@@ -641,6 +653,41 @@ def phong_may(_=None) -> dict:
     return {"ds": PHONG_MAY}
 
 
+def phong_viet(_=None) -> dict:
+    """Họ phông máy dùng được cho chữ tiếng Việt (có đủ dấu): [{ho, du_dau, co_dam, co_nghieng, so_kieu}], đã sắp theo tên."""
+    return {"ds": phong_chu.ds_phong_viet()}
+
+
+def chu_tim_phong(d: dict) -> dict:
+    """Phông máy ứng với họ + đậm/nghiêng. dam_gia/nghieng_gia = máy không có kiểu đó, sẽ giả lập khi ghi."""
+    m = phong_chu.tim_phong(d.get("ho", ""), bool(d.get("dam")), bool(d.get("nghieng")))
+    if not m:
+        raise LoiApp(404, f"Máy không có phông {d.get('ho', '')}.")
+    return {"ho": m["ho"], "kieu": m["kieu"], "du_dau": m["du_dau"], "dam_gia": m["dam_gia"], "nghieng_gia": m["nghieng_gia"]}
+
+
+def pdf_da_chon(duong) -> str:
+    if duong not in PDF_DA_CHON:
+        raise LoiApp(403, "Trang này không thuộc file đã mở.")
+    return duong
+
+
+def chu_tim_dong(d: dict) -> dict:
+    """Dòng chữ có sẵn ở điểm (x, y) pt, gốc trên-trái, trên trang `trang` (từ 1) đang nhìn thấy của file PDF đã mở. dong = None nếu không có chữ."""
+    try:
+        return {"dong": chu_pdf.tim_dong(pdf_da_chon(d.get("duong")), int(d["trang"]), float(d["x"]), float(d["y"]))}
+    except ValueError as e:
+        raise LoiApp(400, str(e))
+
+
+def chu_da_them(d: dict) -> dict:
+    """Chữ đã thêm bằng app trong file PDF đã mở: [{id, trang, x, y, chu, phong, co, mau, dam, nghieng, gach_chan, gian_dong, rong, cao}]."""
+    try:
+        return {"ds": chu_pdf.doc_chu_da_them(pdf_da_chon(d.get("duong")))}
+    except ValueError as e:
+        raise LoiApp(400, str(e))
+
+
 def mo_ngoai(d: dict) -> dict:
     """Lần mở sau gửi file sang đây. Chạy ở luồng riêng vì evaluate_js đợi trang trả lời."""
     def lam():
@@ -717,6 +764,8 @@ class XuLy(BaseHTTPRequestHandler):
             self._json(200, thu_vien())
         elif url.path == "/api/phong":
             self._json(200, phong_may())
+        elif url.path == "/api/phong-viet":
+            self._json(200, phong_viet())
         elif url.path == "/api/du-an":
             self._json(200, thong_tin_du_an())
         elif url.path == "/api/tep":
@@ -748,7 +797,7 @@ class XuLy(BaseHTTPRequestHandler):
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
-                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
+                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
         if not viec:
             raise LoiApp(404, "Không có việc này.")
         self._json(200, viec(d))
