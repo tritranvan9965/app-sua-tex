@@ -362,7 +362,9 @@ function capNhatConTroNet() {
   // Thêm hình cây bút chĩa lên phải, đầu bút trùng tâm chấm.
   const p = tn[loai], d = Math.max(4, Math.min(80, p.net * v.daVe)), r = d / 2, mau = p.mau, o = 3;
   const W = Math.ceil(d + 38), H = W, cx = r + o, cy = H - r - o;
-  const but = `<g transform="translate(${cx} ${cy}) rotate(-45)"><path d="M0 0L8 -3.2V3.2Z" fill="${mau}" stroke="#fff" stroke-width="3.4" stroke-linejoin="round"/><path d="M8 -3.2H27V3.2H8Z" fill="#fff" stroke="#fff" stroke-width="3.4" stroke-linejoin="round"/><path d="M0 0L8 -3.2V3.2Z" fill="${mau}" stroke="#17302a" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 -3.2H27V3.2H8Z" fill="#fff" stroke="#17302a" stroke-width="1.1" stroke-linejoin="round"/><path d="M13 -3.2V3.2" stroke="#17302a" stroke-width="1"/></g>`;
+  const thanBut = `<path d="M8 -3.6H28V3.6H8Z" fill="${mau}"/><path d="M0 0L8 -3.6V3.6Z" fill="#17302a"/>`;
+  const vien = c => `<path d="M0 0L8 -3.6H28V3.6H8Z" fill="none" stroke="${c[0]}" stroke-width="${c[1]}" stroke-linejoin="round"/>`;
+  const but = `<g transform="translate(${cx} ${cy}) rotate(-45)">${vien(["#fff", 4])}${thanBut}${vien(["#17302a", 1.2])}</g>`;
   const cham = `<circle cx="${cx}" cy="${cy}" r="${r + 1.6}" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="${cx}" cy="${cy}" r="${r + 0.4}" fill="none" stroke="#17302a" stroke-width="1"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="${mau}"/>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${cham}${but}</svg>`;
   document.body.style.setProperty("--con-tro", `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${Math.round(cx)} ${Math.round(cy)}, crosshair`);

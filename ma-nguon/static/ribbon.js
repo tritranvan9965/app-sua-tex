@@ -120,7 +120,7 @@ function dsRibbon() {
       ]],
       ["Đánh dấu", [
         lenhCt("Tô sáng", "to-sang", "to-sang", true, "Bôi đen chữ để tô"),
-        lenhCt("Gạch chân", "gach-chan", "gach-chan", false, "Bôi đen chữ để gạch"), lenhCt("Gạch ngang", "gach-ngang", "gach-ngang", false, "Bôi đen chữ để gạch"),
+        lenhCt("Gạch chân", "gach-chan", "gach-chan", false, "Bôi đen chữ để kẻ một đường dưới chân chữ"), lenhCt("Gạch ngang", "gach-ngang", "gach-ngang", false, "Bôi đen chữ để kẻ một đường ngang giữa chữ, như gạch bỏ"),
       ]],
       ["Vẽ", [
         lenhCt("Bút vẽ", "but", "but", true),
