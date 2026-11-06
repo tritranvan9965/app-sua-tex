@@ -12,9 +12,11 @@ import sys
 import winreg
 from pathlib import Path
 
-TEN = "Sửa TeX"
-MA = "SuaTeX"
-PHIEN_BAN = "1.0.7"
+TEN = "TriTeX"
+MA = "TriTeX"
+PHIEN_BAN = "1.1.0"
+TEN_CU = "Sửa TeX"  # tên trước 1.1.0, chỉ dùng để dọn bản cũ
+MA_CU = "SuaTeX"
 THU_MUC_CAI = Path(os.environ["LOCALAPPDATA"]) / "Programs" / MA
 EXE = THU_MUC_CAI / f"{MA}.exe"
 UNINSTALL = rf"Software\Microsoft\Windows\CurrentVersion\Uninstall\{MA}"
@@ -74,7 +76,7 @@ def bao_doi_loai_file() -> None:
 
 def tao_loi_tat(p: Path) -> None:
     # WScript.Shell không ghi được tên có chữ tiếng Việt, nên tạo bằng tên tạm rồi đổi tên.
-    lenh = ("$t=Join-Path $env:TEMP 'suatex-tam.lnk'; $s=(New-Object -ComObject WScript.Shell).CreateShortcut($t); "
+    lenh = ("$t=Join-Path $env:TEMP 'tritex-tam.lnk'; $s=(New-Object -ComObject WScript.Shell).CreateShortcut($t); "
             "$s.TargetPath=$env:DICH; $s.WorkingDirectory=$env:CHO; $s.Save(); Move-Item -Force -LiteralPath $t -Destination $env:LOI_TAT")
     subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", lenh], check=True, capture_output=True,
                    env={**os.environ, "LOI_TAT": str(p), "DICH": str(EXE), "CHO": str(THU_MUC_CAI)}, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -140,8 +142,10 @@ def dang_ky() -> None:
     bao_doi_loai_file()
 
 
-def bo_dang_ky() -> None:
-    for d, (_, lop) in LOAI.items():
+def bo_dang_ky(ma: str = MA, ten: str = TEN) -> None:
+    """Gỡ mọi đăng ký của một tên app. Mặc định là app hiện tại; bộ cài gọi với MA_CU, TEN_CU để dọn bản Sửa TeX."""
+    for d in LOAI:
+        lop = f"{ma}{d}"
         xoa_cay(rf"{LOP}\{lop}")
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, rf"{LOP}\{d}\OpenWithProgids", 0, winreg.KEY_SET_VALUE) as k:
@@ -154,18 +158,49 @@ def bo_dang_ky() -> None:
     import chuyen_pdf
     for d in [".pdf", *chuyen_pdf.DUOI]:
         for viec in ("ChuyenPdf", "ChuyenPdfMo", "Gop"):
-            xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shell\{MA}.{viec}")
-        xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shellex\ContextMenuHandlers\{MA}.ChuyenPdf")
-    for k in [*MENU_FILE, MENU_GOP_CU, MENU_THU_MUC, rf"{LOP}\CLSID\{MENU_DLL}", rf"{LOP}\Applications\{MA}.exe", rf"Software\{MA}", UNINSTALL]:
+            xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shell\{ma}.{viec}")
+        xoa_cay(rf"{LOP}\SystemFileAssociations\{d}\shellex\ContextMenuHandlers\{ma}.ChuyenPdf")
+    for k in [*[rf"{LOP}\SystemFileAssociations\{d}\shell\{ma}" for d in LOAI], rf"{LOP}\*\shell\{ma}.Gop", rf"{LOP}\Directory\shell\{ma}",
+              rf"{LOP}\CLSID\{MENU_DLL}", rf"{LOP}\Applications\{ma}.exe", rf"Software\{ma}",
+              rf"Software\Microsoft\Windows\CurrentVersion\Uninstall\{ma}"]:
         xoa_cay(k)
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\RegisteredApplications", 0, winreg.KEY_SET_VALUE) as k:
-            winreg.DeleteValue(k, MA)
+            winreg.DeleteValue(k, ma)
     except OSError:
         pass
-    for p in LOI_TAT:
-        p.unlink(missing_ok=True)
+    for m in (0x02, 0x10):
+        (thu_muc_he_thong(m) / f"{ten}.lnk").unlink(missing_ok=True)
     bao_doi_loai_file()
+
+
+def ban_cu_dang_chay() -> bool:
+    """Exe đang chạy thì Windows không cho mở để ghi; dùng cách này để biết trước khi xoá gì."""
+    exe = THU_MUC_CAI.parent / MA_CU / f"{MA_CU}.exe"
+    try:
+        if exe.is_file():
+            open(exe, "ab").close()
+    except PermissionError:
+        return True
+    return False
+
+
+def go_ban_cu() -> bool:
+    """Dọn bản Sửa TeX (trước 1.1.0) khi cài TriTeX: gỡ đăng ký, xoá thư mục cài và thư mục DLL menu của nó.
+    Chỉ xoá thư mục cài khi đúng là của app (có SuaTeX.exe). Dữ liệu trong thư mục dữ liệu SuaTeX trong %APPDATA% được giữ làm bản lưu.
+    Trả về False nếu app cũ còn chạy nên không xoá được (đã gỡ đăng ký nhưng thư mục còn)."""
+    cu = THU_MUC_CAI.parent / MA_CU
+    bo_dang_ky(MA_CU, TEN_CU)
+    ok = True
+    if (cu / f"{MA_CU}.exe").is_file():
+        try:
+            shutil.rmtree(cu)
+        except OSError:
+            ok = False
+    menu_cu = THU_MUC_CAI.parent / f"{MA_CU}-menu"
+    if menu_cu.is_dir() and all(f.is_file() and f.suffix == ".dll" for f in menu_cu.iterdir()):
+        shutil.rmtree(menu_cu, ignore_errors=True)  # Explorer có thể còn giữ DLL, khi đó thư mục ở lại và vô hại
+    return ok
 
 
 def go(im_lang: bool = False) -> None:

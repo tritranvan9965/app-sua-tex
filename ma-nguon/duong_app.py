@@ -7,7 +7,23 @@ from pathlib import Path
 
 GOC_MA = Path(__file__).resolve().parent
 DA_DONG_GOI = getattr(sys, "frozen", False)
-DU_LIEU = Path(os.environ["APPDATA"]) / "SuaTeX" if DA_DONG_GOI else GOC_MA.parent
+
+
+def chep_du_lieu_cu(appdata: Path) -> None:
+    """Lần chạy đầu sau khi đổi tên từ Sửa TeX (1.0.x) sang TriTeX: chép (không di chuyển, không xoá) dữ liệu cũ sang thư mục mới.
+    Bỏ cong-dang-chay.txt vì nó trỏ tới cổng của cửa sổ Sửa TeX cũ."""
+    moi, cu = appdata / "TriTeX", appdata / "SuaTeX"
+    if moi.exists() or not cu.is_dir():
+        return
+    try:
+        shutil.copytree(cu, moi, ignore=shutil.ignore_patterns("cong-dang-chay.txt"))
+    except OSError:
+        shutil.rmtree(moi, ignore_errors=True)  # chép dở thì bỏ, lần sau chép lại từ đầu
+
+
+if DA_DONG_GOI:
+    chep_du_lieu_cu(Path(os.environ["APPDATA"]))
+DU_LIEU = Path(os.environ["APPDATA"]) / "TriTeX" if DA_DONG_GOI else GOC_MA.parent
 THU_VIEN = DU_LIEU / "thu-vien-mau"  # mỗi mẫu một thư mục con, thêm mẫu là thêm thư mục
 
 if DA_DONG_GOI:

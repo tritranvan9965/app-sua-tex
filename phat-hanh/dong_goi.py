@@ -1,4 +1,4 @@
-"""Tạo bộ cài: phat-hanh/SuaTeX-Setup-<phiên bản>.exe. Chạy: .venv\\Scripts\\python.exe -I phat-hanh\\dong_goi.py"""
+"""Tạo bộ cài: phat-hanh/TriTeX-Setup-<phiên bản>.exe. Chạy: .venv\\Scripts\\python.exe -I phat-hanh\\dong_goi.py"""
 import shutil
 import subprocess
 import sys
@@ -37,7 +37,7 @@ def tao_bieu_tuong_loai(p: Path, nhan: str, chu: str, nen: str) -> None:
 
 def pyinstaller(*ts) -> None:
     subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--log-level", "WARN", "--workpath", str(TAM / "lam"),
-                    "--specpath", str(TAM), "--windowed", "--paths", str(MA), "--icon", str(TAM / "sua-tex.ico"), *ts], check=True)
+                    "--specpath", str(TAM), "--windowed", "--paths", str(MA), "--icon", str(TAM / "tritex.ico"), *ts], check=True)
 
 
 def bien_dich_menu(dich: Path) -> None:
@@ -49,15 +49,15 @@ def bien_dich_menu(dich: Path) -> None:
 def main():
     shutil.rmtree(TAM, ignore_errors=True)
     TAM.mkdir(parents=True)
-    tao_bieu_tuong(TAM / "sua-tex.ico")
+    tao_bieu_tuong(TAM / "tritex.ico")
     pyinstaller("--name", cai_dat.MA, "--distpath", str(TAM / "app"), "--add-data", f"{MA / 'static'};static",
                 "--add-data", f"{GOC / 'thu-vien-mau'};thu-vien-mau", str(MA / "app.py"))
     tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "pdf.ico", "PDF", "#ff9d94", "#4b2f2f")
     tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "tex.ico", "TEX", "#86d0ff", "#25415a")
     bien_dich_menu(TAM / "app" / cai_dat.MA / "menu.dll")
-    shutil.make_archive(str(TAM / "sua-tex"), "zip", TAM / "app" / cai_dat.MA)
-    ten = f"SuaTeX-Setup-{cai_dat.PHIEN_BAN}"
-    pyinstaller("--onefile", "--name", ten, "--distpath", str(PH), "--add-data", f"{TAM / 'sua-tex.zip'};.", str(PH / "bo_cai.py"))
+    shutil.make_archive(str(TAM / "tritex"), "zip", TAM / "app" / cai_dat.MA)
+    ten = f"TriTeX-Setup-{cai_dat.PHIEN_BAN}"
+    pyinstaller("--onefile", "--name", ten, "--distpath", str(PH), "--add-data", f"{TAM / 'tritex.zip'};.", str(PH / "bo_cai.py"))
     shutil.rmtree(TAM)
     print(PH / f"{ten}.exe")
 

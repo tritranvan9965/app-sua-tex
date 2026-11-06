@@ -101,7 +101,7 @@ def tru_dong(nhat_ky: str, lech: int) -> str:
 def duong_nhap(tex: Path, ban: str) -> Path:
     """PDF để xem khi đang sửa: nằm ở thư mục tạm của máy, không vào dự án và không đồng bộ OneDrive."""
     ma = hashlib.sha1(str(tex.resolve()).lower().encode("utf-8")).hexdigest()[:16]
-    return Path(tempfile.gettempdir()) / "sua-tex-xem" / f"{ma}_{ban}.pdf"
+    return Path(tempfile.gettempdir()) / "tritex-xem" / f"{ma}_{ban}.pdf"
 
 
 def sao_luu(p: Path, moc: str) -> None:

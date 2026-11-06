@@ -13,7 +13,7 @@ $("vung-soan").hidden = true;
 // ---------- Gọi máy chủ ----------
 
 async function goi(duong, than) {
-  const tuy = than ? {method: "POST", headers: {"Content-Type": "application/json", "X-App": "sua-tex"}, body: JSON.stringify(than)} : {};
+  const tuy = than ? {method: "POST", headers: {"Content-Type": "application/json", "X-App": "tritex"}, body: JSON.stringify(than)} : {};
   const tl = await fetch(duong, tuy);
   const kq = await tl.json();
   if (!tl.ok) throw new Error(kq.loi || "Không làm được việc này.");
@@ -201,7 +201,7 @@ async function napCauHinh() {
   const da = await goi("/api/du-an"), ban = tt.ban;
   datCauHinh(da);
   if (tt.dsBan.includes(ban)) datDauBan(tt.ban = ban);
-  document.title = `${da.ten} - Sửa TeX`;
+  document.title = `${da.ten} - TriTeX`;
   gocHien = da.goc_mo.find(g => g.dang_mo)?.duong ?? null;
   veCay(da);
   return da;

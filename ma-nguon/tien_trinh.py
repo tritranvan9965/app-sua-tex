@@ -14,7 +14,7 @@ from tkinter import font, ttk
 
 import chuyen_pdf
 
-TIEU_DE = "Sửa TeX - Chuyển thành PDF"
+TIEU_DE = "TriTeX - Chuyển thành PDF"
 MAU_LOI = "#b3261e"
 SO_DONG_HIEN = 7  # nhiều file hơn thì cuộn
 CAO_DONG = 58

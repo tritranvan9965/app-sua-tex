@@ -1,6 +1,6 @@
 // Mục "Chuyển thành "Tên file".pdf" trong menu chuột phải. Chữ đổi theo file đang chọn nên không đăng ký bằng registry được,
-// phải là DLL chạy trong Explorer. Bấm vào thì gọi SuaTeX.exe --chuyen-pdf với tất cả file đã chọn, để app chuyển lần lượt từng file.
-// DLL nằm ở ...\Programs\SuaTeX-menu\, exe ở ...\Programs\SuaTeX\.
+// phải là DLL chạy trong Explorer. Bấm vào thì gọi TriTeX.exe --chuyen-pdf với tất cả file đã chọn, để app chuyển lần lượt từng file.
+// DLL nằm ở ...\Programs\TriTeX-menu\, exe ở ...\Programs\TriTeX\.
 #define COBJMACROS
 #include <windows.h>
 #include <shlobj.h>
@@ -34,7 +34,7 @@ static void duong_exe(wchar_t *o, DWORD co) {
     wchar_t *c = wcsrchr(o, L'\\');
     if (c) *c = 0;
   }
-  wcsncat(o, L"\\SuaTeX\\SuaTeX.exe", co - wcslen(o) - 1);
+  wcsncat(o, L"\\TriTeX\\TriTeX.exe", co - wcslen(o) - 1);
 }
 
 static HBITMAP anh_bieu_tuong(void) {

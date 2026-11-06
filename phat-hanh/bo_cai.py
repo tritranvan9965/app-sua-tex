@@ -10,10 +10,10 @@ from pathlib import Path
 
 import cai_dat as cd
 
-GOI = Path(getattr(sys, "_MEIPASS", Path(__file__).parent)) / "sua-tex.zip"
-HUONG_DAN = ("Đã cài xong. Có biểu tượng trên màn hình nền và menu Start, chuột phải vào file .tex, .pdf sẽ có mục Mở bằng Sửa TeX.\n\n"
-             "Windows không cho phần mềm tự đặt mình làm app mặc định. Để mở PDF, .tex bằng Sửa TeX khi bấm đúp:\n"
-             "chuột phải vào file > Open with > Choose another app > Sửa TeX > tích Always use this app.\n\n"
+GOI = Path(getattr(sys, "_MEIPASS", Path(__file__).parent)) / "tritex.zip"
+HUONG_DAN = ("Đã cài xong. Có biểu tượng trên màn hình nền và menu Start, chuột phải vào file .tex, .pdf sẽ có mục Mở bằng TriTeX.\n\n"
+             "Windows không cho phần mềm tự đặt mình làm app mặc định. Để mở PDF, .tex bằng TriTeX khi bấm đúp:\n"
+             "chuột phải vào file > Open with > Choose another app > TriTeX > tích Always use this app.\n\n"
              "Muốn biên dịch .tex thì máy cần có MiKTeX hoặc TeX Live.\n\nMở trang Ứng dụng mặc định của Windows ngay bây giờ?")
 
 
@@ -33,7 +33,11 @@ def chinh() -> int:
     im = "/im" in sys.argv
     if not im and cd.hoi(f"Cài {cd.TEN} {cd.PHIEN_BAN} vào máy này?\nChỉ cài cho tài khoản đang dùng, không cần quyền quản trị.", 0x24) != 6:
         return 0
+    if cd.ban_cu_dang_chay():
+        cd.hoi(f"{cd.TEN_CU} (tên cũ của {cd.TEN}) đang chạy. Đóng app rồi chạy lại bộ cài.", 0x30)
+        return 1
     try:
+        cu = cd.go_ban_cu()  # bản trước 1.1.0 tên Sửa TeX: gỡ đăng ký và thư mục cài, dữ liệu trong %APPDATA% giữ nguyên
         if cd.THU_MUC_CAI.exists():
             shutil.rmtree(cd.THU_MUC_CAI)
         cd.THU_MUC_CAI.mkdir(parents=True)
@@ -46,6 +50,8 @@ def chinh() -> int:
     except (OSError, subprocess.SubprocessError) as e:
         cd.hoi(f"Không cài được: {e}", 0x10)
         return 1
+    if not cu:
+        cd.hoi(f"Chưa xoá hết thư mục cài của {cd.TEN_CU} cũ (có file đang bị giữ). {cd.TEN} vẫn dùng bình thường, bạn có thể xoá thư mục đó sau.", 0x40)
     if im:
         return 0
     if not co_webview2():

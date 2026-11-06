@@ -197,7 +197,7 @@ class Sfnt:
 THU_MUC_PHONG = [Path(os.environ.get("WINDIR", r"C:\Windows")) / "Fonts"]
 if os.environ.get("LOCALAPPDATA"):
     THU_MUC_PHONG.append(Path(os.environ["LOCALAPPDATA"]) / "Microsoft" / "Windows" / "Fonts")
-TEP_NHO = Path(os.environ["LOCALAPPDATA"]) / "SuaTeX" / "phong-pdf.json" if os.environ.get("LOCALAPPDATA") else None
+TEP_NHO = Path(os.environ["LOCALAPPDATA"]) / "TriTeX" / "phong-pdf.json" if os.environ.get("LOCALAPPDATA") else None
 _DANH_MUC = None
 
 
@@ -245,7 +245,7 @@ def _doc_mat(p: Path, i: int):
 
 
 def danh_muc(lam_moi: bool = False) -> list:
-    """Mọi mặt phông trên máy. Đọc lần đầu mất vài giây nên nhớ trong bộ nhớ và trong %LOCALAPPDATA%\\SuaTeX."""
+    """Mọi mặt phông trên máy. Đọc lần đầu mất vài giây nên nhớ trong bộ nhớ và trong %LOCALAPPDATA%\\TriTeX."""
     global _DANH_MUC
     if _DANH_MUC is not None and not lam_moi:
         return _DANH_MUC

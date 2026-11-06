@@ -295,7 +295,7 @@ def mo_moi(duong: str, tep: str = None) -> dict:
     if not tep and p.is_dir():
         ghi_gan_day(p, "thu_muc")
     if CUA_SO:
-        CUA_SO.set_title(f"{DA['ten']} - Sửa TeX")
+        CUA_SO.set_title(f"{DA['ten']} - TriTeX")
     return {}
 
 
@@ -409,7 +409,7 @@ def pdf_nhap(d: dict) -> dict:
 def pdf_trong(d: dict) -> dict:
     """Trang trắng cùng khổ với trang đang xem, là một file PDF nhỏ trong thư mục tạm."""
     rong, cao = round(float(d.get("rong", 595)), 1), round(float(d.get("cao", 842)), 1)
-    p = Path(tempfile.gettempdir()) / "sua-tex-xem" / f"trong-{rong}x{cao}.pdf"
+    p = Path(tempfile.gettempdir()) / "tritex-xem" / f"trong-{rong}x{cao}.pdf"
     cong_cu_pdf.trang_trong(rong, cao, p)
     PDF_DA_CHON.add(str(p))
     return {**cong_cu_pdf.thong_tin(p), "ten": "Trang trắng"}
@@ -510,7 +510,7 @@ def pdf_in(d: dict) -> dict:
     trang = [{**x, "so": int(x["so"]), "anh": base64.b64decode(x["anh"]) if x.get("anh") else None} for x in d.get("trang", [])]
     if any(x["duong"] not in PDF_DA_CHON for x in trang):
         raise LoiApp(403, "Trang này không thuộc file đã mở.")
-    thu_muc = Path(tempfile.gettempdir()) / "sua-tex-in"
+    thu_muc = Path(tempfile.gettempdir()) / "tritex-in"
     thu_muc.mkdir(exist_ok=True)
     ten = Path(str(d.get("ten") or "in")).stem[:60] or "in"
     try:
@@ -927,7 +927,7 @@ class XuLy(BaseHTTPRequestHandler):
 
     def _post(self):
         # Trang web lạ không tự gửi được tiêu đề riêng này, nên không ghi file hộ trang khác được.
-        if self.headers.get("X-App") != "sua-tex":
+        if self.headers.get("X-App") != "tritex":
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
@@ -944,12 +944,12 @@ def mo_cua_so(dia_chi: str, ten: str) -> bool:
         import webview
     except ImportError:
         return False
-    CUA_SO = cua_so = webview.create_window(f"{ten} - Sửa TeX", dia_chi, width=1440, height=900, min_size=(1000, 640), text_select=True)
+    CUA_SO = cua_so = webview.create_window(f"{ten} - TriTeX", dia_chi, width=1440, height=900, min_size=(1000, 640), text_select=True)
 
     dang_hoi = threading.Event()
 
     def hoi_bang_hop_he_thong() -> bool:
-        return ctypes.windll.user32.MessageBoxW(0, "File đang mở có thay đổi chưa lưu. Đóng app và bỏ các thay đổi đó?", "Sửa TeX", 0x34) == 6  # 6 là nút Yes
+        return ctypes.windll.user32.MessageBoxW(0, "File đang mở có thay đổi chưa lưu. Đóng app và bỏ các thay đổi đó?", "TriTeX", 0x34) == 6  # 6 là nút Yes
 
     def hoi_giao_dien():
         """Nhờ giao diện hiện hộp Lưu / Không lưu / Hủy. Giao diện không trả lời trong 3 giây thì hỏi bằng hộp của hệ thống, không đóng nếu có thay đổi chưa lưu mà người dùng không đồng ý."""
@@ -990,7 +990,7 @@ def gui_sang_cua_so_dang_chay(duong, gop=None, chuyen=None) -> bool:
         kn = http.client.HTTPConnection("127.0.0.1", cong, timeout=3)
         try:
             kn.request("POST", "/api/mo-ngoai", json.dumps({"duong": duong, "gop": gop, "chuyen": chuyen}).encode("utf-8"),
-                       {"Content-Type": "application/json", "X-App": "sua-tex"})
+                       {"Content-Type": "application/json", "X-App": "tritex"})
             if kn.getresponse().status >= 400:
                 return False
         finally:
@@ -1020,7 +1020,7 @@ def mo_luc_dau(duong) -> None:
             except (ValueError, KeyError, OSError):
                 continue
         else:
-            DA = loi.lap_du_an({}, Path.home(), "Sửa TeX")
+            DA = loi.lap_du_an({}, Path.home(), "TriTeX")
     loi.dat_du_an(DA)
 
 
@@ -1044,13 +1044,13 @@ def chuyen_vao_tam(ds: list, tam: Path, tieu_de: str) -> dict:
 
     chuyen_pdf.chuyen_nhieu([(p, tam / f"{i}" / f"{p.stem}.pdf") for i, p in enumerate(ps)], bao)
     for chu in bao_loi:
-        ctypes.windll.user32.MessageBoxW(0, chu, f"Sửa TeX - {tieu_de}", 0x10)
+        ctypes.windll.user32.MessageBoxW(0, chu, f"TriTeX - {tieu_de}", 0x10)
     return ra
 
 
 def chuyen_de_mo(ds: list) -> list:
     """Chuyển thành PDF tạm để mở trong app, người dùng tự lưu. Không ghi gì vào thư mục của file gốc."""
-    ra = chuyen_vao_tam(ds, Path(tempfile.mkdtemp(prefix="SuaTeX-chuyen-")), "Chuyển thành PDF")
+    ra = chuyen_vao_tam(ds, Path(tempfile.mkdtemp(prefix="TriTeX-chuyen-")), "Chuyển thành PDF")
     return [{"duong": str(ra[i]), "thu_muc": str(Path(ds[i]).parent)} for i in sorted(ra)]
 
 
@@ -1082,7 +1082,7 @@ def cho_gom_file(thu: Path, duong: str) -> list:
 def gop_thanh_pdf(ds: list) -> list:
     """File không phải PDF được chuyển thành PDF tạm trước, rồi mới đưa vào công cụ gộp. Giữ nguyên thứ tự đã chọn."""
     can_chuyen = [i for i, x in enumerate(ds) if Path(x).suffix.lower() != ".pdf"]
-    ra = chuyen_vao_tam([ds[i] for i in can_chuyen], Path(tempfile.mkdtemp(prefix="SuaTeX-gop-")), "Gộp thành PDF")
+    ra = chuyen_vao_tam([ds[i] for i in can_chuyen], Path(tempfile.mkdtemp(prefix="TriTeX-gop-")), "Gộp thành PDF")
     moi = {i: str(ra[j]) for j, i in enumerate(can_chuyen) if j in ra}
     return [moi.get(i, str(Path(x))) for i, x in enumerate(ds) if i in moi or i not in can_chuyen]
 
@@ -1092,7 +1092,7 @@ def main():
     gop = None
     if "--chuyen-mo" in sys.argv:
         i = sys.argv.index("--chuyen-mo")
-        ds = cho_gom_file(Path(tempfile.gettempdir()) / "SuaTeX-chuyen", sys.argv[i + 1])
+        ds = cho_gom_file(Path(tempfile.gettempdir()) / "TriTeX-chuyen", sys.argv[i + 1])
         del sys.argv[i:i + 2]
         if not ds:
             return
@@ -1101,7 +1101,7 @@ def main():
             return
     if "--gop" in sys.argv:
         i = sys.argv.index("--gop")
-        gop = cho_gom_file(Path(tempfile.gettempdir()) / "SuaTeX-gop", sys.argv[i + 1])
+        gop = cho_gom_file(Path(tempfile.gettempdir()) / "TriTeX-gop", sys.argv[i + 1])
         del sys.argv[i:i + 2]
         if not gop:
             return
