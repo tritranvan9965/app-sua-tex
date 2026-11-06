@@ -301,7 +301,26 @@ body[data-cc="chu"] .khung-hc:hover,body[data-cc="hop-chu"] .khung-hc:hover{outl
 /* Sửa chữ có sẵn */
 body[data-cc="sua-chu"] .to-trang{cursor:text}
 body.dang-hoi .to-trang{cursor:progress}
-.vien-sc{position:absolute;z-index:3;pointer-events:none;border:1.5px solid var(--bang);border-radius:2px;background:#2b7a6512}
+/* Sửa chữ, Sửa đối tượng kiểu Phantom: khung mảnh cho mọi ô của các trang đang hiện */
+.lop-sp{position:absolute;inset:0;z-index:3;pointer-events:none}
+.khung-sp{position:absolute;box-sizing:border-box;pointer-events:auto;touch-action:none;border-radius:2px}
+.khung-sp[hidden]{display:none}
+.sp-chu{border:1px solid #2b7a65aa;cursor:text;background:#2b7a6509}
+.sp-chu:hover{border:1.5px solid var(--bang);background:#2b7a6518}
+.sp-chu.da-sua{border:1.5px solid #d9822b;background:#d9822b14}
+.sp-chu.khong-sua,.sp-dt.khong-sua{border:1px dashed #8a8f8d;cursor:not-allowed;background:none}
+.sp-chu.khong-sua:hover,.sp-dt.khong-sua:hover{border-color:#b3362d;background:#b3362d0f}
+.sp-dt{border:1px solid #1f5fbfbb;cursor:pointer;background:#1f5fbf08}
+.sp-dt:hover{border:1.5px solid #1f5fbf;background:#1f5fbf14}
+.sp-dt.chon{border:1.5px solid #1f5fbf;background:#1f5fbf10}
+.sp-dt.da-sua{border-style:dashed}
+.chon-dt{position:absolute;box-sizing:border-box;pointer-events:auto;touch-action:none;cursor:move;border:1.5px solid #1f5fbf;outline:1px solid #fff8;border-radius:1px}
+.chon-dt[hidden]{display:none}
+.tay-dt{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;box-sizing:border-box;background:#fff;border:1.5px solid #1f5fbf;border-radius:2px;touch-action:none}
+.chon-dt.nhieu .tay-dt{display:none}
+.tay-nw{left:0;top:0;cursor:nwse-resize}.tay-n{left:50%;top:0;cursor:ns-resize}.tay-ne{left:100%;top:0;cursor:nesw-resize}
+.tay-e{left:100%;top:50%;cursor:ew-resize}.tay-se{left:100%;top:100%;cursor:nwse-resize}.tay-s{left:50%;top:100%;cursor:ns-resize}
+.tay-sw{left:0;top:100%;cursor:nesw-resize}.tay-w{left:0;top:50%;cursor:ew-resize}
 .o-nhap-sc{z-index:5}
 .ghi-chu-sc{position:absolute;z-index:6;max-width:min(420px,90%);padding:5px 9px;border-radius:6px;background:#fff6dd;border:1px solid #e3c36a;color:#4a3a05;font-size:12.5px;line-height:1.35;box-shadow:0 3px 10px #17302a33;pointer-events:none}
 #tc-ghi{padding:0 4px;color:var(--muc-mo);font-size:12px}

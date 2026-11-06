@@ -74,6 +74,7 @@ const BT = {
   tay: '<path d="m7 21-4-4a2 2 0 0 1 0-2.8L13.2 4a2 2 0 0 1 2.8 0l5 5a2 2 0 0 1 0 2.8L11.8 21"/><path d="M7 21h14"/><path d="m8.5 9 7.5 7.5"/>',
   "ghi-chu": '<path d="M21 14a2 2 0 0 1-2 2H8l-5 4V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   "ds-ghi-chu": '<path d="M21 14a2 2 0 0 1-2 2H8l-5 4V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 8h8"/><path d="M8 12h5"/>',
+  "sua-dt": '<rect x="4" y="4" width="11" height="11" rx="1" stroke-dasharray="2.5 2"/><path d="M12 12l8 3.2-3.4 1.4L15 20z"/>',
   "sua-chu": '<path d="M4 7V5h10v2"/><path d="M9 5v11"/><path d="M7 16h4"/><path d="m13 20 1-3.5 6-6a1.6 1.6 0 0 1 2.3 2.3l-6 6z"/>',
   "hop-chu": `${KHUNG}<path d="M8 9h8"/><path d="M12 9v7"/>`,
   "dong-dau": '<path d="M5 21h14"/><path d="M5 17.5h14V15a2 2 0 0 0-2-2h-3V9.5a3.2 3.2 0 1 0-4 0V13H7a2 2 0 0 0-2 2z"/>',

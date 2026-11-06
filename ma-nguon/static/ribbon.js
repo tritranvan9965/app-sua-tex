@@ -21,7 +21,7 @@ const LY_DO_CHUNG = new Map([[coTex, LD_TEX], [coChon, LD_CHON], [coTrang, LD_TR
 // Khai theo thứ tự kiểm tra: điều kiện nào chưa đạt thì báo lý do của nó.
 const khoaTheo = (...ds) => () => ds.find(([ok]) => !ok())?.[1]();
 
-const TEN_CT = {chu: "Chọn chữ", vung: "Chọn vùng", "sua-chu": "Sửa chữ"};  // tên công cụ đang dùng, hiện ở thanh dưới
+const TEN_CT = {chu: "Chọn chữ", vung: "Chọn vùng", "sua-chu": "Sửa chữ", "sua-dt": "Sửa đối tượng"};  // tên công cụ đang dùng, hiện ở thanh dưới
 const sapCo = (ten, ic, to = false, tenNgan) => ({ten, ic, to, tenNgan, sapCo: true});
 const lenhCt = (ten, ic, ma, to = false, goiY, tenNgan) => {
   TEN_CT[ma] = ten;
@@ -113,9 +113,12 @@ function dsRibbon() {
       ["Công cụ", [
         {ten: "Chọn chữ", ic: "chon-chu", phim: "Alt+1", goiY: "Bôi đen chữ trên PDF để sao chép", lam: () => datCongCu("chu"), tich: () => coXem() && congCu === "chu", bat: coXem},
         {ten: "Chọn vùng", ic: "chon-vung", phim: "Alt+2", goiY: "Kéo một khung trên PDF để sao chép thành ảnh", lam: () => datCongCu("vung"), tich: () => coXem() && congCu === "vung", bat: coXem},
-        {ten: "Sửa chữ", ic: "sua-chu", to: true, phim: "Alt+3", goiY: "Bấm vào một dòng chữ trong PDF để sửa tại chỗ. Enter để xong, Esc để hủy. Chữ cũ bị xóa hẳn, chữ mới là chữ thật. Thiếu dấu tiếng Việt thì dòng đó đổi sang phông gần giống",
+        {ten: "Sửa chữ", ic: "sua-chu", to: true, phim: "Alt+3", goiY: "Mọi ô chữ trên trang hiện khung. Bấm vào ô để sửa tại chỗ, bấm ra ngoài là xong, Esc để hủy ô đang sửa. Chữ cũ bị xóa hẳn, chữ mới là chữ thật. Thiếu dấu tiếng Việt thì ô đó đổi sang phông gần giống",
           lam: () => datCongCu("sua-chu"), tich: () => coSuaChu() && congCu === "sua-chu", bat: coSuaChu,
           khoa: () => (!coXem() ? LD_XEM() : "Chỉ sửa chữ được khi mở file PDF. Mở một file PDF, hoặc bấm Tách, gộp trang để đưa PDF vừa biên dịch sang dải trang.")},
+        {ten: "Sửa đối tượng", ic: "sua-dt", to: true, phim: "Alt+4", goiY: "Mọi ảnh, hình trên trang hiện khung. Bấm để chọn (Ctrl+bấm chọn thêm), kéo để dời, kéo núm ở góc để co (ảnh giữ tỉ lệ, hình giữ Shift để giữ tỉ lệ), phím mũi tên dời 1 pt (Shift: 10 pt), Delete để xóa, Ctrl+Z hoàn tác",
+          lam: () => datCongCu(congCu === "sua-dt" ? "chu" : "sua-dt"), tich: () => coSuaChu() && congCu === "sua-dt", bat: coSuaChu,
+          khoa: () => (!coXem() ? LD_XEM() : "Chỉ sửa đối tượng được khi mở file PDF. Mở một file PDF, hoặc bấm Tách, gộp trang để đưa PDF vừa biên dịch sang dải trang.")},
         sapCo("Kéo trang", "ban-tay"), lenhCt("Tẩy", "tay", "tay", false, "Bấm vào chú thích để xóa"),
       ]],
       ["Đánh dấu", [

@@ -42,27 +42,26 @@ function mucSua(dong, kq, g, nhap, tt) {
 
 // ---------- Mở ô sửa ----------
 
-async function batDauSuaChu(v, t, x, y) {
-  if (sc.dangHoi) return;
+// dong: một ô trong danh sách của trang (sua-phantom.js, từ /api/chu-ds-dong); xBam: chỗ bấm (pt) để đặt con trỏ.
+async function batDauSuaChu(v, t, dong, xBam) {
   const m = t.m;
   if (m.xoay) return bao("Trang này đã xoay trong app. Lưu file rồi mở lại để sửa chữ.", true);
+  if (dong.sua_duoc === false) return bao(dong.ly_do ? loiDeHieu(dong.ly_do) : "Dòng này chưa sửa được.", true);
+  if (sc.sua) chotSuaChu(true);
+  await sc.cho;  // ô trước còn đang chốt: chờ xong để danh sách chú thích của trang là bản mới nhất
+  if (sc.dangHoi || sc.sua) return;
   sc.dangHoi = true;
   document.body.classList.add("dang-hoi");
   try {
-    const {dong} = await goi("/api/chu-tim-dong", {duong: m.duong, trang: m.so, x, y});
-    if (!dong) return bao("Không thấy dòng chữ ở chỗ bấm. PDF dạng ảnh quét thì chưa sửa được chữ.", true);
-    if (dong.loai === "chu-da-them") return bao("Đây là chữ đã thêm bằng app. Dùng công cụ Hộp chữ để sửa.", true);
     const truoc = t.m.ct, cu = truoc.find(c => c.loai === "sua-dong" && c.dong_id === dong.id);
     let g, kq0;
-    const khoa = `${m.duong}|${dong.id}`;
     if (cu) g = {k_cu: cu.k_cu, x: cu.x, nen: cu.nen, cv: cu.cv};
     else {
-      if (!probeSc.has(khoa)) probeSc.set(khoa, await hoiSc(m, dong.id, dong.chu, {}));  // chạy thử nguyên chữ cũ: cho biết đường cơ sở, cỡ và lõi có sửa được dòng này không
-      kq0 = probeSc.get(khoa);
+      kq0 = await duKienSc(m, dong);  // chạy thử nguyên chữ cũ: cho biết đường cơ sở, cỡ và lõi có sửa được dòng này không
       g = hinhHoc(kq0);
     }
     if (sc.sua) return;
-    moSuaChu(v, t, dong, g, cu, kq0, truoc);
+    moSuaChu(v, t, dong, g, cu, kq0, truoc, xBam);
   } catch (e) {
     bao(loiDeHieu(e.message), true);
   } finally {
@@ -71,13 +70,24 @@ async function batDauSuaChu(v, t, x, y) {
   }
 }
 
+// Hỏi trước được lúc rê chuột vào ô, nên bấm xuống là mở ngay.
+function duKienSc(m, dong) {
+  const khoa = `${m.duong}|${dong.id}`;
+  if (!probeSc.has(khoa)) {
+    const p = hoiSc(m, dong.id, dong.chu, {});
+    probeSc.set(khoa, p);
+    p.catch(() => probeSc.delete(khoa));
+  }
+  return probeSc.get(khoa);
+}
+
 function loiDeHieu(tb) {
   if (/XObject|cấu trúc lạ/.test(tb)) return "Dòng này nằm trong một khối con của trang (thường gặp ở PDF xuất từ phần mềm đồ họa), app chưa sửa được chữ ở đây.";
   if (/Type0|Identity|CID/i.test(tb)) return "Phông của dòng này dùng kiểu mã hóa đặc biệt, app chưa sửa được chữ ở đây.";
   return tb;
 }
 
-function moSuaChu(v, t, dong, g, cu, kq0, truoc) {
+function moSuaChu(v, t, dong, g, cu, kq0, truoc, xBam) {
   xoaGhiChuSc();
   const nhap = cu ? {chu: cu.chu, phong: cu.phong, co: cu.co, mau: cu.mau, dam: cu.dam, nghieng: cu.nghieng}
     : {chu: dong.chu.trim(), phong: dong.goi_y_phong, co: Math.round(dong.co * 2) / 2, mau: dong.mau, dam: !!dong.dam, nghieng: !!dong.nghieng};
@@ -112,9 +122,21 @@ function moSuaChu(v, t, dong, g, cu, kq0, truoc) {
   v.veLop(t);
   kieuOSua();
   o.focus();
-  o.setSelectionRange(o.value.length, o.value.length);
+  const vt = xBam === undefined ? o.value.length : viTriConTro(nhap, xBam - g.x);
+  o.setSelectionRange(vt, vt);
   capNhatThanhHc();
   baoPhong(sc.sua, cu ?? kq0, null, true);
+}
+
+// Con trỏ đặt vào kẽ chữ gần chỗ bấm nhất (dx: pt tính từ mép trái chữ).
+function viTriConTro(nhap, dx) {
+  moDo.font = fontHc(nhap);
+  let tot = 0, gan = Infinity;
+  for (let i = 0; i <= nhap.chu.length; i++) {
+    const d = Math.abs(moDo.measureText(nhap.chu.slice(0, i)).width - dx);
+    if (d < gan) { gan = d; tot = i; }
+  }
+  return tot;
 }
 
 // Ô gõ trùng đường cơ sở, cỡ chữ, phông với chữ sẽ ghi.
@@ -141,10 +163,14 @@ function datDinhDangSc(thay) {
 
 // ---------- Chốt, hủy ----------
 
-async function chotSuaChu(luu) {
+function chotSuaChu(luu) {
   const s = sc.sua;
-  if (!s) return;
+  if (!s) return sc.cho;
   sc.sua = null;
+  return (sc.cho = chotXongSc(s, luu));
+}
+
+async function chotXongSc(s, luu) {
   s.o.onblur = null;
   s.o.remove();
   const {v, t, dong, g, nhap, truoc, cu} = s;
@@ -201,33 +227,6 @@ function baoPhong({t, g}, kq, moi, thu = false) {
   Object.assign(d.style, {left: `${Math.max(0, g.k_cu[0]) * he}px`, top: `${(g.k_cu[3] + 6) * he}px`});
   t.o.append(d);
   sc.henGhiChu = setTimeout(xoaGhiChuSc, 9000);
-}
-
-// ---------- Viền khi rê chuột: lấy từ lớp chữ của pdf.js, chỉ hỏi máy chủ lúc bấm ----------
-
-let henRe = 0, lanRe = null;
-function reChuot(e) {
-  if (congCu !== "sua-chu") return;
-  lanRe = e;
-  henRe ||= requestAnimationFrame(() => {
-    henRe = 0;
-    const dau = lanRe.target.closest?.(".to-trang");
-    let vien = document.querySelector(".vien-sc");
-    if (!dau || sc.sua || sc.dangHoi) return vien?.remove();
-    const x = lanRe.clientX, y = lanRe.clientY;
-    const trung = [...dau.querySelectorAll(".textLayer span:not(.markedContent)")].filter(s => s.textContent.trim()).map(s => s.getBoundingClientRect())
-      .filter(r => x >= r.left - 1 && x <= r.right + 1 && y >= r.top - 1 && y <= r.bottom + 1);
-    if (!trung.length) return vien?.remove();
-    const r = trung.reduce((a, b) => (b.width * b.height < a.width * a.height ? b : a)), g = dau.getBoundingClientRect();
-    if (!vien) { vien = document.createElement("div"); vien.className = "vien-sc"; }
-    if (vien.parentNode !== dau) dau.append(vien);
-    Object.assign(vien.style, {left: `${r.left - g.left - 2}px`, top: `${r.top - g.top - 1}px`, width: `${r.width + 4}px`, height: `${r.height + 2}px`});
-  });
-}
-
-for (const v of [xvTex, xvPdf]) {
-  v.o.addEventListener("pointermove", reChuot);
-  v.o.addEventListener("pointerleave", () => document.querySelector(".vien-sc")?.remove());
 }
 
 // Cảnh báo trước khi lưu: những dòng chữ mới thò ra quá chỗ cũ. Trả true nếu cứ lưu.

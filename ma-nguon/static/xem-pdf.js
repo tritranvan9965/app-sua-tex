@@ -144,6 +144,7 @@ class TrinhXem {
     veChonNet(ctx, t, this.daVe);
     veTrinhBay(ctx, this.tb, this.trang.indexOf(t), this.trang.length, t.w, t.h);
     capNhatKhungHc(this, t);
+    capNhatKhungSp(this, t);
     if (this.daVe !== daVeConTro) capNhatConTroNet();
     if (hc.t === t) capNhatThanhHc();
   }
@@ -198,9 +199,12 @@ class TrinhXem {
     const px = (e.clientX - goc.left) / this.daVe, py = (e.clientY - goc.top) / this.daVe;
     boChonHc();
     if (congCu === "hop-chu") { e.preventDefault(); return batDauHc(this, t, px, py); }
-    if (congCu === "sua-chu") {
+    if (congCu === "sua-chu" || congCu === "sua-dt") {  // bấm vào khoảng trắng: chốt ô đang sửa, bỏ chọn đối tượng (bấm vào ô thì khung của ô tự xử lý)
       e.preventDefault();
-      return this === xvPdf ? batDauSuaChu(this, t, px, py) : bao("Sửa chữ chỉ dùng khi mở file PDF.", true);
+      if (this !== xvPdf) return bao("Sửa chữ, sửa đối tượng chỉ dùng khi mở file PDF.", true);
+      if (sc.sua) chotSuaChu(true);
+      boChonDt();
+      return;
     }
     if (NHOM_BAM.has(congCu)) { e.preventDefault(); return moNhapChu(this, t, px, py, congCu); }
     if (congCu === "tay") {
@@ -356,10 +360,11 @@ function datCongCu(c) {
   boChonHc();
   boChonNet();
   huySuaChu();
+  boChonDt();
   document.querySelector(".o-nhap")?.remove();
-  document.querySelector(".vien-sc")?.remove();
   document.body.dataset.cc = c;
-  document.body.classList.toggle("cc-vung", c === "vung" || NHOM_KEO.has(c) || NHOM_BAM.has(c) || c === "tay" || c === "sua-chu");
+  document.body.classList.toggle("cc-vung", c === "vung" || NHOM_KEO.has(c) || NHOM_BAM.has(c) || c === "tay" || c === "sua-chu" || c === "sua-dt");
+  spTatCa();
   capNhatRibbon();
 }
 
@@ -487,6 +492,7 @@ addEventListener("keydown", e => {
   if (e.altKey && e.key === "1") { e.preventDefault(); datCongCu("chu"); }
   if (e.altKey && e.key === "2") { e.preventDefault(); datCongCu("vung"); }
   if (e.altKey && e.key === "3" && coSuaChu()) { e.preventDefault(); datCongCu("sua-chu"); }
+  if (e.altKey && e.key === "4" && coSuaChu()) { e.preventDefault(); datCongCu("sua-dt"); }
 });
 // Khi đang bôi đen, lớp chữ phải phủ kín trang để kéo qua chỗ trống không làm nhảy vùng chọn.
 addEventListener("pointerdown", e => e.target.closest?.(".textLayer")?.querySelector(".endOfContent")?.classList.add("active"));

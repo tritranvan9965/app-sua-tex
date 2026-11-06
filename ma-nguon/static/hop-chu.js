@@ -14,7 +14,7 @@ const luuCtChu = () => { try { localStorage.setItem("suaTexHopChu", JSON.stringi
 // hc.c: hộp đang chọn (đã nằm trong t.m.ct). hc.sua: đang gõ {o: ô gõ, nhap: bản đang sửa, goc: hộp cũ hoặc null nếu là hộp mới}.
 const hc = {v: null, t: null, c: null, sua: null};
 // sc: ô sửa chữ có sẵn (sua-chu.js) {o, nhap, doi, dong, g, t, v, truoc, cu}. Thanh định dạng dùng chung với hộp chữ.
-const sc = {sua: null, dangHoi: false, henGhiChu: 0};
+const sc = {sua: null, dangHoi: false, henGhiChu: 0, cho: null};
 
 const moDo = document.createElement("canvas").getContext("2d");
 const fontHc = (c, px = c.co) => `${c.nghieng ? "italic " : ""}${c.dam ? "700 " : "400 "}${px}px "${c.phong}", sans-serif`;
