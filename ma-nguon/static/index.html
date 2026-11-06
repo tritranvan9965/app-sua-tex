@@ -9,15 +9,30 @@
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body class="khong-bai" data-cc="chu">  <!-- chưa mở file thì chưa có bài, cột mục lục bài ẩn cho tới khi veMucLuc thấy có bài -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo-tritex" viewBox="0 0 64 64">
+    <rect x="2" y="2" width="60" height="60" rx="12" fill="#1d4238" stroke="#e8efe9" stroke-opacity=".45" stroke-width="1.5"/>
+    <rect x="2.75" y="46.5" width="58.5" height="3.5" fill="#c0262d"/>
+    <text x="32" y="26.5" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="24.5" fill="#e8efe9">TeX</text>
+  </symbol>
+</svg>
 <header id="ribbon">
   <div id="ribbon-hang">
-    <div id="ribbon-tab"></div>
+    <div id="ribbon-tab">
+      <button type="button" id="logo" data-ten="Giới thiệu TriTeX" aria-label="Giới thiệu TriTeX"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#logo-tritex"/></svg></button>
+    </div>
+    <div id="tieu-de"></div>
     <div class="ribbon-phai">
       <button type="button" id="nut-phim" data-ic="hoi" data-ten="Phím tắt" aria-label="Phím tắt"></button>
-      <button type="button" id="nut-gon" data-ic="tro-len" data-ten="Thu gọn ribbon" data-phim="Ctrl+F1" aria-label="Thu gọn ribbon"></button>
+      <button type="button" id="nut-hien-thi" data-ic="hien-ribbon" data-ten="Tùy chọn hiển thị ribbon" aria-label="Tùy chọn hiển thị ribbon" aria-haspopup="menu"></button>
+    </div>
+    <div id="nut-he-thong">
+      <button type="button" id="cs-thu-nho" data-ten="Thu nhỏ" aria-label="Thu nhỏ"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0 5.5h10"/></svg></button>
+      <button type="button" id="cs-phong-to" data-ten="Phóng to" aria-label="Phóng to"><svg viewBox="0 0 10 10" aria-hidden="true"></svg></button>
+      <button type="button" id="cs-dong" data-ten="Đóng" aria-label="Đóng"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
     </div>
   </div>
-  <div id="ribbon-than"></div>
+  <div id="ribbon-than"><button type="button" id="nut-gon" data-ic="tro-len" data-ten="Thu gọn ribbon" data-phim="Ctrl+F1" aria-label="Thu gọn ribbon"></button></div>
   <input id="tim" class="o-rong" type="search" placeholder="Tìm chữ trong file" aria-label="Tìm chữ trong file">
   <input id="khoang-trang" class="o-rong" placeholder="1-3, 5" title="Gõ số trang rồi nhấn Enter" aria-label="Chọn trang theo số thứ tự">
 </header>
@@ -252,6 +267,18 @@
   </form>
 </dialog>
 
+<dialog id="hop-gioi-thieu">
+  <form method="dialog" class="gioi-thieu">
+    <svg class="logo-lon" viewBox="0 0 64 64" aria-hidden="true"><use href="#logo-tritex"/></svg>
+    <h2>TriTeX</h2>
+    <p class="gt-ban">Phiên bản <span id="gt-ban"></span></p>
+    <p>Soạn đề LaTeX, xem và sửa PDF</p>
+    <p class="gt-tg">Phát triển bởi Trí Trí</p>
+    <p class="gt-nam">© <span id="gt-nam"></span></p>
+    <div class="nut-hop"><button value="dong" class="chinh">Đóng</button></div>
+  </form>
+</dialog>
+
 <dialog id="hop-phim">
   <form method="dialog">
     <h2>Phím tắt</h2>
@@ -297,5 +324,6 @@
 <script src="/static/ribbon.js"></script>
 <script src="/static/bo-cuc.js"></script>
 <script src="/static/menu-phai.js"></script>
+<script src="/static/cua-so.js"></script>
 </body>
 </html>

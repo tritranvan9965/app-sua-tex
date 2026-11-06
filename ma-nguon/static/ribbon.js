@@ -287,7 +287,7 @@ function taoRibbon() {
     nut.setAttribute("role", "tab");
     nut.setAttribute("aria-controls", `rb-${t.ma}`);
     nut.onclick = () => bamTab(t.ma);
-    nut.ondblclick = () => doiThuGon();
+    nut.ondblclick = doiThuGon;
     o.id = `rb-${t.ma}`;
     o.className = "bang-lenh";
     o.setAttribute("role", "tabpanel");
@@ -308,7 +308,12 @@ function taoRibbon() {
     b.insertAdjacentHTML("afterbegin", bieuTuong(b.dataset.ic));
     if (b.dataset.chu) b.insertAdjacentHTML("beforeend", `<span class="chu-nut">${b.dataset.chu}</span>`);
   });
-  document.getElementById("nut-gon").onclick = doiThuGon;
+  $("nut-gon").onclick = doiThuGon;
+  $("nut-hien-thi").onclick = () => { if (menuMo?.nut === $("nut-hien-thi")) dongMenu(); else moMenuHienThi(); };
+  $("ribbon-than").addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (b && b.id !== "nut-gon" && b.getAttribute("aria-disabled") !== "true") moTamRibbon(false);  // chạy xong một lệnh thì ẩn ribbon hiện tạm
+  });
   document.getElementById("bd-mo-file").onclick = () => moKhac("tep");
   document.getElementById("bd-mo-thu-muc").onclick = () => moKhac("thu_muc");
   document.getElementById("luu-tep").onclick = e => { if (e.currentTarget.getAttribute("aria-disabled") !== "true") luuVaXuat(); };
@@ -336,27 +341,54 @@ function chuyenTab(ma) {
   vuaRibbon();
 }
 
-// Đang thu gọn thì bấm tab chỉ mở tạm, bấm ra ngoài là gập lại như Word.
-function bamTab(ma) {
-  chuyenTab(ma);
-  if (bc.thuGon) document.getElementById("ribbon").classList.add("mo-tam");
+// Ba chế độ hiển thị ribbon như Office: "du" (tab và lệnh), "tab" (chỉ tab, bấm tab thì lệnh hiện tạm đè lên trang), "an" (ẩn cả hàng tab, bấm thanh tiêu đề để hiện tạm).
+const CHE_DO_RIBBON = [["du", "Hiện đủ ribbon"], ["tab", "Chỉ hiện tab"], ["an", "Tự ẩn ribbon"]];
+
+// Ribbon hiện tạm: bấm ra ngoài hay chạy xong một lệnh thì ẩn lại.
+function moTamRibbon(bat) {
+  $("ribbon").classList.toggle("mo-tam", !!bat && bc.ribbon !== "du");
+  capNhatNutGon();
   vuaRibbon();
 }
 
-function apThuGon() {
-  const r = document.getElementById("ribbon"), nut = document.getElementById("nut-gon");
-  r.classList.toggle("thu-gon", !!bc.thuGon);
-  r.classList.remove("mo-tam");
-  nut.dataset.ten = bc.thuGon ? "Hiện lại ribbon" : "Thu gọn ribbon";
-  nut.setAttribute("aria-label", nut.dataset.ten);
-  nut.querySelector("svg").innerHTML = BT[bc.thuGon ? "tro-xuong" : "tro-len"];
+function bamTab(ma) {
+  chuyenTab(ma);
+  moTamRibbon(true);
 }
 
-function doiThuGon() {
-  bc.thuGon = !bc.thuGon;
+function capNhatNutGon() {
+  const nut = $("nut-gon"), ghim = bc.ribbon !== "du";
+  nut.dataset.ten = ghim ? "Ghim ribbon" : "Thu gọn ribbon";
+  nut.setAttribute("aria-label", nut.dataset.ten);
+  nut.querySelector("svg").innerHTML = BT[ghim ? "tro-xuong" : "tro-len"];
+}
+
+function apThuGon() {
+  if (!CHE_DO_RIBBON.some(([ma]) => ma === bc.ribbon)) bc.ribbon = bc.thuGon ? "tab" : "du";  // cài đặt cũ chỉ có thuGon
+  delete bc.thuGon;
+  const r = $("ribbon");
+  r.classList.toggle("thu-gon", bc.ribbon !== "du");
+  r.classList.toggle("tu-an", bc.ribbon === "an");
+  moTamRibbon(false);
+  $("nut-hien-thi").setAttribute("aria-expanded", "false");
+}
+
+function datCheDoRibbon(ma) {
+  bc.ribbon = ma;
   apThuGon();
   apBoCuc();
+  capNhatVungPdf();
   luuBoCuc();
+  requestAnimationFrame(() => { apBoCuc(); capNhatVungPdf(); });  // khung xem tính lại sau khi bố cục đã đổi chỗ
+}
+
+// Nhấp đúp tab, Ctrl+F1: qua lại giữa hiện đủ và chỉ hiện tab; đang tự ẩn thì hiện đủ.
+function doiThuGon() {
+  datCheDoRibbon(bc.ribbon === "du" ? "tab" : "du");
+}
+
+function moMenuHienThi() {
+  moMenu($("nut-hien-thi"), CHE_DO_RIBBON.map(([ma, ten]) => ({ten, tich: bc.ribbon === ma, lam: () => datCheDoRibbon(ma)})));
 }
 
 // Nhóm thiếu chỗ thì thu về chỉ biểu tượng, nhóm ít dùng thu trước, rồi đến các nhóm bên phải.
@@ -400,6 +432,8 @@ function capNhatRibbon() {
 
 // Tên file trên đầu mỗi vùng: chữ nghiêng là bản chưa lưu. PDF biên dịch ra chỉ là bản nháp nên nghiêng đến khi được lưu.
 function capNhatTen() {
+  const dangMo = dangPdf() ? pt.ten : tt.tep?.ten;
+  $("tieu-de").textContent = dangMo ? `${dangMo} - TriTeX` : "TriTeX";
   const pdf = dangPdf(), tenTep = $("ten-tep"), luuTep = $("luu-tep");
   tenTep.classList.toggle("chua-luu-ten", !!coThayDoi());
   luuTep.hidden = !tt.tep;
@@ -495,6 +529,7 @@ function moMenu(nut, muc, toa) {
     b.disabled = x.bat ? !x.bat() : false;
     b.innerHTML = '<span class="ten"></span><span class="phim"></span>';
     b.children[0].textContent = x.ten;
+    if (x.tich !== undefined) { b.setAttribute("role", "menuitemradio"); b.setAttribute("aria-checked", !!x.tich); }
     b.children[1].textContent = x.phim || "";
     if (x.nguy) b.classList.add("nguy");
     b.onclick = () => { dongMenu(); x.lam(); };
@@ -517,7 +552,7 @@ function moMenu(nut, muc, toa) {
 
 function moPhimTat() {
   const ds = [...dsTep().filter(x => x?.phim), ...NUT_RIBBON.map(n => n.x).filter(x => x.phim),
-    {ten: "Thu gọn ribbon", phim: "Ctrl+F1"}];
+    {ten: "Hiện đủ ribbon / Chỉ hiện tab", phim: "Ctrl+F1"}];
   const daCo = new Set();
   $("ds-phim").replaceChildren(...ds.filter(x => !daCo.has(x.phim) && daCo.add(x.phim)).map(x => {
     const li = document.createElement("li"), k = document.createElement("kbd");
@@ -530,9 +565,8 @@ function moPhimTat() {
 }
 
 addEventListener("pointerdown", e => {
-  if (menuMo && !menuMo.bang.contains(e.target) && !$("tab-tep").contains(e.target)) dongMenu();
-  const r = $("ribbon");
-  if (r.classList.contains("mo-tam") && !r.contains(e.target)) r.classList.remove("mo-tam");
+  if (menuMo && !menuMo.bang.contains(e.target) && !menuMo.nut?.contains(e.target)) dongMenu();
+  if (!$("ribbon").contains(e.target)) moTamRibbon(false);
 });
 
 taoRibbon();

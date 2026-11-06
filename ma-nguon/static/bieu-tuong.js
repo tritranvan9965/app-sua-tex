@@ -107,6 +107,7 @@ const BT = {
   "vua-trang": '<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 7.5v9"/><path d="m10 9.5 2-2 2 2"/><path d="m10 14.5 2 2 2-2"/>',
   "toan-man": '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
 
+  "hien-ribbon": '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/>',
   "tro-len": '<path d="m6 15 6-6 6 6"/>',
   "tro-xuong": '<path d="m6 9 6 6 6-6"/>',
   "tro-trai": '<path d="m15 6-6 6 6 6"/>',

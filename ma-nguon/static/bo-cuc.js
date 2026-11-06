@@ -1,7 +1,7 @@
 "use strict";
 // Bố cục: ẩn hiện từng vùng, kéo đổi kích thước, cỡ chữ. Cài đặt lưu ở máy chủ vì cổng của app đổi mỗi lần mở.
 
-const BO_CUC_GOC = {ban: true, le: true, soan: true, xem: true, rongBan: 216, tiLe: 0.5, co: 14, cheDo: "dong", thuGon: false, day: true, rongDay: 170, coBan: 12, phongCode: "", phongUi: "", soInter: true, coUi: 100};
+const BO_CUC_GOC = {ban: true, le: true, soan: true, xem: true, rongBan: 216, tiLe: 0.5, co: 14, cheDo: "dong", ribbon: "du", day: true, rongDay: 170, coBan: 12, phongCode: "", phongUi: "", soInter: true, coUi: 100};
 const RONG_LE = 132, MIN_VUNG = 260;
 let bc = {...BO_CUC_GOC};
 let henLuuBoCuc;
@@ -158,7 +158,7 @@ function moTim() {
   if (!bc.soan) batTat("soan");
   if (tt.cheDo !== "dong") datCheDo("dong");
   chuyenTab("chu");
-  if (bc.thuGon) $("ribbon").classList.add("mo-tam");
+  moTamRibbon(true);
   $("tim").focus();
   $("tim").select();
 }

@@ -39,7 +39,7 @@ button.chinh:focus-visible{outline-offset:2px}
 #ribbon{grid-column:1/-1;position:relative;z-index:6;zoom:var(--co-ui,1)}
 dialog{zoom:var(--co-ui,1)}
 #thanh-duoi{zoom:var(--co-ui,1)}
-#ribbon-hang{height:32px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 6px 0 0;background:var(--bang)}
+#ribbon-hang{height:32px;display:flex;align-items:flex-end;padding:0;background:var(--bang);user-select:none}
 #ribbon-tab,.ds-tab{display:flex;align-items:flex-end;height:100%}
 #ribbon-tab button{border:0;background:none;color:var(--phan);height:28px;padding:0 13px;font-size:13px;border-radius:6px 6px 0 0;
   transition:background-color .15s ease-out,color .15s ease-out}
@@ -48,15 +48,36 @@ dialog{zoom:var(--co-ui,1)}
 .thu-gon:not(.mo-tam) #ribbon-tab button[aria-selected=true]{background:none;color:var(--phan);font-weight:400}
 #ribbon-tab #tab-tep{align-self:stretch;height:auto;border-radius:0;background:var(--bang-sang);color:#fff;font-weight:600;padding:0 16px;margin-right:6px}
 #ribbon-tab #tab-tep:hover,#ribbon-tab #tab-tep[aria-expanded=true]{background:var(--but-do)}
-.ribbon-phai{display:flex;align-self:center;gap:2px}
+.ribbon-phai{display:flex;align-self:center;gap:2px;margin-right:6px}
+.co-cua-so .ribbon-phai{margin-right:4px}
+#tieu-de{flex:1;min-width:0;align-self:center;padding:0 12px;text-align:center;font-size:12px;color:var(--phan-phu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tu-an #tieu-de{cursor:pointer}
+#ribbon-tab #logo{align-self:center;display:grid;place-items:center;width:34px;height:28px;padding:0;margin:0 2px 0 4px;border-radius:5px}
+#ribbon-tab #logo svg{width:20px;height:20px}
+#nut-he-thong{display:none;align-self:stretch}
+.co-cua-so #nut-he-thong{display:flex}
+#nut-he-thong button{display:grid;place-items:center;width:46px;height:100%;border:0;border-radius:0;background:none;color:var(--phan)}
+#nut-he-thong button:hover{background:var(--bang-sang)}
+#nut-he-thong #cs-dong:hover{background:#c42b1c;color:#fff}
+#nut-he-thong svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:1}
+#nut-he-thong :focus-visible{outline-color:#fff}
+.tu-an:not(.mo-tam) .ds-tab,.tu-an:not(.mo-tam) #tab-tep{display:none}
+.cs-co{display:none;position:fixed;z-index:60}
+.co-cua-so:not(.phong-to) .cs-co{display:block}
+.cs-co-t,.cs-co-d{left:6px;right:6px;height:4px;cursor:ns-resize}
+.cs-co-l,.cs-co-r{top:6px;bottom:6px;width:4px;cursor:ew-resize}
+.cs-co-t{top:0}.cs-co-d{bottom:0}.cs-co-l{left:0}.cs-co-r{right:0}
+.cs-co-tl,.cs-co-tr,.cs-co-dl,.cs-co-dr{width:8px;height:8px}
+.cs-co-tl{top:0;left:0;cursor:nwse-resize}.cs-co-dr{bottom:0;right:0;cursor:nwse-resize}
+.cs-co-tr{top:0;right:0;cursor:nesw-resize}.cs-co-dl{bottom:0;left:0;cursor:nesw-resize}
 .ribbon-phai button{display:grid;place-items:center;width:26px;height:26px;border:0;background:none;color:var(--phan);border-radius:5px}
 .ribbon-phai button:hover{background:var(--bang-sang)}
 #ribbon :focus-visible{outline-offset:-2px}
 #ribbon-tab :focus-visible,.ribbon-phai :focus-visible{outline-color:#fff}
-#ribbon-than{background:var(--giay);border-bottom:1px solid var(--ke);box-shadow:0 1px 3px #17302a14}
+#ribbon-than{position:relative;background:var(--giay);border-bottom:1px solid var(--ke);box-shadow:0 1px 3px #17302a14}
 .thu-gon:not(.mo-tam) #ribbon-than{display:none}
 .mo-tam #ribbon-than{position:absolute;left:0;right:0;top:32px;box-shadow:0 6px 16px #17302a33}
-.bang-lenh{display:flex;align-items:stretch;height:86px;padding:4px 0 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--phan-mo) transparent}
+.bang-lenh{display:flex;align-items:stretch;height:86px;padding:4px 24px 0 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--phan-mo) transparent}
 .nhom{flex:none;display:flex;flex-direction:column;padding:0 7px;border-right:1px solid var(--ke)}
 .nhom-than{flex:1;display:flex;align-items:stretch;gap:2px;min-height:0}
 .nhom{position:relative}
@@ -96,6 +117,8 @@ dialog{zoom:var(--co-ui,1)}
 .bang-menu .phim{color:var(--muc-mo)}
 .bang-menu.chuot-phai{border-radius:6px;min-width:220px;box-shadow:0 0 0 1px var(--ke),0 8px 24px #17302a33}
 .bang-menu button.nguy{color:var(--but-do)}
+.bang-menu [role=menuitemradio] .ten::before{content:"✓";display:inline-block;width:1.4em}
+.bang-menu [role=menuitemradio][aria-checked=false] .ten::before{visibility:hidden}
 .bang-menu hr{border:0;border-top:1px solid var(--ke);margin:4px 2px}
 
 /* Hàng cố định, để lúc chưa có thẻ nào các vùng không trôi lên hàng của thẻ */
@@ -521,3 +544,14 @@ dialog h2{font-size:17px;margin:0}
 #thanh-net .tn-chu{padding:0 8px;font-weight:600}
 #thanh-net .tn-vitri .bt{width:14px;height:14px}
 #thanh-net .tn-dong{font-size:18px;line-height:1;font-weight:600;width:28px}
+
+/* Nút thu gọn ở góc phải dưới ribbon, hộp giới thiệu */
+#ribbon-than #nut-gon{position:absolute;right:3px;bottom:3px;z-index:1;display:grid;place-items:center;width:22px;height:22px;padding:0;color:var(--muc-mo);background:var(--giay)}
+#hop-gioi-thieu{width:min(380px,92vw)}
+.gioi-thieu{align-items:center;text-align:center;gap:6px;padding:26px 24px 20px}
+.gioi-thieu p{margin:0}
+.logo-lon{width:88px;height:88px;margin-bottom:6px}
+.gt-ban,.gt-nam{color:var(--muc-mo);font-size:13px}
+.gt-tg{font-weight:700;margin-top:8px!important}
+.gioi-thieu .nut-hop{margin-top:14px;width:100%;justify-content:center}
+.gioi-thieu .nut-hop button{min-width:96px;height:36px}

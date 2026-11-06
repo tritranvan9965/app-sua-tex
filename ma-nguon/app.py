@@ -27,6 +27,7 @@ GOC_APP = Path(__file__).resolve().parent
 sys.path.insert(0, str(GOC_APP))
 import bien_dich  # noqa: E402
 import duong_app  # noqa: E402
+import khung_cua_so  # noqa: E402
 import loi  # noqa: E402
 
 
@@ -91,6 +92,7 @@ KHOA = threading.Lock()  # lưu và xuất lần lượt, không chồng lên nh
 CONG = 8765
 PDF_DA_CHON = set()
 CHUA_LUU = False  # trang báo về, vì lúc đóng cửa sổ không hỏi lại trang được (sẽ treo)
+KHUNG = None  # điều khiển cửa sổ không viền (khung_cua_so.KhungCuaSo)
 CUA_SO = None  # cửa sổ app; chạy bằng trình duyệt thì không có, nên không có hộp chọn file
 
 
@@ -367,6 +369,27 @@ def thoat(d: dict) -> dict:
     return {}
 
 
+def thong_tin(_) -> dict:
+    import cai_dat
+    return {"phien_ban": cai_dat.PHIEN_BAN, "co_cua_so": KHUNG is not None}
+
+
+def cua_so_lenh(d: dict) -> dict:
+    """Việc của thanh tiêu đề tự vẽ: kéo, đổi cỡ bằng mép, thu nhỏ, phóng to. Đóng đi qua /api/thoat để vẫn hỏi lưu."""
+    if not KHUNG:
+        return {"khong_co_cua_so": True}
+    lenh = d.get("lenh")
+    if lenh == "keo":
+        KHUNG.keo()
+    elif lenh == "co":
+        KHUNG.doi_co(str(d.get("huong", "")))
+    elif lenh == "thu-nho":
+        KHUNG.thu_nho()
+    elif lenh == "phong-to":
+        return KHUNG.doi_phong_to()
+    return KHUNG.trang_thai()
+
+
 def pdf_chon(d: dict) -> dict:
     """Chỉ file vừa chọn mới đọc được qua /api/pdf-tep, để trang web không đọc được file bất kỳ trên máy."""
     ds = d.get("duong")
@@ -553,6 +576,7 @@ def toan_man(d: dict) -> dict:
     if bool(d.get("bat")) != TOAN_MAN:
         TOAN_MAN = not TOAN_MAN
         CUA_SO.toggle_fullscreen()
+        threading.Timer(0.3, KHUNG.ap_dung).start()  # WinForms đặt lại kiểu cửa sổ khi đổi viền, phải thêm lại kiểu đổi cỡ
     return {}
 
 
@@ -892,6 +916,8 @@ class XuLy(BaseHTTPRequestHandler):
             if hoi.get("duong") not in PDF_DA_CHON:
                 raise LoiApp(403, "File này chưa được chọn.")
             self._gui(200, pdf_de_xem(hoi["duong"]), "application/pdf")
+        elif url.path == "/api/thong-tin":
+            self._json(200, thong_tin({}))
         elif url.path == "/api/gan-day":
             self._json(200, gan_day())
         elif url.path == "/api/thu-vien":
@@ -931,7 +957,7 @@ class XuLy(BaseHTTPRequestHandler):
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
-                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-ds-dong": chu_ds_dong, "/api/dt-ds": dt_ds, "/api/dt-thu": dt_thu, "/api/chu-sua-thu": chu_sua_thu, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
+                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/cua-so": cua_so_lenh, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-ds-dong": chu_ds_dong, "/api/dt-ds": dt_ds, "/api/dt-thu": dt_thu, "/api/chu-sua-thu": chu_sua_thu, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
         if not viec:
             raise LoiApp(404, "Không có việc này.")
         self._json(200, viec(d))
@@ -944,7 +970,11 @@ def mo_cua_so(dia_chi: str, ten: str) -> bool:
         import webview
     except ImportError:
         return False
-    CUA_SO = cua_so = webview.create_window(f"{ten} - TriTeX", dia_chi, width=1440, height=900, min_size=(1000, 640), text_select=True)
+    global KHUNG
+    CUA_SO = cua_so = webview.create_window(f"{ten} - TriTeX", dia_chi, width=1440, height=900, min_size=(1000, 640), text_select=True,
+                                            frameless=True, easy_drag=False)  # hàng tab ribbon là thanh tiêu đề, giao diện tự kéo, tự đổi cỡ (khung_cua_so.py)
+    KHUNG = khung_cua_so.KhungCuaSo(cua_so, (1000, 640))
+    cua_so.events.shown += lambda: KHUNG.ap_dung()
 
     dang_hoi = threading.Event()
 
