@@ -14,7 +14,7 @@ from pathlib import Path
 
 TEN = "Sửa TeX"
 MA = "SuaTeX"
-PHIEN_BAN = "1.0.6"
+PHIEN_BAN = "1.0.7"
 THU_MUC_CAI = Path(os.environ["LOCALAPPDATA"]) / "Programs" / MA
 EXE = THU_MUC_CAI / f"{MA}.exe"
 UNINSTALL = rf"Software\Microsoft\Windows\CurrentVersion\Uninstall\{MA}"
