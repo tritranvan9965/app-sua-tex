@@ -165,8 +165,56 @@ function boTepTex() {
   thongBaoPdf("Mở một file .tex để xem PDF.");
 }
 
+// Hộp hỏi kiểu Word: "luu" | "khong" | "huy". Esc hoặc bấm ra ngoài là Hủy, Enter là Lưu.
+function hoiLuuThe(t, lyDo = "Nếu không lưu, các thay đổi sẽ mất.") {
+  const h = $("hop-hoi-luu");
+  $("hhl-tieu").textContent = `Lưu thay đổi vào ${t.ten}?`;
+  $("hhl-noi").textContent = lyDo;
+  return new Promise(xong => {
+    let kq = "huy";
+    const bam = e => { kq = e.submitter?.value || "huy"; };
+    h.querySelector("form").addEventListener("submit", bam, {once: true});
+    h.addEventListener("close", () => xong(kq), {once: true});
+    if (h.open) h.close();
+    h.showModal();
+    $("hhl-luu").focus();
+  });
+}
+
+// Lưu thẻ t bằng đúng luồng lưu của loại thẻ đó. Trả true nếu xong và không còn thay đổi (lưu lỗi, hủy hộp lưu, hủy chọn nơi lưu đều là false).
+async function luuTheXong(t) {
+  await chonThe(t);
+  if (the.hien !== t) return false;
+  if (t.loai === "pdf") await luuTrang(false);
+  else await luu();
+  return !theChuaLuu(t);
+}
+
+// Hỏi và lưu nếu cần. Trả true nếu được phép đóng thẻ.
+async function hoiRoiLuuThe(t, lyDo) {
+  if (!theChuaLuu(t)) return true;
+  if (the.hien !== t) await chonThe(t);  // chuyển sang thẻ đó để người dùng thấy file nào đang được hỏi
+  const kq = await hoiLuuThe(t, lyDo);
+  if (kq === "huy") return false;
+  return kq === "khong" || luuTheXong(t);
+}
+
+// Đóng cửa sổ app (máy chủ gọi khi bấm ×, Alt+F4, Tệp → Thoát): hỏi lần lượt từng file chưa lưu. Một file Hủy hoặc lưu lỗi thì không đóng gì cả.
+// Hỏi lần lượt (không gộp một hộp) vì mỗi lần thẻ đó hiện ra, người dùng thấy đúng nội dung mình sắp lưu hay bỏ.
+let dangHoiDong = false;
+async function hoiDongApp() {
+  if (dangHoiDong) return;
+  dangHoiDong = true;
+  try {
+    for (const t of the.ds.filter(theChuaLuu)) if (!await hoiRoiLuuThe(t, "Nếu không lưu, các thay đổi sẽ mất khi đóng app.")) return;
+    daBaoChuaLuu = false;
+    await goi("/api/thoat", {ep: true});
+  } catch (e) { bao(e.message, true); }
+  finally { dangHoiDong = false; }
+}
+
 async function dongThe(t, hoi = true) {
-  if (hoi && theChuaLuu(t) && !confirm(`${t.ten} có thay đổi chưa lưu. Bỏ các thay đổi đó?`)) return;
+  if (hoi && !await hoiRoiLuuThe(t)) return;
   const i = the.ds.indexOf(t);
   the.ds.splice(i, 1);
   if (t !== the.hien) {

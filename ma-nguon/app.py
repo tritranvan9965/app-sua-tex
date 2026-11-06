@@ -356,10 +356,13 @@ def ghi_cai_dat(d: dict) -> dict:
     return {}
 
 
-def thoat(_) -> dict:
-    """Đóng cửa sổ như bấm nút X, nên vẫn hỏi nếu còn thay đổi chưa lưu."""
+def thoat(d: dict) -> dict:
+    """Đóng cửa sổ như bấm nút X, nên vẫn hỏi nếu còn thay đổi chưa lưu. ep: giao diện đã hỏi người dùng xong, đóng luôn."""
+    global CHUA_LUU
     if not CUA_SO:
         return {"khong_co_cua_so": True}
+    if d.get("ep"):
+        CHUA_LUU = False
     threading.Timer(0.1, CUA_SO.destroy).start()
     return {}
 
@@ -943,11 +946,38 @@ def mo_cua_so(dia_chi: str, ten: str) -> bool:
         return False
     CUA_SO = cua_so = webview.create_window(f"{ten} - Sửa TeX", dia_chi, width=1440, height=900, min_size=(1000, 640), text_select=True)
 
+    dang_hoi = threading.Event()
+
+    def hoi_bang_hop_he_thong() -> bool:
+        return ctypes.windll.user32.MessageBoxW(0, "File đang mở có thay đổi chưa lưu. Đóng app và bỏ các thay đổi đó?", "Sửa TeX", 0x34) == 6  # 6 là nút Yes
+
+    def hoi_giao_dien():
+        """Nhờ giao diện hiện hộp Lưu / Không lưu / Hủy. Giao diện không trả lời trong 3 giây thì hỏi bằng hộp của hệ thống, không đóng nếu có thay đổi chưa lưu mà người dùng không đồng ý."""
+        global CHUA_LUU
+        try:
+            kq = []
+            t = threading.Thread(target=lambda: kq.append(cua_so.evaluate_js("typeof hoiDongApp === 'function' ? (hoiDongApp(), true) : false")), daemon=True)
+            t.start()
+            t.join(3)
+            if not (kq and kq[0] is True):
+                if hoi_bang_hop_he_thong():
+                    CHUA_LUU = False
+                    cua_so.destroy()
+        except Exception:
+            if hoi_bang_hop_he_thong():
+                CHUA_LUU = False
+                cua_so.destroy()
+        finally:
+            dang_hoi.clear()
+
     def khi_dong():
+        """Có thay đổi chưa lưu thì chặn đóng, nhờ giao diện hỏi; giao diện đóng lại bằng /api/thoat {ep} sau khi người dùng chọn."""
         if not CHUA_LUU:
             return True
-        hoi = ctypes.windll.user32.MessageBoxW(0, "File đang mở có thay đổi chưa lưu. Đóng app và bỏ các thay đổi đó?", "Sửa TeX", 0x34)
-        return hoi == 6  # 6 là nút Yes
+        if not dang_hoi.is_set():
+            dang_hoi.set()
+            threading.Thread(target=hoi_giao_dien, daemon=True).start()
+        return False
 
     cua_so.events.closing += khi_dong
     webview.start()

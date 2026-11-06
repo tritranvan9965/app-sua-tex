@@ -356,6 +356,9 @@ dialog h2{font-size:17px;margin:0}
 .muc-luu label{display:block;padding:1px 0}
 .muc-luu .canh-bao,.canh-bao{color:var(--but-do);font-size:13px;margin:4px 0 0}
 .nut-hop{display:flex;justify-content:flex-end;gap:8px}
+#hop-hoi-luu{width:min(460px,92vw)}
+#hop-hoi-luu p{margin:0;color:var(--muc-mo);line-height:1.45}
+#hop-hoi-luu .nut-hop button{min-width:96px;height:38px;font-size:14.5px}
 
 /* Hộp thoại In */
 #hop-in{width:min(900px,96vw)}
