@@ -46,6 +46,12 @@ def bien_dich_menu(dich: Path) -> None:
                     str(PH / "menu_chuot_phai.c"), "-lshell32", "-lole32", "-luuid", "-lgdi32", "-luser32"], check=True)
 
 
+def bien_dich_khung(dich: Path) -> None:
+    """DLL xử lý thông điệp cửa sổ không viền (xem ma-nguon/khung_cua_so.c), nằm cạnh TriTeX.exe."""
+    subprocess.run([sys.executable, "-m", "ziglang", "cc", "-shared", "-Os", "-s", "-target", "x86_64-windows-gnu", "-o", str(dich),
+                    str(MA / "khung_cua_so.c"), "-luser32"], check=True)
+
+
 def main():
     shutil.rmtree(TAM, ignore_errors=True)
     TAM.mkdir(parents=True)
@@ -55,6 +61,7 @@ def main():
     tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "pdf.ico", "PDF", "#ff9d94", "#4b2f2f")
     tao_bieu_tuong_loai(TAM / "app" / cai_dat.MA / "tex.ico", "TEX", "#86d0ff", "#25415a")
     bien_dich_menu(TAM / "app" / cai_dat.MA / "menu.dll")
+    bien_dich_khung(TAM / "app" / cai_dat.MA / "khung_cua_so.dll")
     shutil.make_archive(str(TAM / "tritex"), "zip", TAM / "app" / cai_dat.MA)
     ten = f"TriTeX-Setup-{cai_dat.PHIEN_BAN}"
     pyinstaller("--onefile", "--name", ten, "--distpath", str(PH), "--add-data", f"{TAM / 'tritex.zip'};.", str(PH / "bo_cai.py"))

@@ -2,22 +2,22 @@
 
 pywebview tạo cửa sổ không viền thì mất luôn khung đổi cỡ, Snap và nút hệ thống. Ở đây bù lại bằng WinAPI:
 - thêm kiểu WS_THICKFRAME / MINIMIZEBOX / MAXIMIZEBOX để Win+mũi tên, phóng to đúng vùng làm việc (không đè thanh taskbar);
-- chặn WM_NCCALCSIZE để vùng làm việc phủ kín cửa sổ (không còn viền tiêu đề hay viền dày);
+- chặn WM_NCCALCSIZE để vùng làm việc phủ kín cửa sổ (không còn viền tiêu đề hay viền dày). Việc này làm trong khung_cua_so.dll
+  (mã C, khung_cua_so.c), không làm bằng ctypes: thủ tục cửa sổ viết bằng Python bắt luồng giao diện giành GIL nên treo app khi một
+  luồng Python khác chờ luồng giao diện (restore(), hộp chọn file của pywebview);
 - kéo cửa sổ và đổi cỡ bằng mép do giao diện báo (mousedown), rồi một luồng đọc vị trí chuột đến khi nhả nút.
   Cách này không dùng WM_NCLBUTTONDOWN vì WebView2 giữ chuột nên kéo xong lần đầu thì các lần sau không còn nhận mousedown.
 """
 import ctypes
+import sys
 import threading
 import time
 from ctypes import wintypes
+from pathlib import Path
 
 u = ctypes.windll.user32
-LRESULT = ctypes.c_ssize_t
-WNDPROC = ctypes.WINFUNCTYPE(LRESULT, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
-u.SetWindowLongPtrW.restype = ctypes.c_void_p
-u.SetWindowLongPtrW.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_void_p]
-u.CallWindowProcW.restype = LRESULT
-u.CallWindowProcW.argtypes = [ctypes.c_void_p, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+u.SetForegroundWindow.argtypes = [wintypes.HWND]
+u.IsIconic.argtypes = [wintypes.HWND]
 u.GetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int]
 u.GetWindowLongW.restype = ctypes.c_long
 u.SetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_long]
@@ -30,14 +30,27 @@ u.GetMonitorInfoW.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
 u.IsZoomed.argtypes = [wintypes.HWND]
 u.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
 
-GWL_STYLE, GWLP_WNDPROC = -16, -4
+GWL_STYLE = -16
 WS_THICKFRAME, WS_MINIMIZEBOX, WS_MAXIMIZEBOX = 0x40000, 0x20000, 0x10000
-WM_NCCALCSIZE = 0x83
 SWP_NOSIZE, SWP_NOMOVE, SWP_NOZORDER, SWP_NOACTIVATE, SWP_FRAMECHANGED = 0x1, 0x2, 0x4, 0x10, 0x20
 SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE = 3, 6, 9
 MONITOR_NEAREST = 2
 VK_LBUTTON = 1
 CHAM = 0.008  # giây giữa hai lần đọc vị trí chuột
+
+
+def _nap_dll():
+    """Bản cài: DLL nằm cạnh TriTeX.exe. Chạy từ mã nguồn: nằm cạnh file này (biên dịch từ khung_cua_so.c)."""
+    cho = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
+    try:
+        dll = ctypes.WinDLL(str(cho / "khung_cua_so.dll"))
+    except OSError:
+        return None  # thiếu DLL thì cửa sổ còn viền Windows, vẫn hơn treo app
+    dll.gan_khung.argtypes = [wintypes.HWND]
+    return dll
+
+
+DLL = _nap_dll()
 
 
 class _MonitorInfo(ctypes.Structure):
@@ -65,13 +78,15 @@ class KhungCuaSo:
     def __init__(self, cua_so, nho_nhat: tuple[int, int]):
         self.cua_so = cua_so
         self.nho_nhat = nho_nhat
-        self._cu = None
-        self._proc = WNDPROC(self._xu_ly)  # giữ tham chiếu, nếu không bị thu dọn thì app sập
+        self._hwnd = None
         self._dang_keo = threading.Lock()
 
     @property
     def hwnd(self) -> int:
-        return self.cua_so.native.Handle.ToInt64()
+        # Lấy một lần rồi nhớ: đọc thuộc tính .NET từ luồng khác mỗi lần kéo chuột là không cần thiết.
+        if self._hwnd is None:
+            self._hwnd = self.cua_so.native.Handle.ToInt64()
+        return self._hwnd
 
     # ---------- Kiểu cửa sổ ----------
 
@@ -80,24 +95,22 @@ class KhungCuaSo:
         h = self.hwnd
         kieu = (u.GetWindowLongW(h, GWL_STYLE) & 0xFFFFFFFF) | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
         u.SetWindowLongW(h, GWL_STYLE, ctypes.c_long(kieu).value)  # c_long tự đổi sang số âm khi bit cao bật
-        if self._cu is None:
-            self._cu = u.SetWindowLongPtrW(h, GWLP_WNDPROC, ctypes.cast(self._proc, ctypes.c_void_p))
+        if DLL:
+            DLL.gan_khung(h)
         u.SetWindowPos(h, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
-
-    def _xu_ly(self, h, thong_diep, wp, lp):
-        if thong_diep == WM_NCCALCSIZE and wp:
-            # Không có vùng ngoài vùng làm việc. Phóng to thì cửa sổ tràn ra ngoài màn hình một khung dày, nên thu về vùng làm việc.
-            if u.IsZoomed(h):
-                r = ctypes.cast(lp, ctypes.POINTER(wintypes.RECT)).contents
-                lv = _vung_lam_viec(u.MonitorFromWindow(h, MONITOR_NEAREST))
-                r.left, r.top, r.right, r.bottom = lv.left, lv.top, lv.right, lv.bottom
-            return 0
-        return u.CallWindowProcW(self._cu, h, thong_diep, wp, lp)
 
     # ---------- Nút hệ thống ----------
 
     def trang_thai(self) -> dict:
         return {"phong_to": bool(u.IsZoomed(self.hwnd))}
+
+    def dua_len(self) -> None:
+        """Đưa cửa sổ lên trước khi lần mở sau gửi file sang. Dùng WinAPI thay cho restore()/on_top của pywebview,
+        vì các hàm đó gọi Invoke của .NET từ luồng này và chờ luồng giao diện."""
+        h = self.hwnd
+        if u.IsIconic(h):
+            u.ShowWindow(h, SW_RESTORE)
+        u.SetForegroundWindow(h)
 
     def thu_nho(self) -> None:
         u.ShowWindow(self.hwnd, SW_MINIMIZE)

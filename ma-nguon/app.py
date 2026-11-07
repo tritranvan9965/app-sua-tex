@@ -849,9 +849,8 @@ def chu_da_them(d: dict) -> dict:
 def mo_ngoai(d: dict) -> dict:
     """Lần mở sau gửi file sang đây. Chạy ở luồng riêng vì evaluate_js đợi trang trả lời."""
     def lam():
-        CUA_SO.restore()
-        CUA_SO.on_top = True
-        CUA_SO.on_top = False
+        if KHUNG:
+            KHUNG.dua_len()  # không dùng restore()/on_top của pywebview: chúng chờ luồng giao diện qua Invoke của .NET
         if d.get("chuyen"):
             CUA_SO.evaluate_js(f"moChuyen({json.dumps(d['chuyen'])})")
         elif d.get("gop"):
