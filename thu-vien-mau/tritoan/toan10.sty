@@ -1,0 +1,12 @@
+% toan10.sty — Mẫu Toán 10: gọi lõi chung tritoan.sty, rồi thêm phần riêng của lớp.
+% Sửa giao diện chung thì sửa tritoan.sty. File này chỉ giữ những gì Toán 10 khác các lớp khác.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{toan10}[2026/11/07 Mau tai lieu Toan 10]
+\RequirePackage{tritoan}
+\input{danhmuc10.tex}
+\renewcommand{\tenmon}{TOÁN 10}
+
+% Ghi đè khi lớp này cần khác lõi, ví dụ:
+% \renewcommand{\chantrang}{Ôn thi Toán 10 - Thầy Trí}
+% \definecolor{xanh}{HTML}{0B5345}
+\endinput

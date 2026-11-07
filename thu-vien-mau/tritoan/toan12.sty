@@ -1,0 +1,12 @@
+% toan12.sty — Mẫu Toán 12: gọi lõi chung tritoan.sty, rồi thêm phần riêng của lớp.
+% Sửa giao diện chung thì sửa tritoan.sty. File này chỉ giữ những gì Toán 12 khác các lớp khác.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{toan12}[2026/11/07 Mau tai lieu Toan 12]
+\RequirePackage{tritoan}
+\input{danhmuc12.tex}
+\renewcommand{\tenmon}{TOÁN 12}
+
+% Ghi đè khi lớp này cần khác lõi, ví dụ:
+% \renewcommand{\chantrang}{Ôn thi Toán 12 - Thầy Trí}
+% \definecolor{xanh}{HTML}{0B5345}
+\endinput

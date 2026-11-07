@@ -1,0 +1,353 @@
+% =====================================================================
+%  tritoan.sty  —  LÕI CHUNG cho mọi tài liệu Toán (biên dịch bằng XeLaTeX)
+%
+%  Không dùng trực tiếp. Mỗi lớp có một file mỏng gọi lõi này:
+%     toan9.sty, toan10.sty, toan11.sty, toan12.sty
+%  File lớp chỉ nạp danh mục của lớp và ghi đè vài giá trị (tên môn, chân trang, màu...).
+%
+%  Quy ước để sửa ít:
+%    - Sửa giao diện chung (phông, màu, hộp, cách in câu hỏi) thì sửa Ở ĐÂY, mọi lớp tự nhận.
+%    - Thứ riêng của một lớp thì để trong file lớp, dùng \renewcommand để ghi đè.
+%    - Không xoá hay đổi nghĩa lệnh cũ, để tài liệu đã viết vẫn biên dịch được.
+%    - Lệnh nội bộ có chữ @ (\tt@...), người viết tài liệu không dùng.
+%
+%  Bản HS / GV: một nguồn, hai bản. Công tắc \ifGV.
+%    - Biên dịch thẳng file .tex  -> bản GV (có lời giải, đáp án).
+%    - Bản HS: định nghĩa \BANHS trước khi nạp mẫu (app TriTeX tự làm khi dự án có cấu hình hai bản).
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tritoan}[2026/11/07 Loi chung tai lieu Toan]
+
+% ---------- Công tắc HS / GV ----------
+\newif\ifGV
+\ifdefined\BANHS \GVfalse \else \GVtrue \fi
+
+% ---------- Trang, phông ----------
+\RequirePackage[a4paper,top=1.8cm,bottom=1.8cm,left=2cm,right=1.6cm,headsep=0.5cm,headheight=15pt]{geometry}
+% Lưu ý: newtxmath làm XeLaTeX (MiKTeX trên máy) treo khi gặp \geqslant -> dùng unicode-math
+\RequirePackage{amsmath}
+\RequirePackage{unicode-math}
+\setmainfont{Times New Roman}
+\setmathfont{texgyretermes-math.otf}
+\linespread{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+\RequirePackage{enumitem,multicol,array,tabularx,xcolor,graphicx}
+\RequirePackage{tikz,tkz-euclide}
+\usetikzlibrary{calc,angles,quotes,intersections,patterns,arrows.meta}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{fancyhdr}
+\RequirePackage{lastpage}
+
+% ---------- Màu (file lớp có thể ghi đè bằng \definecolor) ----------
+\definecolor{xanh}{HTML}{1F4E79}
+\definecolor{xanhnhat}{HTML}{EAF1F8}
+\definecolor{cam}{HTML}{C55A11}
+\definecolor{xam}{HTML}{6B6B6B}
+
+% ---------- Giá trị file lớp hay ghi đè ----------
+\newcommand{\tenmon}{TOÁN}                                        % file lớp: \renewcommand{\tenmon}{TOÁN 10}
+\newcommand{\chantrang}{Giỏi Toán cùng Trí Trí - ĐT: 0827.06.05.99}  % dòng bên trái chân trang
+
+% ---------- Danh mục chuẩn & thông tin tài liệu ----------
+% Tên lấy từ danh mục của lớp (danhmuc10.tex...). Trong file .tex ghi:
+%   \loai{1}\chuong{3}   |   \loai{2}\de{01}   |   \loai{3}\chuyende{1}
+\newcommand{\dmuc}[2]{\expandafter\def\csname dm@#1\endcsname{#2}}
+\newcommand{\dmucngan}[2]{\expandafter\def\csname dm@#1@ngan\endcsname{#2}}
+\newcommand{\laydm}[1]{\ifcsname dm@#1\endcsname\csname dm@#1\endcsname
+  \else\PackageError{tritoan}{Danh muc chua co muc '#1' (xem file danhmuc cua lop)}{}\fi}
+\newcommand{\laydmngan}[1]{\ifcsname dm@#1@ngan\endcsname\csname dm@#1@ngan\endcsname\else\laydm{#1}\fi}
+
+\newcommand{\tenbo}{}        % bên phải đầu trang: tên bộ tài liệu
+\newcommand{\tentailieu}{}   % tên đầy đủ: chương / chuyên đề / đề (dùng trong tiêu đề)
+\newcommand{\tendau}{}       % tên trên đầu trang (bản ngắn nếu danh mục có)
+\newcommand{\loai}[1]{\renewcommand{\tenbo}{\laydm{loai#1}}}
+\newcommand{\chuong}[1]{\renewcommand{\tentailieu}{\laydm{chuong#1}}\renewcommand{\tendau}{\laydmngan{chuong#1}}}
+\newcommand{\chuyende}[1]{\renewcommand{\tentailieu}{\laydm{chuyende#1}}\renewcommand{\tendau}{\laydmngan{chuyende#1}}}
+\newcommand{\de}[1]{\renewcommand{\tentailieu}{Đề số #1}\renewcommand{\tendau}{Đề số #1}}
+\newcommand{\dattentailieu}[1]{\renewcommand{\tentailieu}{#1}\renewcommand{\tendau}{#1}}  % đặt tay khi cần
+
+% Bên trái đầu trang: nếu vẫn quá dài thì tự thu nhỏ cho vừa, không đè lên tên bộ bên phải
+\newsavebox{\hopdau}
+\newcommand{\daugoc}{\sbox{\hopdau}{\footnotesize\color{xam}\tendau}%
+  \ifdim\wd\hopdau>0.6\textwidth\resizebox{0.6\textwidth}{!}{\usebox{\hopdau}}\else\usebox{\hopdau}\fi}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\daugoc}
+\fancyhead[R]{\footnotesize\bfseries\color{xanh}\tenbo}
+\fancyfoot[L]{\small\color{xanh}\chantrang}
+\fancyfoot[R]{\small Trang \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ---------- Tiêu đề ----------
+% \tieude{\tentailieu}{Bài 1. Mệnh đề}  (dòng trên lấy tên chương từ danh mục)
+% Nhiều bài trong một file: bài đầu \tieude{\tentailieu}{...}, các bài sau \tieude{}{...} (không lặp tên chương)
+% và \baimoi trước mỗi bài để đánh số dạng, bài, ví dụ, câu lại từ 1.
+\newcommand{\baimoi}{\setcounter{dang}{0}\setcounter{bt}{0}\setcounter{vd}{0}\setcounter{cau}{0}}
+\newcommand{\tieude}[2]{%
+  \cophanfalse\dautrang{0}{\if\relax\detokenize{#2}\relax#1\else#2\fi}%
+  \begin{center}
+    \if\relax\detokenize{#1}\relax\else{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\vspace{2pt}\fi
+    {\Large\bfseries\color{xanh}\MakeUppercase{#2}}
+  \end{center}\vspace{4pt}}
+
+% Phần lớn: A. LÝ THUYẾT / B. VÍ DỤ / C. BÀI TẬP
+\newcommand{\phan}[1]{\par\cophantrue\dautrang{1}{#1}\medskip{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\smallskip}
+
+% Dạng bài: \dang{Xét tính đúng sai của mệnh đề}
+\newcounter{dang}
+\newcommand{\dang}[1]{\par\medskip\refstepcounter{dang}\ifcophan\dautrang{2}{Dạng \thedang. #1}\else\dautrang{1}{Dạng \thedang. #1}\fi%
+  \begin{tcolorbox}[colback=xanh,colframe=xanh,coltext=white,boxrule=0pt,arc=2pt,
+    left=6pt,right=6pt,top=3pt,bottom=3pt,before skip=6pt,after skip=4pt]
+  \bfseries Dạng \thedang. #1\end{tcolorbox}}
+
+% Mục nhỏ trong một dạng: loại câu hỏi
+\newcommand{\muc}[1]{\par\smallskip{\bfseries\color{cam}\large\textbullet\ #1}\par\smallskip}
+\newcommand{\muctn}{\muc{Trắc nghiệm nhiều phương án lựa chọn}}
+\newcommand{\mucds}{\muc{Trắc nghiệm đúng sai}}
+\newcommand{\muctln}{\muc{Trắc nghiệm trả lời ngắn}}
+
+% Hộp kiến thức / phương pháp
+\newtcolorbox{kienthuc}{breakable,enhanced,colback=xanhnhat,colframe=xanh,
+  boxrule=0.6pt,arc=2pt,left=6pt,right=6pt,top=4pt,bottom=4pt}
+\newtcolorbox{phuongphap}{breakable,enhanced,colback=white,colframe=cam,boxrule=0.5pt,
+  borderline west={2.5pt}{0pt}{cam},arc=0pt,left=8pt,top=2pt,bottom=2pt,
+  before upper={\textbf{\color{cam}Phương pháp.}\ }}
+
+% ---------- Bài tự luận ----------
+% \begin{bt} Đề bài ... \loigiai{...} \end{bt}
+% Nhãn mức độ (tuỳ chọn, chỉ hiện ở bản GV): \begin{bt}[TH]
+\newcommand{\tt@nhanmuc}[1]{\ifGV\if\relax\detokenize{#1}\relax\else\ {\footnotesize\color{xam}[Mức #1]}\fi\fi}
+\newcounter{bt}
+\newenvironment{bt}[1][]{\par\smallskip\refstepcounter{bt}%
+  \noindent{\bfseries\color{xanh}Bài \thebt.}\tt@nhanmuc{#1}\ \ignorespaces}%
+  {\par}
+
+% Ví dụ có lời giải mẫu (in ở cả hai bản)
+\newcounter{vd}
+\newenvironment{vd}{\par\smallskip\refstepcounter{vd}%
+  \noindent{\bfseries\color{cam}Ví dụ \thevd.}\ \ignorespaces}{\par}
+\newcommand{\giai}[1]{\par{\itshape\bfseries Lời giải.}\ #1\par}
+
+% Lời giải: chỉ in ở bản GV
+\newtcolorbox{hopgiai}{breakable,enhanced,colback=white,colframe=xam,boxrule=0pt,
+  borderline west={1.5pt}{0pt}{xanh},arc=0pt,left=8pt,right=0pt,top=1pt,bottom=1pt,
+  before skip=2pt,after skip=4pt,
+  before upper={{\bfseries\itshape\color{xanh}Lời giải.}\ }}
+\newcommand{\loigiai}[1]{\ifGV\begin{hopgiai}#1\end{hopgiai}\fi}
+% Đáp số ngắn (bài tự luyện): chỉ in ở bản GV
+\newcommand{\dapso}[1]{\ifGV\par{\bfseries\color{xanh}Đáp số:}\ #1\par\fi}
+
+% =====================================================================
+%  CÂU HỎI THEO ĐỊNH DẠNG MỚI: trắc nghiệm (tn), đúng sai (ds), trả lời ngắn (tln)
+%  Ba loại dùng chung bộ đếm "Câu n". Bộ đếm về 1 khi gặp \baimoi hoặc sang PHẦN mới của đề.
+%  Đáp án ghi lại tự động để in bảng đáp án bằng \bangdapan (chỉ in ở bản GV).
+% =====================================================================
+\newcounter{cau}
+\newcommand{\tt@daucau}[1]{\par\smallskip\refstepcounter{cau}%
+  \noindent{\bfseries\color{xanh}Câu \thecau.}\tt@nhanmuc{#1}\ \ignorespaces}
+
+% ---------- Trắc nghiệm 4 phương án ----------
+% \begin{tn}[NB] Đề ... \pa{..}{\dung{..}}{..}{..} \loigiai{...} \end{tn}
+% \pa: 4 cột, \paa: 2 cột, \paaa: mỗi phương án một dòng.
+% \dung{...}: phương án đúng — bản GV in đậm, gạch chân, và ghi vào bảng đáp án.
+\newenvironment{tn}[1][]{\tt@daucau{#1}}{\par}
+\newcommand{\tt@chu}{?}
+\newcommand{\tt@A}{\textbf{A.}~\def\tt@chu{A}}
+\newcommand{\tt@B}{\textbf{B.}~\def\tt@chu{B}}
+\newcommand{\tt@C}{\textbf{C.}~\def\tt@chu{C}}
+\newcommand{\tt@D}{\textbf{D.}~\def\tt@chu{D}}
+\newcommand{\dung}[1]{\tt@ghitn\ifGV\underline{\textbf{#1}}\else#1\fi}
+\newcommand{\pa}[4]{\par\noindent
+  \begin{tabularx}{\linewidth}{@{}XXXX@{}}\tt@A#1&\tt@B#2&\tt@C#3&\tt@D#4\end{tabularx}\par}
+\newcommand{\paa}[4]{\par\noindent
+  \begin{tabularx}{\linewidth}{@{}XX@{}}\tt@A#1&\tt@B#2\\\tt@C#3&\tt@D#4\end{tabularx}\par}
+\newcommand{\paaa}[4]{\par\noindent{\tt@A#1}\par\noindent{\tt@B#2}\par\noindent{\tt@C#3}\par\noindent{\tt@D#4}\par}
+
+% ---------- Đúng sai: 4 ý a), b), c), d) ----------
+% \begin{ds}[TH] Đề ...
+%   \ydung{Ý đúng}  \ysai{Ý sai}  \ydung{...}  \ysai{...}
+%   \loigiai{...}
+% \end{ds}
+% Bản GV in "Đúng"/"Sai" ở cuối mỗi ý.
+\newcounter{ydsai}
+\renewcommand{\theydsai}{\alph{ydsai}}
+\newcommand{\tt@y}[2]{\par\refstepcounter{ydsai}\tt@ghids{#1}%
+  \noindent\hangindent=1.6em\hangafter=1\makebox[1.6em][l]{\bfseries\theydsai)}#2%
+  \ifGV\nobreak\hfill\nobreak{\bfseries\color{cam}\ #1}\fi\par}
+\newcommand{\ydung}[1]{\tt@y{Đúng}{#1}}
+\newcommand{\ysai}[1]{\tt@y{Sai}{#1}}
+\newenvironment{ds}[1][]{\tt@daucau{#1}\setcounter{ydsai}{0}\tt@batdauds}{\tt@ketds\par}
+
+% ---------- Trả lời ngắn ----------
+% \begin{tln}[VD] Đề ... \traloi{2,5} \loigiai{...} \end{tln}
+% Bản GV in đáp số; bản HS không in gì.
+\newenvironment{tln}[1][]{\tt@daucau{#1}}{\par}
+\newcommand{\traloi}[1]{\tt@ghitln{#1}\ifGV\par{\bfseries\color{cam}Đáp số:}\ #1\par\fi}
+
+% ---------- Ghi đáp án và in bảng ----------
+% \bangdapan: in bảng đáp án các câu đã gặp từ lần gọi trước (chỉ bản GV), rồi xoá để dùng tiếp.
+% Đặt ở cuối đề, hoặc cuối mỗi bài học.
+\ExplSyntaxOn
+\prop_new:N \g__tt_tn_prop
+\prop_new:N \g__tt_ds_prop
+\prop_new:N \g__tt_tln_prop
+\tl_new:N \g__tt_ds_tl
+\cs_generate_variant:Nn \prop_gput:Nnn { Nee, Nen }
+% Đáp án trắc nghiệm có thể bị ghi nhiều lần (tabularx đo bảng mấy lượt) nên ghi đè theo số câu.
+\cs_new_protected:Npn \tt@ghitn
+  { \prop_gput:Nee \g__tt_tn_prop { \arabic{cau} } { \tt@chu } }
+\cs_new_protected:Npn \tt@batdauds { \tl_gclear:N \g__tt_ds_tl }
+\cs_new_protected:Npn \tt@ghids #1
+  { \tl_gput_right:Ne \g__tt_ds_tl { \str_if_eq:nnTF {#1} {Đúng} {Đ} {S} } }
+\cs_new_protected:Npn \tt@ketds
+  { \prop_gput:Nee \g__tt_ds_prop { \arabic{cau} } { \g__tt_ds_tl } }
+\cs_new_protected:Npn \tt@ghitln #1
+  { \prop_gput:Nen \g__tt_tln_prop { \arabic{cau} } {#1} }
+
+\tl_new:N \l__tt_cau_tl
+\tl_new:N \l__tt_da_tl
+\tl_new:N \l__tt_bang_tl
+\int_new:N \l__tt_dem_int
+\dim_new:N \l__tt_rong_dim
+\cs_new_protected:Npn \__tt_xa_hang:
+  {
+    \tl_put_right:Ne \l__tt_bang_tl
+      {
+        \exp_not:N \begin{tabular}{|l|*{\int_use:N \l__tt_dem_int}{>{\exp_not:N \centering \exp_not:N \arraybackslash}p{\dim_use:N \l__tt_rong_dim}|}} \exp_not:N \hline
+        \exp_not:N \bfseries Câu \exp_not:V \l__tt_cau_tl \exp_not:N \\ \exp_not:N \hline
+        Đáp~án \exp_not:V \l__tt_da_tl \exp_not:N \\ \exp_not:N \hline
+        \exp_not:N \end{tabular} \exp_not:N \par \exp_not:N \smallskip
+      }
+    \tl_clear:N \l__tt_cau_tl
+    \tl_clear:N \l__tt_da_tl
+    \int_zero:N \l__tt_dem_int
+  }
+% #1: danh sách đáp án, #2: tên loại, #3: số câu mỗi hàng, #4: độ rộng ô
+\cs_new_protected:Npn \__tt_bang:Nnnn #1#2#3#4
+  {
+    \prop_if_empty:NF #1
+      {
+        \dim_set:Nn \l__tt_rong_dim {#4}
+        \tl_clear:N \l__tt_bang_tl
+        \int_zero:N \l__tt_dem_int
+        \prop_map_inline:Nn #1
+          {
+            \tl_put_right:Nn \l__tt_cau_tl { & ##1 }
+            \tl_put_right:Nn \l__tt_da_tl { & ##2 }
+            \int_incr:N \l__tt_dem_int
+            \int_compare:nNnT \l__tt_dem_int = {#3} { \__tt_xa_hang: }
+          }
+        \int_compare:nNnT \l__tt_dem_int > 0 { \__tt_xa_hang: }
+        \par \noindent { \bfseries \color{xanh} #2 } \par
+        \noindent \tl_use:N \l__tt_bang_tl
+      }
+    \prop_gclear:N #1
+  }
+\NewDocumentCommand \bangdapan { }
+  {
+    \ifGV
+      \par \medskip
+      \begin{center} { \large \bfseries \color{xanh} BẢNG ~ ĐÁP ~ ÁN } \end{center}
+      \__tt_bang:Nnnn \g__tt_tn_prop { Trắc~nghiệm~nhiều~phương~án } { 12 } { 0.8cm }
+      \__tt_bang:Nnnn \g__tt_ds_prop { Trắc~nghiệm~đúng~sai } { 8 } { 1.4cm }
+      \__tt_bang:Nnnn \g__tt_tln_prop { Trắc~nghiệm~trả~lời~ngắn } { 8 } { 1.4cm }
+    \else
+      \prop_gclear:N \g__tt_tn_prop
+      \prop_gclear:N \g__tt_ds_prop
+      \prop_gclear:N \g__tt_tln_prop
+    \fi
+  }
+\ExplSyntaxOff
+
+% =====================================================================
+%  ĐỀ KIỂM TRA
+%  Thông tin đề (ghi trước \taodaude, cái nào không ghi thì lấy mặc định):
+%    \so{...} \truong{...} \kythi{...} \thoigian{...} \made{...}
+%  \taodaude         : khung đầu đề, họ tên, số báo danh; đổi chân trang thành "Trang x/y - Mã đề"
+%  \phantn \phands \phantln : PHẦN I, II, III kèm lời dặn chuẩn; số câu tự đếm
+%  \hetde            : dòng "HẾT"
+% =====================================================================
+\newcommand{\tt@so}{SỞ GIÁO DỤC VÀ ĐÀO TẠO HÀ NỘI}
+\newcommand{\tt@truong}{TRƯỜNG THPT PHAN HUY CHÚ - ĐỐNG ĐA}
+\newcommand{\tt@kythi}{ĐỀ KIỂM TRA}
+\newcommand{\tt@thoigian}{90 phút}
+\newcommand{\tt@made}{}
+\newcommand{\so}[1]{\renewcommand{\tt@so}{#1}}
+\newcommand{\truong}[1]{\renewcommand{\tt@truong}{#1}}
+\newcommand{\kythi}[1]{\renewcommand{\tt@kythi}{#1}}
+\newcommand{\thoigian}[1]{\renewcommand{\tt@thoigian}{#1}}
+\newcommand{\made}[1]{\renewcommand{\tt@made}{#1}}
+
+\fancypagestyle{de}{\fancyhf{}%
+  \fancyfoot[C]{\small Trang \thepage/\pageref*{LastPage}%
+    \if\relax\detokenize\expandafter{\tt@made}\relax\else\ -- Mã đề \tt@made\fi}%
+  \renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}}
+
+\newcommand{\taodaude}{%
+  \pagestyle{de}\thispagestyle{de}%
+  \noindent\begin{tabularx}{\linewidth}{@{}>{\centering\arraybackslash}p{0.5\linewidth}
+      >{\centering\arraybackslash}X@{}}
+    \small\tt@so & \bfseries\MakeUppercase{\tt@kythi}\\
+    \small\bfseries\tt@truong & \bfseries Môn: \tenmon\\
+    \rule[3pt]{0.5\linewidth}{0.4pt} & \itshape Thời gian làm bài: \tt@thoigian, không kể thời gian phát đề\\
+    \itshape(Đề có \pageref*{LastPage} trang) &
+  \end{tabularx}\par\medskip
+  \noindent Họ, tên học sinh: \makebox[6.3cm]{\dotfill}\quad Số báo danh: \makebox[2.6cm]{\dotfill}%
+  \if\relax\detokenize\expandafter{\tt@made}\relax\else
+    \hfill\fbox{\bfseries Mã đề \tt@made}\fi
+  \par\medskip}
+
+% PHẦN I, II, III: đánh số La Mã tự động, câu đánh lại từ 1, lời dặn ghi số câu cuối (đúng từ lượt dịch thứ hai).
+% Ghi nhãn thẳng vào .aux (không dùng \label) vì lastpage sang trang ở cuối tài liệu trước khi nhãn kịp in ra.
+\newcounter{phande}
+\newcommand{\tt@chotphan}{\ifnum\value{phande}>0
+  \immediate\write\@auxout{\string\newlabel{tt@hetphan\arabic{phande}}{{\arabic{cau}}{}{}{}{}}}\fi}
+\AtEndDocument{\tt@chotphan}
+\newcommand{\tt@phande}[2]{\tt@chotphan\stepcounter{phande}\setcounter{cau}{0}%
+  \par\medskip\noindent{\bfseries\color{xanh}PHẦN \Roman{phande}. #1}\
+  Thí sinh trả lời từ câu 1 đến câu \ref*{tt@hetphan\arabic{phande}}.#2\par\smallskip}
+\newcommand{\phantn}{\tt@phande{Câu trắc nghiệm nhiều phương án lựa chọn.}
+  { Mỗi câu hỏi thí sinh chỉ chọn một phương án.}}
+\newcommand{\phands}{\tt@phande{Câu trắc nghiệm đúng sai.}
+  { Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn đúng hoặc sai.}}
+\newcommand{\phantln}{\tt@phande{Câu trắc nghiệm trả lời ngắn.}{}}
+\newcommand{\hetde}{\par\medskip\begin{center}\bfseries\rule[0.6ex]{3cm}{0.4pt}\quad HẾT\quad\rule[0.6ex]{3cm}{0.4pt}\end{center}}
+
+% ---------- Ý nhỏ a), b), c) xếp theo hàng ngang ----------
+% \begin{cacy}(2) \item ... \item ... \end{cacy}   (số cột trong ngoặc tròn, bỏ trống = 1 cột)
+\RequirePackage{tasks}
+\NewTasksEnvironment[label=\alph*),label-width=1.3em,item-indent=1.6em,
+  before-skip=1pt,after-skip=2pt,after-item-skip=2pt]{cacy}[\item](1)
+
+% ---------- Hình ----------
+% Ô giữ chỗ hình vẽ (chờ vẽ lại bằng TikZ): \hinhcho{số trang gốc}{mô tả}
+\newcommand{\hinhcho}[2]{\par\begin{center}\fcolorbox{cam}{white}{\parbox{0.8\linewidth}{\footnotesize
+  \textbf{\color{cam}[Hình — trang #1]}\ #2}}\end{center}}
+% Hình gốc cắt từ PDF nguồn: \hinhgoc{duong/dan/hinh.pdf}{mô tả (không in)}
+% Đường dẫn tính từ thư mục ngân hàng của dự án; app (hoặc xuat.py) tự chép file hình khi biên dịch.
+\RequirePackage[export]{adjustbox}
+\newcommand{\hinhgoc}[2]{\par\begin{center}\includegraphics[max width=0.6\linewidth]{#1}\end{center}}
+% Chỗ bản số hóa chưa đọc rõ: \chuaro{?}
+\newcommand{\chuaro}[1]{\colorbox{yellow}{\textbf{#1}}}
+
+% ---------- Lệnh toán hay dùng ----------
+\newcommand{\heva}[1]{\left\{\begin{aligned}#1\end{aligned}\right.}
+\newcommand{\hoac}[1]{\left[\begin{aligned}#1\end{aligned}\right.}
+\providecommand{\wideparen}[1]{\mathop{\overset{\frown}{#1}}}  % cung AB
+\providecommand{\overarc}[1]{\wideparen{#1}}
+\providecommand{\widearc}[1]{\wideparen{#1}}
+% Kiểu Việt Nam: ≥ ≤ viết nghiêng (⩾ ⩽)
+\AtBeginDocument{\let\geq\geqslant\let\ge\geqslant\let\leq\leqslant\let\le\leqslant}
+
+% ---------- Dấu trang: mục lục trong PDF, hiện ở thanh bên của app ----------
+% \tieude là cấp 0, \phan cấp 1, \dang cấp 2. hidelinks để chữ không bị khung màu.
+\RequirePackage[unicode,bookmarksopen=true,hidelinks]{hyperref}
+\newif\ifcophan  % đã có \phan trước \dang chưa: có thì \dang nằm cấp 2, chưa thì cấp 1 (tránh nhảy cấp làm mục lục lồng sai)
+\newcounter{dautrang}
+\newcommand{\dautrang}[2]{\refstepcounter{dautrang}\pdfbookmark[#1]{#2}{dautrang.\thedautrang}}
+
+\endinput

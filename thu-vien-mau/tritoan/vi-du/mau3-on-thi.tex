@@ -1,0 +1,52 @@
+% MẪU 3 — Chuyên đề ôn thi tốt nghiệp THPT: nhiều chuyên đề, mỗi chuyên đề vài bài.
+% Mỗi bài: A. Lý thuyết, B. Ví dụ, C. Bài tập (trắc nghiệm, đúng sai, trả lời ngắn để lẫn).
+% Đổi lớp: chỉ sửa dòng \usepackage{toan12}.
+\documentclass[12pt]{article}
+\usepackage{toan12}
+\begin{document}
+\loai{3}\chuyende{1}
+
+\tieude{\tentailieu}{Bài 1. Tính đơn điệu của hàm số}
+
+\phan{A. Lý thuyết}
+\begin{kienthuc}
+Cho hàm số $y=f(x)$ có đạo hàm trên khoảng $K$. Nếu $f'(x)>0$ với mọi $x\in K$ thì $f$ đồng biến trên $K$.
+\end{kienthuc}
+
+\phan{B. Ví dụ}
+\begin{vd}
+Tìm các khoảng đơn điệu của hàm số $y=x^3-3x$.
+\giai{$y'=3x^2-3=0\iff x=\pm1$. Hàm số đồng biến trên $(-\infty;-1)$ và $(1;+\infty)$, nghịch biến trên $(-1;1)$.}
+\end{vd}
+
+\phan{C. Bài tập}
+\begin{tn}[NB]
+Hàm số $y=x^3$ đồng biến trên khoảng nào?
+\pa{\dung{$\mathbb{R}$}}{$(0;+\infty)$ chỉ}{$(-\infty;0)$}{$(-1;1)$}
+\end{tn}
+\begin{ds}[TH]
+Cho hàm số $y=x^4-2x^2$.
+\ydung{$y'=4x^3-4x$.}
+\ysai{Hàm số đồng biến trên $(-1;0)$ và $(0;1)$.}
+\ydung{Hàm số nghịch biến trên $(-\infty;-1)$.}
+\ysai{Hàm số có đúng một điểm cực trị.}
+\end{ds}
+\begin{tln}[VD]
+Có bao nhiêu giá trị nguyên của $m\in[-5;5]$ để hàm số $y=x^3-3x^2+mx$ đồng biến trên $\mathbb{R}$?
+\traloi{3}
+\loigiai{$y'=3x^2-6x+m\ge0\ \forall x \iff \Delta'=9-3m\le0\iff m\ge3$. Có $m\in\{3;4;5\}$.}
+\end{tln}
+\begin{tn}[TH]
+Hàm số $y=\dfrac{x-1}{x+1}$
+\paa{nghịch biến trên $\mathbb{R}\setminus\{-1\}$.}{\dung{đồng biến trên từng khoảng xác định.}}{đồng biến trên $\mathbb{R}$.}{nghịch biến trên từng khoảng xác định.}
+\end{tn}
+
+\bangdapan
+
+% ===================== BÀI 2 =====================
+\newpage\baimoi
+\tieude{}{Bài 2. Cực trị của hàm số}
+\phan{A. Lý thuyết}
+\phan{B. Ví dụ}
+\phan{C. Bài tập}
+\end{document}
