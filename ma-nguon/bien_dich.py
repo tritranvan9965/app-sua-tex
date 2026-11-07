@@ -64,18 +64,55 @@ def tim_mau(thu_muc: Path) -> dict:
     return thay
 
 
-def chep_mau(tex: Path, chu: str, tam: Path):
-    """Mở nhanh không có cấu hình dự án: lấy mẫu gần file nhất, không có thì lấy trong thư viện mẫu.
-    Chép kèm các file nằm cạnh mẫu."""
+def ten_can(chu: str) -> set:
+    """Tên file .sty, .cls mà một đoạn LaTeX gọi bằng usepackage, RequirePackage, documentclass."""
     goi = re.findall(r"(?m)^[^%\n]*\\(?:usepackage|RequirePackage)(?:\[[^\]]*\])?\{([^}]+)\}", chu)
     lop = re.findall(r"(?m)^[^%\n]*\\documentclass(?:\[[^\]]*\])?\{([^}]+)\}", chu)
-    can = {f"{x.strip()}.sty" for g in goi for x in g.split(",")} | {f"{x.strip()}.cls" for x in lop}
-    thay = {**loi.cac_mau()["noi"], **tim_mau(tex.parent)}
-    for ten in can - {f.name for f in tam.iterdir()}:
+    return {f"{x.strip()}.sty" for g in goi for x in g.split(",")} | {f"{x.strip()}.cls" for x in lop}
+
+
+def chep_goi(thay: dict, ten: str, tam: Path):
+    """Chép thư mục chứa gói `ten` vào chỗ biên dịch, không ghi đè file đã có."""
+    for f in thay[ten].iterdir():
+        if f.is_file() and f.suffix.lower() in CHEP_KEM and not (tam / f.name).exists():
+            shutil.copy(f, tam / f.name)
+
+
+def chep_phu_thuoc(tam: Path, thay: dict, sau_toi_da: int = 6):
+    """Dò các gói mà .sty, .cls đã có trong chỗ biên dịch gọi tiếp (lõi dùng chung như tritoan.sty), chép những gói còn thiếu.
+    Gói hệ thống như amsmath không có trong `thay` thì bỏ qua. Giới hạn số vòng để không lặp mãi."""
+    da_xet = set()
+    for _ in range(sau_toi_da):
+        moi = False
+        for f in list(tam.iterdir()):
+            if f.suffix.lower() not in (".sty", ".cls") or f.name in da_xet:
+                continue
+            da_xet.add(f.name)
+            try:
+                chu = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            for ten in ten_can(chu):
+                if ten in thay and not (tam / ten).exists():
+                    chep_goi(thay, ten, tam)
+                    moi = True
+        if not moi:
+            return
+
+
+def chep_mau(tex: Path, chu: str, tam: Path, thay: dict = None):
+    """Mở nhanh không có cấu hình dự án: lấy mẫu gần file nhất, không có thì lấy trong thư viện mẫu.
+    Chép kèm các file nằm cạnh mẫu, rồi các gói mà mẫu đó gọi tiếp."""
+    thay = thay or tim_thay(tex)
+    for ten in ten_can(chu) - {f.name for f in tam.iterdir()}:
         if ten in thay:
-            for f in thay[ten].iterdir():
-                if f.is_file() and f.suffix.lower() in CHEP_KEM and not (tam / f.name).exists():
-                    shutil.copy(f, tam / f.name)
+            chep_goi(thay, ten, tam)
+    chep_phu_thuoc(tam, thay)
+
+
+def tim_thay(tex: Path) -> dict:
+    """Nơi tìm gói còn thiếu: gần file .tex trước, rồi đến thư viện mẫu."""
+    return {**loi.cac_mau()["noi"], **tim_mau(tex.parent)}
 
 
 def them_mau(nguon: Path, ghi_de: bool = False) -> dict:
@@ -127,7 +164,9 @@ def bien_dich(tex: Path, chu: str, ban: str, dich: Path = None) -> tuple:
         du = chep_nguon(tex.parent, tam)
         chep_them(da, tam)
         chep_hinh(da, chu, tam)
-        if not da["xuat"]["chep_them"]:
+        if da["xuat"]["chep_them"]:
+            chep_phu_thuoc(tam, tim_thay(tex))  # chỉ bổ sung gói thiếu, không đè file của dự án
+        else:
             chep_mau(tex, than, tam)
         # Lệnh chọn bản để cùng dòng đầu, để số dòng trong báo lỗi vẫn khớp file gốc.
         (tam / f"{TEN_CHINH}.tex").write_text(da["xuat"]["ban"].get(ban, "") + than, encoding="utf-8")
