@@ -459,6 +459,25 @@ dialog h2{font-size:17px;margin:0}
   padding:4px 6px 4px 0;border-radius:4px}
 .dong:hover{background:var(--le)}
 .khoi.lt .dong:hover{background:#17639c14}
+.keo-tay,.keo-xoa{display:inline-grid;place-items:center;width:24px;height:24px;padding:0;border:0;border-radius:4px;background:none;color:var(--muc-mo);align-self:center}
+.keo-tay{cursor:grab;touch-action:none;opacity:.55}
+.keo-xoa{margin-left:auto;opacity:0}
+.keo-tay .bt,.keo-xoa .bt{width:16px;height:16px}
+.khoi:hover .keo-tay,.khoi:hover .keo-xoa,.keo-tay:focus-visible,.keo-xoa:focus-visible{opacity:1}
+.keo-tay:hover{background:var(--le);color:var(--bang)}
+.keo-xoa:hover,.keo-xoa:focus-visible{background:var(--but-do-nhat);color:var(--but-do)}
+.dang-keo-khoi,.dang-keo-khoi *{cursor:grabbing!important;user-select:none}
+.khoi.dang-keo{opacity:.4}
+.keo-vach{position:absolute;left:10px;right:10px;height:3px;border-radius:2px;background:var(--bang-sang);pointer-events:none;z-index:3}
+.keo-vach::before{content:"";position:absolute;left:-4px;top:-3px;width:9px;height:9px;border-radius:50%;background:var(--bang-sang)}
+.khoi.vua-keo{animation:vua-keo 1.2s ease-out}
+@keyframes vua-keo{from{background:#2b5a4d33}to{background:transparent}}
+#keo-bao{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:var(--muc);color:#fff;padding:8px 10px 8px 14px;border-radius:8px;box-shadow:0 4px 16px #0003;z-index:8;font-size:13px}
+#keo-bao[hidden]{display:none}
+#keo-bao button{border:1px solid #ffffff66;background:none;color:#fff;border-radius:5px;padding:2px 10px;font-size:13px}
+#keo-bao button:hover{background:#ffffff22}
+#keo-bao small{opacity:.6}
+@media (prefers-reduced-motion:reduce){.khoi.vua-keo{animation:none}}
 .dong.pa{display:inline-grid;vertical-align:top;width:calc(50% - 2px);grid-template-columns:24px minmax(0,1fr)}
 .dong.pa .so{font-weight:700;color:var(--muc)}
 .dong.pa.dung .so,.dong.pa.dung .nd{color:#17703f;font-weight:700}
