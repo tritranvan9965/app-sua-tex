@@ -138,12 +138,18 @@ function tachDong(chu, m, a, b, ds) {
 
 const gonTen = s => s.replace(/\\[a-zA-Z]+\*?|[{}$\\]/g, " ").replace(/\s+/g, " ").trim();
 
+// Mã câu: theo nhãn của dự án nếu có; không thì tự nhận "%@ ... id=MÃ | ..." ở dòng trên câu,
+// hoặc "%[MÃ]" ngay sau \begin{...} cùng dòng (kiểu ex_test).
+const ID_TU_NHAN = /^\s*%@(?:.*?[\s|])?id=([^ |\n]+)/;
 function idTruoc(chu, d) {
-  if (!MAU_ID) return null;
   let c = d;
   while (c > 0 && /\s/.test(chu[c - 1])) c--;
-  const ma = chu.slice(chu.lastIndexOf("\n", c - 1) + 1, c).match(MAU_ID);
-  return ma ? ma[1] : null;
+  const tren = chu.slice(chu.lastIndexOf("\n", c - 1) + 1, c);
+  const ma = (MAU_ID && tren.match(MAU_ID)) || tren.match(ID_TU_NHAN);
+  if (ma) return ma[1];
+  const het = chu.indexOf("\n", d);
+  const cung = chu.slice(d, het < 0 ? chu.length : het).match(/^\\begin\{[^}]*\}(?:\[[^\]\n]*\])?\s*%\s*\[([^\]\n]+)\]/);
+  return cung ? cung[1].trim() : null;
 }
 
 // Tách cả file thành các khối theo thứ tự. loai là muc (tiêu đề), bai, lt (lý thuyết) hoặc tu-do (phần còn lại).
@@ -170,7 +176,7 @@ function phanTichFile(chu) {
       them({loai: "tu-do", dau: vt, cuoi: d}, () => quetVung(chu, vt, d, "de", dong));
       if (t[1]) {
         const ten = t[1][0].toUpperCase() + t[1].slice(1).toLowerCase();
-        themBai(ten === "Bài tập" ? "Bài" : ten, +t[2], d, het, d, het);
+        themBai(ten === "Bài tập" ? "Bài" : ten, +t[2], d, het, d, het, {id: idTruoc(chu, d + m.slice(d, het).search(/\S/))});  // m đã che dòng ghi chú nên nhảy tới đúng chữ "Câu"
         vt = het;
         return;
       }
