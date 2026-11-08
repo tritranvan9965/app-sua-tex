@@ -62,10 +62,26 @@ def luu_anh(tex: Path, chu: str, du_lieu: bytes, duoi: str) -> str:
     return f"hinh/{tm.name}/{p.name}"
 
 
-def anh_khong_dung(tex: Path, chu: str) -> list:
-    """Ảnh trong hinh/<tên file>/ mà văn bản không còn nhắc tới (tính cả dòng ghi chú, cho chắc)."""
+def da_dung_truoc(tex: Path, ds_ref: list) -> set:
+    """Tên file (có đuôi) trong hinh/<tên file>/ mà các đường dẫn ds_ref trỏ tới. Đường dẫn trỏ ra thư mục khác thì bỏ qua."""
     tm = thu_muc_anh(tex)
-    if not tm.is_dir():
-        return []
-    return [f for f in sorted(tm.iterdir())
-            if f.is_file() and f.suffix.lower() in DUOI_THU_MUC and not re.search(r"(?<![\w])" + re.escape(f.stem) + r"(?![\w])", chu)]
+    ra = set()
+    for ref in ds_ref if isinstance(ds_ref, list) else []:
+        if not isinstance(ref, str):
+            continue
+        r = Path(ref.strip().replace("\\", "/"))
+        if r.parent.as_posix() not in (".", f"hinh/{tm.name}"):
+            continue
+        for f in tm.iterdir() if tm.is_dir() else []:
+            if f.is_file() and f.stem == r.stem and r.suffix.lower() in ("", f.suffix.lower()):
+                ra.add(f.name)
+    return ra
+
+
+def anh_khong_dung(tex: Path, chu: str, ds_ref: list) -> list:
+    """Ảnh trong hinh/<tên file>/ mà file này từng dùng (có trong ds_ref: lúc mở, lúc lưu trước, hoặc app vừa thêm)
+    và văn bản nay không còn nhắc tới (tính cả dòng ghi chú, cho chắc). Ảnh lạ chưa từng được nhắc tới thì không đụng."""
+    tm = thu_muc_anh(tex)
+    da = da_dung_truoc(tex, ds_ref)
+    return [f for f in sorted(tm.iterdir() if tm.is_dir() else [])
+            if f.is_file() and f.name in da and f.suffix.lower() in DUOI_THU_MUC and not re.search(r"(?<![\w])" + re.escape(f.stem) + r"(?![\w])", chu)]

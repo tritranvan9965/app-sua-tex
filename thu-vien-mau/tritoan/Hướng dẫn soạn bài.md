@@ -128,5 +128,4 @@ Tỉ lệ là phần của độ rộng dòng (`\linewidth`). Lệnh `\hinhgoc` 
 - Bấm vào ảnh để chọn: kéo núm ở góc để đổi cỡ, nút nhỏ cạnh ảnh để thay ảnh, đổi căn giữa hay bên phải, cắt ảnh, sửa code, xoá.
 - Mỗi thay đổi là một bước Ctrl+Z.
 
-**6. Xoá ảnh.** Xoá ảnh là bỏ lệnh khỏi `.tex` ngay, Ctrl+Z lấy lại được. Khi **Lưu**, ảnh trong `hinh\X\` mà file `.tex` không còn dùng thì TriTeX đưa vào Thùng rác của Windows (lấy lại được từ đó). Chỉ xét thư mục `hinh\X\` của chính file đó, ảnh ở nơi khác không bị đụng.
-
+**6. Xoá ảnh.** Xoá ảnh là bỏ lệnh khỏi `.tex` ngay, Ctrl+Z lấy lại được. Khi **Lưu**, ảnh bạn đã xóa khỏi bài (ảnh file từng dùng khi mở hoặc lúc lưu trước, hoặc TriTeX vừa thêm, nay không còn lệnh nào nhắc tới) được đưa vào Thùng rác của Windows, lấy lại được từ đó. Ảnh tự chép vào `hinh\X\` mà bài chưa từng dùng thì không bị đụng, ảnh ở nơi khác cũng vậy.

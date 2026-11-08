@@ -312,9 +312,16 @@ async function anhChuanHoa(file) {
   return {du_lieu: await anhBase64(blob), duoi};
 }
 
+const anhDaThem = new Set();  // ảnh app vừa thêm vào trong phiên (kể cả khi đã bỏ khỏi bài trước khi Lưu)
+
+// Ảnh file đã dùng: có trong bản lúc mở hoặc lúc lưu trước, và ảnh app vừa thêm. Máy chủ chỉ dọn ảnh nằm trong danh sách này.
+const anhDaDung = () => [...new Set([...anhTim(tt.chuGoc || "").map(c => tt.chuGoc.slice(c.ref.dau, c.ref.cuoi).trim()), ...anhDaThem])];
+
 async function anhTaiLen(file) {
   const {du_lieu, duoi} = await anhChuanHoa(file);
-  return (await goi("/api/anh-them", {duong: tt.tep.duong, chu: soan.getValue(), du_lieu, duoi})).ref;
+  const ref = (await goi("/api/anh-them", {duong: tt.tep.duong, chu: soan.getValue(), du_lieu, duoi})).ref;
+  anhDaThem.add(ref);
+  return ref;
 }
 
 function anhChonQuaInput() {

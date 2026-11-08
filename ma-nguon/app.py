@@ -169,15 +169,15 @@ def luu(d: dict) -> dict:
         lc["file_khac"] = [str(tep_trong_du_an(f)) for f in lc.get("file_khac", [])]
     with KHOA:
         kq = loi.luu(DA, DM, p, d.get("chu", ""), lua_chon)
-    return {**kq, "phien": phien(p), "anh_xoa": don_anh(p, d.get("chu", ""))}
+    return {**kq, "phien": phien(p), "anh_xoa": don_anh(p, d.get("chu", ""), d.get("anh_da_dung"))}
 
 
-def don_anh(p: Path, chu: str) -> int:
+def don_anh(p: Path, chu: str, ds_ref=None) -> int:
     """Ảnh trong hinh/<tên file>/ mà file không còn dùng thì đưa vào Thùng rác. Lỗi ở đây không được làm hỏng việc lưu."""
     if p.suffix.lower() != ".tex":
         return 0
     dem = 0
-    for f in anh_dong.anh_khong_dung(p, chu):
+    for f in anh_dong.anh_khong_dung(p, chu, ds_ref):
         try:
             chay_ps(LENH_XOA_TEP, "Không xoá được ảnh.", TEP_XOA=str(f))
             dem += 1

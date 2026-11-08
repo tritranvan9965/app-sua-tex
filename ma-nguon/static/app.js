@@ -744,7 +744,7 @@ async function luu() {
     const pt = await goi("/api/phan-tich", {duong: tt.tep.duong, chu});
     const canHoi = pt.xoa.length || pt.moi.length || pt.doi.some(x => x.ngan_hang || x.file_khac.length);
     if (canHoi && !await veHopLuu(pt)) return;
-    const kq = await goi("/api/luu", {duong: tt.tep.duong, phien: tt.tep.phien, chu, lua_chon: canHoi ? docLuaChon() : {}});
+    const kq = await goi("/api/luu", {duong: tt.tep.duong, phien: tt.tep.phien, chu, lua_chon: canHoi ? docLuaChon() : {}, anh_da_dung: anhDaDung()});
     tt.tep.phien = kq.phien;
     tt.chuGoc = chu;
     const them = [kq.ngan_hang && `${kq.ngan_hang} câu trong ngân hàng`, kq.file_khac && `${kq.file_khac} file khác`, kq.anh_xoa && `${kq.anh_xoa} ảnh vào Thùng rác`].filter(Boolean);
