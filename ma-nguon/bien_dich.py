@@ -152,6 +152,61 @@ def trich_log(chu_log: str) -> str:
     return "\n".join(loi_tex) or "LaTeX dừng mà không ghi lý do."
 
 
+LENH_LOI_GIAI = ("loigiai", "giai", "huongdan")
+MOI_TRUONG_LOI_GIAI = re.compile(r"\\begin\{(loigiai|solution|giai)\*?\}.*?\\end\{\1\*?\}", re.S)
+
+
+def mau_hieu_banhs(than: str, tam: Path) -> bool:
+    r"""Mẫu mà file gọi (kể cả mẫu mà mẫu đó gọi tiếp) có xử lý \BANHS không. Chỉ nhìn các gói file thật sự dùng."""
+    if re.search(r"\\(?:ifdefined|ifx)\s*\\BANHS|\\@ifundefined\{BANHS\}", than):
+        return True
+    cho, da = list(ten_can(than)), set()
+    while cho:
+        ten = cho.pop()
+        if ten in da:
+            continue
+        da.add(ten)
+        f = tam / ten
+        if not f.is_file():
+            continue
+        chu = f.read_text(encoding="utf-8", errors="replace")
+        if "BANHS" in chu:
+            return True
+        cho += ten_can(chu)
+    return False
+
+
+def bo_loi_giai(chu: str, them: tuple = ()) -> str:
+    r"""Bỏ \loigiai{...}, \giai{...}, \huongdan{...} (đúng cặp ngoặc) và môi trường loigiai, solution.
+    Giữ nguyên số dòng, để số dòng trong báo lỗi LaTeX vẫn khớp file gốc."""
+    ten = "|".join(re.escape(x) for x in dict.fromkeys((*LENH_LOI_GIAI, *them)))
+    mau, ra, vt = re.compile(rf"\\(?:{ten})(?![a-zA-Z@])[ \t]*\{{"), [], 0
+    for m in mau.finditer(chu):
+        dau_dong = chu.rfind("\n", 0, m.start()) + 1
+        if m.start() < vt or re.search(r"(?<!\\)%", chu[dau_dong:m.start()]):
+            continue  # nằm trong khối vừa bỏ, hoặc trong ghi chú
+        i, sau = m.end(), 1
+        while i < len(chu) and sau:
+            c = chu[i]
+            if c == "\\":
+                i += 1
+            elif c == "%":
+                h = chu.find("\n", i)
+                i = len(chu) if h < 0 else h
+                continue
+            elif c == "{":
+                sau += 1
+            elif c == "}":
+                sau -= 1
+            i += 1
+        if sau:
+            continue  # ngoặc không đóng: để nguyên cho LaTeX báo lỗi
+        ra.append(chu[vt:m.start()] + "\n" * chu.count("\n", m.start(), i))
+        vt = i
+    chu = "".join(ra) + chu[vt:]
+    return MOI_TRUONG_LOI_GIAI.sub(lambda m: "\n" * m.group(0).count("\n"), chu)
+
+
 def bien_dich(tex: Path, chu: str, ban: str, dich: Path = None) -> tuple:
     """Trả về (được hay không, nhật ký). File có documentclass thì dịch thẳng, file mảnh thì bọc trước.
     dich là nơi ghi PDF; không nêu thì ghi vào đường thành phẩm, mặc định là cạnh file .tex."""
@@ -168,8 +223,11 @@ def bien_dich(tex: Path, chu: str, ban: str, dich: Path = None) -> tuple:
             chep_phu_thuoc(tam, tim_thay(tex))  # chỉ bổ sung gói thiếu, không đè file của dự án
         else:
             chep_mau(tex, than, tam)
+        lenh_ban = da["xuat"]["ban"].get(ban, "")
+        if "BANHS" in lenh_ban and not mau_hieu_banhs(than, tam):
+            than = bo_loi_giai(than, (da["cau"]["loi_giai"],))  # mẫu không biết \BANHS: tự bỏ lời giải khỏi bản tạm để biên dịch
         # Lệnh chọn bản để cùng dòng đầu, để số dòng trong báo lỗi vẫn khớp file gốc.
-        (tam / f"{TEN_CHINH}.tex").write_text(da["xuat"]["ban"].get(ban, "") + than, encoding="utf-8")
+        (tam / f"{TEN_CHINH}.tex").write_text(lenh_ban + than, encoding="utf-8")
         try:
             for _ in range(2):  # lượt hai để mục lục và tham chiếu đúng
                 subprocess.run(["xelatex", "-interaction=nonstopmode", "-halt-on-error", f"{TEN_CHINH}.tex"], cwd=tam,

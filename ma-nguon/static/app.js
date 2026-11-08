@@ -4,7 +4,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdfjs/pdf.worker.min.js
 
 // Đặt theo dự án đang mở (napDuAn).
 let DAU = "", MAU_ID = null, LOI_GIAI = "\\loigiai{", MAU_PDF = "", MACRO = {}, LENH = [];
-const tt = {tep: null, chuGoc: "", khoi: [], dong: [], soDongDau: 0, hienTai: null, ban: "", pdf: null, trangBai: {}, mocPdf: {}, soLanPdf: 0, daThuDich: new Set(), dangXuat: false, xuatLai: false, nhanBan: {}, dsBan: [], dangBan: false,
+const tt = {tep: null, chuGoc: "", khoi: [], dong: [], soDongDau: 0, hienTai: null, ban: "", pdf: null, trangBai: {}, mocPdf: {}, soLanPdf: 0, daThuDich: new Set(), dangXuat: false, xuatLai: false, nhanBan: {}, dsBan: [], banMacDinh: false, khongHauTo: null, dangBan: false,
   cheDo: "dong", dangSua: null, viec: "", pdfDaLuu: false};
 
 const soan = CodeMirror.fromTextArea($("o-soan"), {mode: "stex", lineNumbers: true, lineWrapping: true, tabSize: 2, autofocus: false});
@@ -173,7 +173,9 @@ function datCauHinh(da) {
   tt.ban = da.ban[0] || "";
   tt.nhanBan = da.nhan_ban || {};
   tt.dsBan = da.ban;
-  // Hai bản thì là một dấu tích: tích là bản đầu (có đáp án), bỏ tích là bản sau. Nhiều bản hơn thì mới cần nút riêng cho từng bản.
+  tt.banMacDinh = !!da.ban_mac_dinh;
+  tt.khongHauTo = da.ban_khong_hau_to || null;
+  // Hai bản thì là một công tắc "Ẩn đáp án": bản đầu có đáp án, bản sau ẩn đáp án. Nhiều bản hơn thì mới cần nút riêng cho từng bản.
   const hop = $("chon-ban"), tich = da.ban.length === 2;
   hop.className = tich ? "" : "chon-ban";
   if (tich) {
@@ -181,9 +183,12 @@ function datCauHinh(da) {
     b.type = "button";
     b.id = "tich-ban";
     b.className = "nut-dau";
-    b.innerHTML = `${bieuTuong("o-trong")}<span class="chu-nut"></span>`;
-    b.dataset.chu = "x";
-    b.onclick = () => chonBan(da.ban[tt.ban === da.ban[0] ? 1 : 0]);
+    b.innerHTML = `${bieuTuong("mat")}<span class="chu-nut">Ẩn đáp án</span>`;
+    b.dataset.chu = "Ẩn đáp án";
+    b.dataset.ten = "Ẩn đáp án";
+    b.setAttribute("aria-label", "Ẩn đáp án");
+    b.dataset.phim = "Ctrl+Shift+H";
+    b.onclick = batTatDapAn;
     hop.replaceChildren(b);
   } else hop.replaceChildren(...da.ban.map(ban => {
     const b = document.createElement("button");
@@ -299,6 +304,7 @@ async function moTep(duong) {
   $("cd-nhom").hidden = $("chon-ban").hidden = !tep.la_tex;
   soan.swapDoc(CodeMirror.Doc(tep.chu, "stex"));
   apDungCheDo();
+  dapAnCapNhat(false);
   veThe();
   capNhat();
   napPdf();
@@ -553,21 +559,12 @@ function cuonPdf(k) {
 
 function datDauBan(ban) {
   document.querySelectorAll("#chon-ban button[data-ban]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ban === ban));
-  const nut = $("tich-ban");
-  if (nut) {
-    const co = ban === tt.dsBan[0], ten = tt.nhanBan[ban] || ban;
-    nut.setAttribute("aria-pressed", co);
-    nut.setAttribute("aria-label", ten);
-    nut.dataset.ten = ten;
-    const kia = tt.nhanBan[tt.dsBan[co ? 1 : 0]] || tt.dsBan[co ? 1 : 0];
-    nut.dataset.goiY = `Đang xem bản "${ten}". Bấm để chuyển sang bản "${kia}".`;
-    nut.querySelector(".chu-nut").textContent = ten;
-    nut.querySelector("svg").innerHTML = BT[co ? "chon-het" : "o-trong"];
-  }
+  dapAnCapNhat();
 }
 
 function chonBan(ban) {
   tt.ban = ban;
+  dapAnQuenMo();
   datDauBan(ban);
   if (tt.tep && tt.tep.la_tex) napPdf(false, true);
 }
@@ -592,14 +589,15 @@ async function bienDich(imLang = false) {
   chotDong();
   tt.dangXuat = true;
   const duong = tt.tep.duong, ban = tt.ban;
-  datViec("Đang chạy thử...");
+  const hauBan = tt.dsBan.length > 1 ? ` bản ${tt.ban}${anDapAn() ? " (ẩn đáp án)" : ""}` : "";
+  datViec(`Đang chạy thử${hauBan}...`);
   let napSau = false, conDung = false;
   try {
     const kq = await goi("/api/bien-dich", {duong, ban, chu: soan.getValue()});
     conDung = tt.tep?.duong === duong && tt.ban === ban;
     if (kq.ok || !conDung) {
       if (kq.ok) { tt.pdfDaLuu = false; xvTex.tb = null; }  // biên dịch lại là bỏ mọi sửa đổi trên PDF cũ
-      if (kq.ok && !imLang && conDung) bao("Chạy thử xong, PDF ở khung bên phải");
+      if (kq.ok && !imLang && conDung) bao(`Chạy thử${hauBan} xong, PDF ở khung bên phải`);
       napSau = true;
     } else hienLoiLatex(kq.nhat_ky, "Chạy thử");
   } catch (e) { bao(e.message, true); }
@@ -614,7 +612,7 @@ async function xuatDung() {
   if (!tt.tep || !tt.tep.la_tex) return bao("Mở một file .tex trước khi lưu ra file PDF.", true);
   await luu();
   if (coThayDoi()) return;
-  const cacBan = tt.dsBan.length ? tt.dsBan : [""];
+  const cacBan = tt.banMacDinh ? [tt.ban] : tt.dsBan.length ? tt.dsBan : [""];  // không khai bản thì chỉ xuất bản đang chọn
   try {
     for (const ban of cacBan) {
       datViec(`Đang lưu ra file PDF${ban ? ` ${ban}` : ""}...`);
@@ -622,7 +620,7 @@ async function xuatDung() {
       if (!kq.ok) { hienLoiLatex(kq.nhat_ky, `Lưu ra file PDF${ban ? ` bản ${ban}` : ""}`); return; }
     }
     tt.pdfDaLuu = true;
-    bao(`Đã lưu ra file PDF${cacBan[0] ? `: ${cacBan.join(", ")}` : ""}`);
+    bao(`Đã lưu ra file PDF${cacBan[0] ? `: ${cacBan.join(", ")}` : ""}${tt.banMacDinh && anDapAn() ? " (ẩn đáp án)" : ""}`);
   } catch (e) { bao(e.message, true); }
   finally { datViec(""); }
 }

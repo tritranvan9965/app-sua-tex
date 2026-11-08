@@ -252,7 +252,7 @@ def thong_tin_du_an() -> dict:
     gop, GOP_DAU = GOP_DAU, None
     chuyen, CHUYEN_DAU = CHUYEN_DAU, None
     return {"ten": DA["ten"], "goc_mo": cac_goc(), "cau": DA["cau"], "xem_nhanh": DA["xem_nhanh"],
-            "ban": list(DA["xuat"]["ban"]), "nhan_ban": DA["xuat"].get("nhan_ban", {}), "tep_dau": DA["tep_dau"], "pdf_dau": pdf, "gop_dau": gop, "chuyen_dau": chuyen}
+            "ban": list(DA["xuat"]["ban"]), "nhan_ban": DA["xuat"].get("nhan_ban", {}), "ban_mac_dinh": DA["ban_mac_dinh"], "ban_khong_hau_to": DA["ban_khong_hau_to"], "tep_dau": DA["tep_dau"], "pdf_dau": pdf, "gop_dau": gop, "chuyen_dau": chuyen}
 
 
 def doc_goc() -> list:
@@ -471,7 +471,7 @@ def pdf_nhap(d: dict) -> dict:
     ban_sao = nguon.with_name(f"{nguon.stem}-{time.time_ns()}.pdf")
     shutil.copy(nguon, ban_sao)
     PDF_DA_CHON.add(str(ban_sao))
-    ten = f"{tex.stem}_{ban}.pdf" if ban else f"{tex.stem}.pdf"
+    ten = f"{tex.stem}{loi.hau_to(ban)}.pdf"
     return {"tep": [{**cong_cu_pdf.thong_tin(ban_sao), "ten": ten}]}
 
 
