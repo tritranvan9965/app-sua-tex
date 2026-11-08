@@ -468,6 +468,8 @@ dialog h2{font-size:17px;margin:0}
 .keo-xoa:hover,.keo-xoa:focus-visible{background:var(--but-do-nhat);color:var(--but-do)}
 .dang-keo-khoi,.dang-keo-khoi *{cursor:grabbing!important;user-select:none}
 .khoi.dang-keo{opacity:.4}
+.khoi.da-chon{outline:2px solid var(--bang-sang);outline-offset:-2px;border-radius:6px;background:#2b5a4d17}
+.khoi.da-chon .keo-tay{opacity:1;color:var(--bang)}
 .keo-vach{position:absolute;left:10px;right:10px;height:3px;border-radius:2px;background:var(--bang-sang);pointer-events:none;z-index:3}
 .keo-vach::before{content:"";position:absolute;left:-4px;top:-3px;width:9px;height:9px;border-radius:50%;background:var(--bang-sang)}
 .khoi.vua-keo{animation:vua-keo 1.2s ease-out}
