@@ -10,7 +10,9 @@ const BO_DONG = /^(?:\\(?:newpage|clearpage|pagebreak|baimoi|noindent|medskip|bi
 
 // Môi trường nào là một khối. Tên viết thường, không có dấu *. Khối của dự án (cau.moi_truong) tính là Bài.
 const KHOI_BAI = {bt: "Bài", bai: "Bài", baitap: "Bài", exercise: "Bài", problem: "Bài", ex: "Câu", cau: "Câu", cauhoi: "Câu", question: "Câu",
-  vd: "Ví dụ", vidu: "Ví dụ", example: "Ví dụ"};
+  vd: "Ví dụ", vidu: "Ví dụ", example: "Ví dụ", tn: "Câu", ds: "Câu", tln: "Câu"};
+// Khối dùng chung một bộ đếm (mẫu tritoan: trắc nghiệm, đúng sai, trả lời ngắn cùng đếm "Câu n"). Khối khác đếm theo tên của nó.
+const DEM_CHUNG = {tn: "cau", ds: "cau", tln: "cau"};
 const KHOI_LT = {kienthuc: "Kiến thức", lythuyet: "Lý thuyết", phuongphap: "Phương pháp", dinhnghia: "Định nghĩa", definition: "Định nghĩa",
   dinhly: "Định lý", theorem: "Định lý", tinhchat: "Tính chất", property: "Tính chất", menhde: "Mệnh đề", proposition: "Mệnh đề", hequa: "Hệ quả",
   corollary: "Hệ quả", bode: "Bổ đề", lemma: "Bổ đề", chuy: "Chú ý", remark: "Chú ý", note: "Chú ý", nhanxet: "Nhận xét", proof: "Chứng minh", chungminh: "Chứng minh"};
@@ -158,6 +160,12 @@ function phanTichFile(chu) {
   const dauTL = m.indexOf("\\begin{document}"), cuoiTL = m.lastIndexOf("\\end{document}");
   const a = dauTL < 0 ? 0 : dauTL + 16, b = cuoiTL < a ? chu.length : cuoiTL;
   const dem1 = ten => (dem[ten] = (dem[ten] || 0) + 1);
+  // File tự định nghĩa lại khối (\renewenvironment{bt}...{Câu \thebt.}) thì lấy chữ và bộ đếm theo đó.
+  const khaiBao = {};
+  for (const t of m.slice(0, dauTL < 0 ? 0 : dauTL).matchAll(/\\(?:re)?newenvironment\*?\{([A-Za-z]+)\}/g)) {
+    const ma = m.slice(t.index + t[0].length, t.index + t[0].length + 400).match(/(Câu|Bài tập|Bài|Ví dụ)\s*\\the([A-Za-z]+)/);
+    if (ma) khaiBao[t[1].toLowerCase()] = {nhan: ma[1] === "Bài tập" ? "Bài" : ma[1], dem: ma[2]};
+  }
   const them = (k, lam) => {
     k.tu = dong.length;
     lam();
@@ -196,7 +204,7 @@ function phanTichFile(chu) {
     them({loai: "tu-do", dau: vt, cuoi: y}, () => quetVung(chu, vt, y, "de", dong));
   };
 
-  const MAU = /\\(?:(chapter|part|section|subsection|subsubsection|paragraph|phan|dang|tieude|baimoi)(?![a-zA-Z])\*?|begin\{([A-Za-z]+)\*?\})/g;
+  const MAU = /\\(?:(chapter|part|section|subsection|subsubsection|paragraph|phan|dang|tieude|baimoi)(?![a-zA-Z])\*?|begin\{([A-Za-z]+)\*?\}|setcounter\{([A-Za-z]+)\}\{(\d+)\}|(phantn|phands|phantln)(?![a-zA-Z]))/g;
   MAU.lastIndex = a;
   let vt = a;
   for (let t; (t = MAU.exec(m)) && t.index < b;) {
@@ -207,6 +215,9 @@ function phanTichFile(chu) {
       for (const k of Object.keys(dem)) dem[k] = 0;
       continue;
     }
+    // Đặt lại số như LaTeX: \setcounter{bt}{0}, và sang PHẦN mới của đề (mẫu tritoan) thì câu về 1.
+    if (t[3]) { dem[t[3]] = +t[4]; continue; }
+    if (t[5]) { dem.cau = 0; continue; }
     if (t[1]) {
       let j = MAU.lastIndex;
       const bo = () => { while (/\s/.test(m[j] || "")) j++; };
@@ -219,14 +230,16 @@ function phanTichFile(chu) {
       if (oDau !== j) k = dongNgoac(m, oDau);
       if (k < 0) continue;
       tuDo(vt, d);
-      const ten = chu.slice(oDau + 1, k), hieu = t[1] === "dang" ? `Dạng ${dem1("Dạng")}.` : "";
+      const ten = chu.slice(oDau + 1, k), hieu = t[1] === "dang" ? `Dạng ${dem1("dang")}.` : "";
       themMuc(CAP_MUC[t[1]], hieu, gonTen(ten), d, k + 1, oDau + 1, k);
       vt = k + 1;
       MAU.lastIndex = vt;
       continue;
     }
     const ten = t[2], tenThuong = ten.toLowerCase();
-    const nhom = KHOI_BAI[tenThuong] || (`\\begin{${ten}}` === DAU ? "Bài" : null), lt = KHOI_LT[tenThuong];
+    const kb = khaiBao[tenThuong];
+    const nhom = kb?.nhan || KHOI_BAI[tenThuong] || (`\\begin{${ten}}` === DAU ? "Bài" : null), lt = !kb && KHOI_LT[tenThuong];
+    const boDem = kb?.dem || DEM_CHUNG[tenThuong] || tenThuong;
     if (!nhom && !lt) continue;
     // Tìm \end đúng cặp, vì khối có thể lồng khối cùng tên.
     const CAP = new RegExp(`\\\\(begin|end)\\{${ten}\\*?\\}`, "g");
@@ -243,7 +256,7 @@ function phanTichFile(chu) {
     if (ts) dauTrong += ts[0].length;
     const cuoi = CAP.lastIndex;
     if (nhom) {
-      themBai(nhom, dem1(nhom), d, cuoi, dauTrong, het, {id: idTruoc(chu, d), muc: ts?.[1] || "", tn: /\\(?:paaa?|pa|choice)(?![a-zA-Z])/.test(m.slice(d, cuoi))});
+      themBai(nhom, dem1(boDem), d, cuoi, dauTrong, het, {id: idTruoc(chu, d), muc: ts?.[1] || "", tn: /\\(?:paaa?|pa|choice)(?![a-zA-Z])/.test(m.slice(d, cuoi))});
     } else them({loai: "lt", nhan: lt, ten: lt, dau: d, cuoi}, () => tachDong(chu, m, dauTrong, het, dong));
     vt = cuoi;
     MAU.lastIndex = vt;
