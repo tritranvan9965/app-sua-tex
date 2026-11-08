@@ -403,7 +403,8 @@ const LENH_DINH_DANG = [["textbf", "\uE000", "\uE001"], ["textit", "\uE002", "\u
 function veChu(s) {
   return thoat(s)
     .replace(/(^|[^\\])%.*$/gm, "$1")
-    .replace(/\\includegraphics(?:\[[^\]]*\])?\{([^}]*)\}/g, '<span class="hinh">[Hình: $1]</span>')
+    .replace(/(\d+)/g, (_, n) => anhCho[n] ?? "")  // lệnh ảnh đã được anhThayCho đổi thành dấu riêng
+    .replace(/\\includegraphics(?:\[[^\]]*\])?\{([^}]*)\}/g,'<span class="hinh">[Hình: $1]</span>')
     .replace(/\\(?:sub)*section\*?\{([^{}]*)\}/g, "<b>$1</b>")
     .replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/g, '<span class="hinh">[Hình vẽ TikZ, xem ở PDF]</span>')
     .replace(/\\begin\{tabular\}[\s\S]*?\\end\{tabular\}/g, '<span class="hinh">[Bảng, xem ở PDF]</span>')
@@ -449,7 +450,8 @@ function moLenh(s, ten, soNhom, ra) {
 
 // Lệnh quen thuộc, dùng khi file dự án không khai cách hiện riêng.
 const MACRO_CHUNG = {"\\heva": "\\left\\{\\begin{aligned}#1\\end{aligned}\\right.", "\\hoac": "\\left[\\begin{aligned}#1\\end{aligned}\\right."};
-const LENH_CHUNG = [{ten: "dung", so_doi: 1, ra: "#1"}, {ten: "chuaro", so_doi: 1, ra: "#1"}, {ten: "dapso", so_doi: 1, ra: "\\\\Đáp số: #1"}, {ten: "hinhgoc", so_doi: 2, ra: "\\includegraphics{#1}"}];
+const LENH_CHUNG = [{ten: "dung", so_doi: 1, ra: "#1"}, {ten: "chuaro", so_doi: 1, ra: "#1"}, {ten: "dapso", so_doi: 1, ra: "\\\\Đáp số: #1"}, {ten: "hinhgoc", so_doi: 2, ra: "\\includegraphics{#1}"},
+  {ten: "hinh", so_doi: 1, ra: "\\includegraphics{#1}"}, {ten: "hinhphai", so_doi: 2, ra: "#2 \\includegraphics{#1}"}, {ten: "hinhtrai", so_doi: 2, ra: "\\includegraphics{#1} #2"}];
 
 function moLenhRieng(s) {
   s = s.replace(/\\True(?![a-zA-Z])\s*/g, "");
@@ -465,7 +467,7 @@ function veCongThuc(tex, hien) {
 }
 
 function veNoiDung(s) {
-  return moLenhRieng(s).split(/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\begin\{(?:align|gather|equation)\*?\}[\s\S]*?\\end\{(?:align|gather|equation)\*?\}|\$(?:\\.|[^$\\])+\$)/).map((ph, i) => {
+  return moLenhRieng(anhThayCho(s)).split(/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\begin\{(?:align|gather|equation)\*?\}[\s\S]*?\\end\{(?:align|gather|equation)\*?\}|\$(?:\\.|[^$\\])+\$)/).map((ph, i) => {
     if (i % 2 === 0) return veChu(ph);
     const hien = !ph.startsWith("$") || ph.startsWith("$$");
     const tex = ph.startsWith("\\begin") ? ph : ph.startsWith("$$") || !ph.startsWith("$") ? ph.slice(2, -2) : ph.slice(1, -1);
@@ -742,10 +744,10 @@ async function luu() {
     const pt = await goi("/api/phan-tich", {duong: tt.tep.duong, chu});
     const canHoi = pt.xoa.length || pt.moi.length || pt.doi.some(x => x.ngan_hang || x.file_khac.length);
     if (canHoi && !await veHopLuu(pt)) return;
-    const kq = await goi("/api/luu", {duong: tt.tep.duong, phien: tt.tep.phien, chu, lua_chon: canHoi ? docLuaChon() : {}});
+    const kq = await goi("/api/luu", {duong: tt.tep.duong, phien: tt.tep.phien, chu, lua_chon: canHoi ? docLuaChon() : {}, anh_da_dung: anhDaDung()});
     tt.tep.phien = kq.phien;
     tt.chuGoc = chu;
-    const them = [kq.ngan_hang && `${kq.ngan_hang} câu trong ngân hàng`, kq.file_khac && `${kq.file_khac} file khác`].filter(Boolean);
+    const them = [kq.ngan_hang && `${kq.ngan_hang} câu trong ngân hàng`, kq.file_khac && `${kq.file_khac} file khác`, kq.anh_xoa && `${kq.anh_xoa} ảnh vào Thùng rác`].filter(Boolean);
     bao(kq.canh_bao[0] || (them.length ? `Đã lưu, sửa thêm ${them.join(" và ")}` : "Đã lưu"), kq.canh_bao.length > 0);
   } catch (e) { bao(e.message, true); }
   finally { tt.dangBan = false; capNhat(); }

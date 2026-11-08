@@ -95,3 +95,37 @@ Mẹo: chép một câu có sẵn trong file mẫu rồi sửa chữ, khỏi ph�
 - Muốn **bản HS**: thêm `\def\BANHS{1}` vào dòng đầu tiên của file, xuất lại, rồi xoá dòng đó đi.
 
 **5. Thiếu tên chương hay chuyên đề?** Thêm một dòng `\dmuc{...}` vào file danh mục **trong thư mục mẫu của thư mục soạn bài**.
+
+## Phần 3. Ảnh
+
+**1. Chỗ đặt.** Ảnh của file `X.tex` nằm ở `hinh\X\` cạnh file `.tex`. Tên thư mục lấy từ tên file `.tex`, bỏ dấu, dấu cách thành `-` (`Buổi 01 Hàm số.tex` → `hinh\Buoi-01-Ham-so\`). Tên ảnh không dấu, không dấu cách.
+
+**2. Tên ảnh.** TriTeX tự đặt `h001`, `h002`, … tăng dần, không dùng lại số đã có trong thư mục. Đừng đổi tên bằng tay khi ảnh đã chèn vào bài.
+
+**3. Loại ảnh.**
+
+| Dùng cho | Loại |
+|---|---|
+| Ảnh chụp màn hình, hình vẽ | PNG |
+| Hình cắt từ PDF | PDF |
+| Ảnh chụp thật | JPG |
+
+WEBP, BMP dán vào thì TriTeX tự đổi sang PNG.
+
+**4. Lệnh chèn ảnh.**
+
+| Muốn viết | Gõ |
+|---|---|
+| Ảnh căn giữa (tỉ lệ bỏ trống = 0.5) | `\hinh[0.5]{hinh/X/h001.png}` |
+| Ảnh bên phải nội dung (tỉ lệ bỏ trống = 0.4) | `\hinhphai[0.4]{hinh/X/h001.png}{nội dung}` |
+| Ảnh bên trái nội dung | `\hinhtrai[0.4]{hinh/X/h001.png}{nội dung}` |
+
+Tỉ lệ là phần của độ rộng dòng (`\linewidth`). Lệnh `\hinhgoc` cũ vẫn dùng được.
+
+**5. Làm trong TriTeX (chế độ Theo dòng).**
+
+- Dán (Ctrl+V) hoặc kéo file ảnh vào một câu: ảnh được lưu và chèn vào cuối phần đề, trước lời giải.
+- Bấm vào ảnh để chọn: kéo núm ở góc để đổi cỡ, nút nhỏ cạnh ảnh để thay ảnh, đổi căn giữa hay bên phải, cắt ảnh, sửa code, xoá.
+- Mỗi thay đổi là một bước Ctrl+Z.
+
+**6. Xoá ảnh.** Xoá ảnh là bỏ lệnh khỏi `.tex` ngay, Ctrl+Z lấy lại được. Khi **Lưu**, ảnh bạn đã xóa khỏi bài (ảnh file từng dùng khi mở hoặc lúc lưu trước, hoặc TriTeX vừa thêm, nay không còn lệnh nào nhắc tới) được đưa vào Thùng rác của Windows, lấy lại được từ đó. Ảnh tự chép vào `hinh\X\` mà bài chưa từng dùng thì không bị đụng, ảnh ở nơi khác cũng vậy.

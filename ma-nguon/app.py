@@ -25,6 +25,7 @@ from urllib.parse import parse_qs, urlparse
 
 GOC_APP = Path(__file__).resolve().parent
 sys.path.insert(0, str(GOC_APP))
+import anh_dong  # noqa: E402
 import bien_dich  # noqa: E402
 import duong_app  # noqa: E402
 import khung_cua_so  # noqa: E402
@@ -168,7 +169,52 @@ def luu(d: dict) -> dict:
         lc["file_khac"] = [str(tep_trong_du_an(f)) for f in lc.get("file_khac", [])]
     with KHOA:
         kq = loi.luu(DA, DM, p, d.get("chu", ""), lua_chon)
-    return {**kq, "phien": phien(p)}
+    return {**kq, "phien": phien(p), "anh_xoa": don_anh(p, d.get("chu", ""), d.get("anh_da_dung"))}
+
+
+def don_anh(p: Path, chu: str, ds_ref=None) -> int:
+    """Ảnh trong hinh/<tên file>/ mà file không còn dùng thì đưa vào Thùng rác. Lỗi ở đây không được làm hỏng việc lưu."""
+    if p.suffix.lower() != ".tex":
+        return 0
+    dem = 0
+    for f in anh_dong.anh_khong_dung(p, chu, ds_ref):
+        try:
+            chay_ps(LENH_XOA_TEP, "Không xoá được ảnh.", TEP_XOA=str(f))
+            dem += 1
+        except LoiApp:
+            pass
+    return dem
+
+
+def anh_doc(hoi: dict) -> tuple:
+    tex = tep_trong_du_an(hoi.get("duong"))
+    f = anh_dong.tim_anh(tex, hoi.get("ref", ""), (hoi.get("gp") or "").split("|"), DA["goc"])
+    if not f:
+        raise LoiApp(404, "Không tìm thấy ảnh.")
+    return f.read_bytes(), anh_dong.KIEU[f.suffix.lower()]
+
+
+def anh_them(d: dict) -> dict:
+    tex = tep_trong_du_an(d.get("duong"))
+    try:
+        return {"ref": anh_dong.luu_anh(tex, d.get("chu", ""), base64.b64decode(d.get("du_lieu", "")), str(d.get("duoi", "")))}
+    except ValueError as e:
+        raise LoiApp(400, str(e))
+
+
+def anh_chon(_) -> dict:
+    """Hộp chọn ảnh của Windows. Trả nội dung file về trang để trang đổi cỡ, đổi định dạng rồi gửi lại /api/anh-them."""
+    if not CUA_SO:
+        return {"khong_co_hop": True}
+    import webview
+    ds = CUA_SO.create_file_dialog(webview.FileDialog.OPEN, directory=thu_muc_bat_dau(),
+                                   file_types=("Ảnh và PDF (*.png;*.jpg;*.jpeg;*.webp;*.bmp;*.gif;*.pdf)",))
+    if not ds:
+        return {"huy": True}
+    f = Path(ds[0])
+    if f.stat().st_size > anh_dong.GIOI_HAN_ANH:
+        raise LoiApp(400, "Ảnh lớn quá 40 MB.")
+    return {"ten": f.name, "duoi": f.suffix.lower().lstrip("."), "du_lieu": base64.b64encode(f.read_bytes()).decode("ascii")}
 
 
 def ban_xuat(ban) -> str:
@@ -871,11 +917,11 @@ class XuLy(BaseHTTPRequestHandler):
     def log_message(self, *_):
         pass
 
-    def _gui(self, ma: int, than: bytes, kieu: str, them=()):
+    def _gui(self, ma: int, than: bytes, kieu: str, them=(), nho="no-store"):
         self.send_response(ma)
         self.send_header("Content-Type", kieu)
         self.send_header("Content-Length", str(len(than)))
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", nho)
         self.send_header("X-Content-Type-Options", "nosniff")
         for k, v in them:
             self.send_header(k, v)
@@ -929,6 +975,9 @@ class XuLy(BaseHTTPRequestHandler):
             self._json(200, thong_tin_du_an())
         elif url.path == "/api/tep":
             self._json(200, doc_tep(hoi.get("duong")))
+        elif url.path == "/api/anh":
+            than, kieu = anh_doc(hoi)
+            self._gui(200, than, kieu, nho="private, max-age=60")  # ảnh mới luôn có tên mới nên nhớ tạm được
         elif url.path == "/api/pdf":
             tex = tep_trong_du_an(hoi.get("duong"))
             ban = ban_xuat(hoi.get("ban"))
@@ -956,7 +1005,7 @@ class XuLy(BaseHTTPRequestHandler):
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
-                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/cua-so": cua_so_lenh, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-ds-dong": chu_ds_dong, "/api/dt-ds": dt_ds, "/api/dt-thu": dt_thu, "/api/chu-sua-thu": chu_sua_thu, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
+                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/cua-so": cua_so_lenh, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-ds-dong": chu_ds_dong, "/api/dt-ds": dt_ds, "/api/dt-thu": dt_thu, "/api/chu-sua-thu": chu_sua_thu, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/anh-them": anh_them, "/api/anh-chon": anh_chon, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
         if not viec:
             raise LoiApp(404, "Không có việc này.")
         self._json(200, viec(d))

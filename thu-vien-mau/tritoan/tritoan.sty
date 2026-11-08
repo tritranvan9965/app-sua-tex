@@ -331,6 +331,15 @@
 % Đường dẫn tính từ thư mục ngân hàng của dự án; app (hoặc xuat.py) tự chép file hình khi biên dịch.
 \RequirePackage[export]{adjustbox}
 \newcommand{\hinhgoc}[2]{\par\begin{center}\includegraphics[max width=0.6\linewidth]{#1}\end{center}}
+% Ảnh của bài (app TriTeX tự chèn, ảnh nằm ở hinh/<tên file>/h001.png... cạnh file .tex):
+%   \hinh[tỉ lệ]{đường dẫn}               ảnh căn giữa, rộng tỉ lệ x \linewidth (bỏ trống = 0.5)
+%   \hinhphai[tỉ lệ]{đường dẫn}{nội dung}  ảnh nằm bên phải nội dung (bỏ trống = 0.4)
+%   \hinhtrai[tỉ lệ]{đường dẫn}{nội dung}  ảnh nằm bên trái nội dung
+\newcommand{\hinh}[2][0.5]{\par\begin{center}\includegraphics[width=#1\linewidth]{#2}\end{center}}
+\newcommand{\hinhphai}[3][0.4]{\par\noindent\begin{minipage}[t]{\dimexpr\linewidth-#1\linewidth-1em\relax}\vspace{0pt}#3\end{minipage}\hfill%
+  \begin{minipage}[t]{#1\linewidth}\vspace{0pt}\raggedleft\includegraphics[width=\linewidth]{#2}\end{minipage}\par}
+\newcommand{\hinhtrai}[3][0.4]{\par\noindent\begin{minipage}[t]{#1\linewidth}\vspace{0pt}\raggedright\includegraphics[width=\linewidth]{#2}\end{minipage}\hfill%
+  \begin{minipage}[t]{\dimexpr\linewidth-#1\linewidth-1em\relax}\vspace{0pt}#3\end{minipage}\par}
 % Chỗ bản số hóa chưa đọc rõ: \chuaro{?}
 \newcommand{\chuaro}[1]{\colorbox{yellow}{\textbf{#1}}}
 

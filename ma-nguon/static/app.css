@@ -576,3 +576,41 @@ dialog h2{font-size:17px;margin:0}
 .gt-tg{font-weight:700;margin-top:8px!important}
 .gioi-thieu .nut-hop{margin-top:14px;width:100%;justify-content:center}
 .gioi-thieu .nut-hop button{min-width:96px;height:36px}
+
+/* Ảnh trong Theo dòng (anh-dong.js) */
+.anh-dong{position:relative;display:inline-block;vertical-align:top;max-width:100%;min-width:48px;min-height:32px;margin:4px 0;border-radius:3px;cursor:pointer;line-height:0}
+.anh-dong.co-ti{width:calc(var(--ti)*100%)}
+.anh-dong img,.anh-dong canvas{display:block;max-width:100%;height:auto}
+.anh-dong.co-ti img,.anh-dong.co-ti canvas{width:100%!important}
+.anh-dong:empty{background:var(--le);outline:1px dashed var(--ke)}
+.anh-giua{display:block;margin:6px auto}
+.anh-phai{float:right;margin:2px 0 6px 12px}
+.anh-trai{float:left;margin:2px 12px 6px 0}
+.anh-dong:hover{outline:2px solid var(--phan-mo);outline-offset:1px}
+.anh-dong.chon{outline:2px solid var(--bang-sang);outline-offset:1px}
+.anh-dong.thieu{min-height:0;padding:8px 10px;border:1px solid var(--but-do);background:var(--but-do-nhat);color:var(--but-do);font-size:13px;line-height:1.4;outline:0}
+.anh-dong.anh-tha,.khoi.anh-tha{outline:2px dashed var(--bang-sang);outline-offset:-2px;background:#2b5a4d17}
+#anh-lop{position:fixed;z-index:20;pointer-events:none}
+#anh-lop .anh-khung{position:absolute;inset:-2px;border:2px solid var(--bang-sang);border-radius:3px}
+#anh-lop .anh-goc{position:absolute;width:10px;height:10px;background:#fff;border:2px solid var(--bang-sang);border-radius:2px;pointer-events:auto;touch-action:none}
+#anh-lop .anh-goc[data-g=tl]{left:-7px;top:-7px;cursor:nwse-resize}
+#anh-lop .anh-goc[data-g=tr]{right:-7px;top:-7px;cursor:nesw-resize}
+#anh-lop .anh-goc[data-g=bl]{left:-7px;bottom:-7px;cursor:nesw-resize}
+#anh-lop .anh-goc[data-g=br]{right:-7px;bottom:-7px;cursor:nwse-resize}
+#anh-lop.khong-doi-co .anh-goc{display:none}
+#anh-lop .anh-thanh{position:absolute;left:-2px;bottom:calc(100% + 10px);display:flex;gap:2px;padding:3px;background:#fff;border:1px solid var(--ke);border-radius:6px;box-shadow:0 3px 10px #0002;pointer-events:auto;white-space:nowrap}
+#anh-lop.duoi .anh-thanh{bottom:auto;top:calc(100% + 10px)}
+.anh-thanh button{border:0;background:none;border-radius:4px;padding:3px 8px;font-size:13px;line-height:1.3;color:var(--muc)}
+.anh-thanh button:hover:not(:disabled){background:var(--le)}
+.anh-thanh button[aria-pressed=true]{background:var(--phan);color:var(--bang);font-weight:600}
+.anh-thanh .anh-xoa{display:grid;place-items:center;padding:3px 6px;color:var(--but-do)}
+.anh-thanh .anh-xoa .bt{width:15px;height:15px}
+#anh-cat{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:#0008}
+.anh-cat-hop{max-width:92vw;max-height:94vh;overflow:auto;padding:14px 16px;background:var(--giay);border-radius:8px;box-shadow:0 8px 30px #0006}
+.anh-cat-hop p{margin:0 0 8px;font-size:13px;color:var(--muc-mo)}
+.anh-cat-khung{position:relative;display:inline-block;line-height:0;cursor:crosshair;touch-action:none;user-select:none;background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/16px 16px}
+.anh-cat-khung canvas{display:block}
+.anh-cat-vung{position:absolute;border:2px solid var(--bang-sang);box-shadow:0 0 0 9999px #0007;cursor:move}
+.anh-cat-hop .nut-sua{margin-top:10px}
+.anh-cat-hop .nut-sua button.chinh{background:var(--bang);color:#fff}
+.anh-cat-hop .nut-sua button.chinh:disabled{background:var(--phan-mo);border-color:var(--phan-mo)}
