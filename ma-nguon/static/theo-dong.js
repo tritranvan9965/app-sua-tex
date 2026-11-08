@@ -305,6 +305,7 @@ function veKhoi(k) {
       s.textContent = chuNhan;
       dau.append(s);
     }
+    if (typeof keoGanNut === "function") keoGanNut(k, dau);
     o.append(dau);
   }
   let phan = "de";
