@@ -184,6 +184,9 @@ def mo_duong(p: Path) -> dict:
     raise ValueError(f"App chưa mở được loại file {p.suffix}")
 
 
+THU_MUC_PHU = re.compile(r"_?(sao-luu(-app)?|log|logs|tmp|temp|cache|build|__pycache__)", re.I)  # sao lưu, nhật ký, file tạm: không cần hiện
+
+
 def quet_thu_muc(thu_muc: Path, duoi=DUOI_SUA) -> dict:
     con = []
     try:
@@ -191,7 +194,9 @@ def quet_thu_muc(thu_muc: Path, duoi=DUOI_SUA) -> dict:
     except PermissionError:  # mở nhanh có thể gặp thư mục hệ thống không được đọc
         ds = []
     for x in ds:
-        if x.name.startswith((".", "_", "~")) or x.name.endswith("_hinh"):
+        if x.name.startswith((".", "~")) or x.name.endswith("_hinh"):  # thư mục ẩn, file tạm của Word; thư mục "_..." của người dùng vẫn hiện
+            continue
+        if x.is_dir() and THU_MUC_PHU.fullmatch(x.name):
             continue
         if x.is_dir():
             nut = quet_thu_muc(x, duoi)
