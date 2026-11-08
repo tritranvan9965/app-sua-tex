@@ -105,7 +105,9 @@
   \bfseries Dạng \thedang. #1\end{tcolorbox}}
 
 % Mục nhỏ trong một dạng: loại câu hỏi
-\newcommand{\muc}[1]{\par\smallskip{\bfseries\color{cam}\large\textbullet\ #1}\par\smallskip}
+% Có dấu trang PDF, cấp con dưới Dạng.
+\newcommand{\muc}[1]{\par\smallskip\ifcophan\dautrang{3}{#1}\else\dautrang{2}{#1}\fi%
+  {\bfseries\color{cam}\large\textbullet\ #1}\par\smallskip}
 \newcommand{\muctn}{\muc{Trắc nghiệm nhiều phương án lựa chọn}}
 \newcommand{\mucds}{\muc{Trắc nghiệm đúng sai}}
 \newcommand{\muctln}{\muc{Trắc nghiệm trả lời ngắn}}

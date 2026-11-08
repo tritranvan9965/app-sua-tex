@@ -16,7 +16,9 @@ const DEM_CHUNG = {tn: "cau", ds: "cau", tln: "cau"};
 const KHOI_LT = {kienthuc: "Kiến thức", lythuyet: "Lý thuyết", phuongphap: "Phương pháp", dinhnghia: "Định nghĩa", definition: "Định nghĩa",
   dinhly: "Định lý", theorem: "Định lý", tinhchat: "Tính chất", property: "Tính chất", menhde: "Mệnh đề", proposition: "Mệnh đề", hequa: "Hệ quả",
   corollary: "Hệ quả", bode: "Bổ đề", lemma: "Bổ đề", chuy: "Chú ý", remark: "Chú ý", note: "Chú ý", nhanxet: "Nhận xét", proof: "Chứng minh", chungminh: "Chứng minh"};
-const CAP_MUC = {chapter: 0, part: 0, tieude: 0, section: 1, phan: 1, subsection: 2, dang: 2, subsubsection: 3, paragraph: 3};
+const CAP_MUC = {chapter: 0, part: 0, tieude: 0, section: 1, phan: 1, subsection: 2, dang: 2, subsubsection: 3, paragraph: 3, muc: 3};
+// Mục loại câu của mẫu tritoan, không có đối số.
+const MUC_SAN = {muctn: "Trắc nghiệm nhiều phương án lựa chọn", mucds: "Trắc nghiệm đúng sai", muctln: "Trắc nghiệm trả lời ngắn"};
 const LENH_LOI_GIAI = ["\\giai{", "\\huongdan{", "\\loigiai{"];
 
 // File không dùng môi trường: nhận theo chữ ở đầu dòng, ví dụ "Câu 1.", "Bài 3:", "Phần II", "Lý thuyết".
@@ -204,7 +206,7 @@ function phanTichFile(chu) {
     them({loai: "tu-do", dau: vt, cuoi: y}, () => quetVung(chu, vt, y, "de", dong));
   };
 
-  const MAU = /\\(?:(chapter|part|section|subsection|subsubsection|paragraph|phan|dang|tieude|baimoi)(?![a-zA-Z])\*?|begin\{([A-Za-z]+)\*?\}|setcounter\{([A-Za-z]+)\}\{(\d+)\}|(phantn|phands|phantln)(?![a-zA-Z]))/g;
+  const MAU = /\\(?:(chapter|part|section|subsection|subsubsection|paragraph|phan|dang|tieude|baimoi|muc)(?![a-zA-Z])\*?|begin\{([A-Za-z]+)\*?\}|setcounter\{([A-Za-z]+)\}\{(\d+)\}|(phantn|phands|phantln)(?![a-zA-Z])|(muctn|mucds|muctln)(?![a-zA-Z]))/g;
   MAU.lastIndex = a;
   let vt = a;
   for (let t; (t = MAU.exec(m)) && t.index < b;) {
@@ -218,6 +220,13 @@ function phanTichFile(chu) {
     // Đặt lại số như LaTeX: \setcounter{bt}{0}, và sang PHẦN mới của đề (mẫu tritoan) thì câu về 1.
     if (t[3]) { dem[t[3]] = +t[4]; continue; }
     if (t[5]) { dem.cau = 0; continue; }
+    if (t[6]) {
+      tuDo(vt, d);
+      vt = MAU.lastIndex;
+      const ten = MUC_SAN[t[6]];  // dòng không có chữ để sửa, nên tên đi vào nhãn của dòng; Mục lục ghép nhan + ten
+      them({loai: "muc", cap: CAP_MUC.muc, nhan: "•", ten, dau: d, cuoi: vt}, () => dong.push({dau: vt, cuoi: vt, phan: "muc", kieu: "chu", nhan: `• ${ten}`}));
+      continue;
+    }
     if (t[1]) {
       let j = MAU.lastIndex;
       const bo = () => { while (/\s/.test(m[j] || "")) j++; };
@@ -230,7 +239,7 @@ function phanTichFile(chu) {
       if (oDau !== j) k = dongNgoac(m, oDau);
       if (k < 0) continue;
       tuDo(vt, d);
-      const ten = chu.slice(oDau + 1, k), hieu = t[1] === "dang" ? `Dạng ${dem1("dang")}.` : "";
+      const ten = chu.slice(oDau + 1, k), hieu = t[1] === "dang" ? `Dạng ${dem1("dang")}.` : t[1] === "muc" ? "•" : "";
       themMuc(CAP_MUC[t[1]], hieu, gonTen(ten), d, k + 1, oDau + 1, k);
       vt = k + 1;
       MAU.lastIndex = vt;

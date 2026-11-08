@@ -449,6 +449,10 @@ dialog h2{font-size:17px;margin:0}
 .khoi.muc.cap-2{margin-top:12px}
 .khoi.muc.cap-2 .dong{padding-left:8px;background:var(--phan)}
 .khoi.muc.cap-3{margin-top:8px}
+.khoi.muc.cap-3 .dong{color:#c2410c}  /* \muc của mẫu tritoan: chữ cam như trên PDF */
+.khoi.muc.cap-3 .dong .so{text-align:left}
+.khoi.muc.cap-3 .dong:has(.nd:empty){grid-template-columns:minmax(0,1fr)}
+.khoi.muc.cap-3 .dong:has(.nd:empty) .nd{display:none}
 .dau-khoi{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--muc-mo)}
 .dau-khoi strong{color:var(--bang)}
 .khoi.lt .dau-khoi strong{color:#17639c}
