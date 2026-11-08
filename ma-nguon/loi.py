@@ -23,6 +23,8 @@ MAC_DINH = {
     "xuat": {"mo_dau_manh": MO_DAU_MANH, "ket_manh": r"\end{document}", "ban": {}, "chep_them": []},
     "xem_nhanh": {"macro": {}, "lenh": []},
 }
+# Dự án không khai bản thì có hai bản: GV (đủ đáp án, tên PDF không hậu tố như trước) và HS (mẫu tritoan hiểu \BANHS).
+BAN_MAC_DINH = {"GV": "", "HS": "\\def\\BANHS{1}"}  # không xuống dòng, để số dòng báo lỗi LaTeX vẫn khớp file
 DUOI_SUA = {".tex", ".sty", ".md", ".txt", ".json", ".csv"}
 
 # Mọi đường dẫn tính theo gốc của dự án đang mở; chưa mở dự án thì chỉ đọc, sửa file thường.
@@ -72,10 +74,15 @@ def la_file_rap(p: Path) -> bool:
     return any(m.get("vai_tro") == "san-pham" and "thu_muc" in m and p.is_relative_to(GOC / m["thu_muc"]) for m in DA["cay"])
 
 
+def hau_to(ban: str) -> str:
+    """Bản mặc định (GV khi dự án không khai bản) giữ tên PDF cũ, không hậu tố."""
+    return "" if not ban or ban == DA.get("ban_khong_hau_to") else f"_{ban}"
+
+
 def ra_duong(mau: str, tex: Path, ban: str) -> Path:
     """Mẫu đường dẫn trong file dự án, tính từ gốc. {ban} là tên bản, {hau_to} là _<bản> hoặc rỗng khi chỉ có một bản."""
     cha = tex.parent.resolve()
-    return GOC / mau.format(ten=tex.stem, thu_muc=tex.parent.name, ban=ban, hau_to=f"_{ban}" if ban else "",
+    return GOC / mau.format(ten=tex.stem, thu_muc=tex.parent.name, ban=ban, hau_to=hau_to(ban),
                             cha=cha.relative_to(GOC).as_posix() if cha.is_relative_to(GOC) else ".")
 
 
@@ -130,6 +137,10 @@ def ghi_file(p: Path, chu: str) -> None:
 
 def lap_du_an(cau_hinh: dict, goc: Path, ten: str, tep_dau: Path = None) -> dict:
     da = {k: {**v, **cau_hinh.get(k, {})} for k, v in MAC_DINH.items()}
+    mac_dinh = not da["xuat"].get("ban")
+    if mac_dinh:
+        da["xuat"] = {**da["xuat"], "ban": dict(BAN_MAC_DINH)}
+    da.update(ban_mac_dinh=mac_dinh, ban_khong_hau_to=next(iter(BAN_MAC_DINH)) if mac_dinh else None)
     da.update(ten=ten, goc=goc, cay=cau_hinh.get("cay", []), tep_dau=str(tep_dau) if tep_dau else None)
     da["duong"]["thanh_pham"].format(ten="", thu_muc="", ban="", hau_to="", cha="")  # sai mẫu thì báo ngay lúc mở
     return da

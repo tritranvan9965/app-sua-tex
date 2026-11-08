@@ -454,6 +454,11 @@ dialog h2{font-size:17px;margin:0}
 .khoi.lt .dau-khoi strong{color:#17639c}
 .dau-khoi span{font-size:12px}
 .dau-khoi span:first-of-type{margin-left:2px}
+.giai-an{display:block;width:100%;margin:10px 0 2px;padding:3px 0;border:0;border-top:1px dashed var(--ke);background:none;color:var(--muc-mo);font-size:12px;text-align:left;cursor:pointer}
+.giai-an:hover{color:var(--muc)}
+.gap-giai{display:inline-block;padding:0 6px;border:1px dashed var(--ke);border-radius:4px;background:var(--le);color:var(--muc-mo);font-size:12px;cursor:pointer}
+.gap-giai[data-dong]::after{content:" · " attr(data-dong)}
+.gap-giai:hover{color:var(--muc)}
 .ten-phan{font-size:13px;font-weight:700;color:var(--muc-mo);margin:14px 0 2px}
 .dong{display:grid;grid-template-columns:30px minmax(0,1fr);gap:6px;width:100%;text-align:left;border:0;background:none;
   padding:4px 6px 4px 0;border-radius:4px}

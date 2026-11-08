@@ -280,7 +280,7 @@ function veDong(raw, kieu) {
 
 function nutDong(chu, d, thuTu, nhanRieng) {
   const b = document.createElement("button");
-  b.className = `dong${d.pa ? " pa" : ""}${d.dung ? " dung" : ""}`;
+  b.className = `dong${d.pa ? " pa" : ""}${d.dung && !anDapAn() ? " dung" : ""}`;  // ẩn đáp án thì đáp án đúng hiện như phương án thường
   b.innerHTML = '<span class="so"></span><span class="nd"></span>';
   b.firstChild.textContent = nhanRieng || d.nhan || "";
   b.lastChild.innerHTML = veDong(chu.slice(d.dau, d.cuoi), d.kieu);
@@ -329,8 +329,14 @@ function veKhoi(k) {
     o.append(dau);
   }
   let phan = "de";
+  const anGiai = anDapAn() && !tt.giaiMo.has(k.i);
   for (let i = k.tu; i < k.den; i++) {
     const d = tt.dong[i];
+    if (anGiai && d.phan === "giai") {
+      if (phan !== "giai") o.append(nutGiaiAn(k));
+      phan = "giai";
+      continue;
+    }
     if (d.phan === "giai" && phan !== "giai") {
       const h = document.createElement("div");
       h.className = "ten-phan";
@@ -341,6 +347,22 @@ function veKhoi(k) {
     o.append(nutDong(chu, d, i));
   }
   caoKhoi.set(chu.slice(k.dau, k.cuoi), o.offsetHeight);
+}
+
+// Bản ẩn đáp án: một dòng mảnh thay chỗ lời giải. Bấm vào thì xem tạm lời giải của riêng câu đó.
+function nutGiaiAn(k) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "giai-an";
+  b.textContent = "Lời giải đã ẩn";
+  b.title = "Bấm để xem lời giải của câu này. Bấm nút Ẩn đáp án để hiện lại cho cả file";
+  b.onclick = e => {
+    e.stopPropagation();
+    tt.giaiMo.add(k.i);
+    k.daVe = false;
+    veKhoi(k);
+  };
+  return b;
 }
 
 function boKhoi(k) {
@@ -445,6 +467,7 @@ function moDong(thuTu) {
   chotDong();
   const d = tt.dong[thuTu], k = khoiCuaDong(thuTu);
   if (!d || !k) return;
+  if (d.phan === "giai" && anDapAn() && !tt.giaiMo.has(k.i)) { tt.giaiMo.add(k.i); k.daVe = false; }  // dòng nằm trong lời giải đang ẩn: mở lời giải của câu đó
   veKhoi(k);
   soan.setCursor(soan.posFromIndex(d.dau));
   const goc = soan.getValue().slice(d.dau, d.cuoi);
@@ -506,6 +529,7 @@ function hienKetQuaTim() {
   quanKhoi.disconnect();
   const chu = soan.getValue(), o = $("vung-dong"), thay = [];
   tt.dong.forEach((d, i) => {
+    if (anDapAn() && d.phan === "giai") return;  // ẩn đáp án thì tìm cũng không lòi lời giải ra
     if (chu.slice(d.dau, d.cuoi).toLowerCase().normalize("NFC").includes(tu)) thay.push({d, i});
   });
   const dau = document.createElement("p");
@@ -535,6 +559,7 @@ function apDungCheDo() {
   $("vung-soan").hidden = dong || !tt.tep;
   $("tim").disabled = !dong;
   if (!dong) soan.refresh();
+  dapAnGap();
   capNhatRibbon();
 }
 

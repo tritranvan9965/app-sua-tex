@@ -78,6 +78,7 @@ async function hienTheTex(t) {
   khoaDong = null;
   datDauBan(s.ban);
   soan.swapDoc(s.doc);
+  dapAnCapNhat(false);
   $("tim").value = "";
   $("mo-dau").hidden = true;
   $("ten-tep").textContent = s.tep.ten;

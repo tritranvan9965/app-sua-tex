@@ -23,6 +23,19 @@
         "8766"
       ],
       "port": 8766
+    },
+    {
+      "name": "app-sua-tex-thu-muc-khong-du-an",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "-I",
+        "ma-nguon/app.py",
+        "C:/Users/tritr/AppData/Local/Temp/claude/C--DATA-Vibe-Coding-app-sua-tex--claude-worktrees-an-dap-an-953c05/019f187a-a863-4404-ba71-c5de14bc3738/scratchpad/thu-khong-du-an",
+        "--khong-mo",
+        "--cong",
+        "8768"
+      ],
+      "port": 8768
     }
   ]
 }

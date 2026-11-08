@@ -159,6 +159,9 @@ function dsRibbon() {
         {ten: "Vùng bên trái", ic: "vung-soan", lam: () => batTat("soan"), tich: () => (dangPdf() ? bc.day : bc.soan)},
         {ten: "Vùng xem kết quả", tenNgan: "Vùng kết quả", ic: "vung-xem", lam: () => batTat("xem"), tich: () => bc.xem, bat: () => !dangPdf(), khoa: "Chỉ dùng khi mở file .tex. Đang xem PDF thì vùng bên trái là dải trang."},
       ]],
+      ["Đáp án", [
+        {ten: "Ẩn đáp án", ic: "mat", to: true, phim: "Ctrl+Shift+H", goiY: "Ẩn lời giải ở cả hai cách sửa và chọn bản HS để Chạy thử, Lưu ra PDF. File .tex không đổi", lam: batTatDapAn, tich: () => anDapAn(), bat: () => coTex() && coNutDapAn(), khoa: () => (coTex() ? "Dự án này có nhiều bản PDF, chọn bản ở các nút trên khung sửa." : LD_TEX())},
+      ]],
       ["Cách sửa", [
         {ten: "Theo dòng", ic: "theo-dong", to: true, lam: () => datCheDo("dong"), tich: () => tt.cheDo === "dong", bat: coTex, khoa: "Chỉ dùng khi mở file .tex. Mở một file .tex để sửa theo dòng."},
         {ten: "Toàn bộ code", ic: "code", to: true, lam: () => datCheDo("code"), tich: () => tt.cheDo === "code", bat: coTex, khoa: "Chỉ dùng khi mở file .tex. Mở một file .tex để sửa toàn bộ code."},
@@ -445,7 +448,7 @@ function capNhatTen() {
   if (!coPdf) return;
   $("luu-pdf").setAttribute("aria-disabled", pdf ? !pt.ds.length : !tt.pdf);
   $("luu-pdf").dataset.khoa = pdf ? "Chưa mở PDF nào." : "Chưa có PDF. Bấm Biên dịch (F5) để tạo trước.";
-  const ten = pdf ? pt.ten : `${tt.tep.ten.replace(/\.tex$/i, "")}${tt.ban ? `_${tt.ban}` : ""}.pdf`;
+  const ten = pdf ? pt.ten : `${tt.tep.ten.replace(/\.tex$/i, "")}${hauToPdf()}.pdf`;
   $("ten-pdf").textContent = ten;
   $("ten-pdf").title = ten;
   $("ten-pdf").classList.toggle("chua-luu-ten", pdf ? pt.nhap || pt.doi : !tt.pdfDaLuu);
