@@ -1,0 +1,3 @@
+MathLive 0.111.1 (npm, phát hành 2026-10-09), giấy phép MIT (xem LICENSE.txt).
+Chỉ chép mathlive.min.js (UMD) và fonts. Không chép sounds: âm bàn phím tắt.
+Nạp lười bởi static/sua-cong-thuc.js.
