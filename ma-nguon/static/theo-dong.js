@@ -460,6 +460,7 @@ function moDong(thuTu) {
   tt.dangSua = {d, o, goc, khoi: k};
   veLai();
   o.focus();
+  if (typeof ctmGan === "function") ctmGan(khung, o, d, ve, chen, veLai);
   khung.scrollIntoView({block: "nearest"});
 }
 

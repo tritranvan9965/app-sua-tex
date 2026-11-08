@@ -614,3 +614,24 @@ dialog h2{font-size:17px;margin:0}
 .anh-cat-hop .nut-sua{margin-top:10px}
 .anh-cat-hop .nut-sua button.chinh{background:var(--bang);color:#fff}
 .anh-cat-hop .nut-sua button.chinh:disabled{background:var(--phan-mo);border-color:var(--phan-mo)}
+
+/* Sửa công thức trực quan (sua-cong-thuc.js) */
+.ct-dau{display:flex;justify-content:flex-end;margin:0 8px 4px 0}
+.ct-dau button{border:1px solid var(--ke);background:#fff;border-radius:5px;padding:2px 8px;font-size:12px}
+.ct-dau button[hidden]{display:none}
+.ct-kv{margin-top:2px}
+.ct-vung{background:#fff;border-radius:4px;padding:8px 10px;min-height:40px;font-size:16px;line-height:2.1;white-space:pre-wrap;overflow-wrap:anywhere}
+.ct-chu{outline:none;border-radius:3px;white-space:pre-wrap}
+.ct-chu:empty{display:inline-block;min-width:8px}
+.ct-chu:focus{background:var(--but-do-nhat)}
+.ct-chu.ct-loi{border:1px dashed var(--but-do);padding:0 3px;font-family:var(--phong-code);font-size:14px}
+.ct-vung math-field{display:inline-block;max-width:100%;font-size:1.15em;padding:1px 6px;margin:0 2px;vertical-align:middle;border:1px solid var(--ke);border-radius:6px;line-height:1.4;white-space:normal;
+  --keyboard-toggle-fill-color:transparent;--hue:210;--caret-color:var(--but-do)}
+.ct-vung math-field:focus-within{border-color:var(--bang);box-shadow:0 0 0 2px var(--but-do-nhat)}
+.ct-vung math-field::part(virtual-keyboard-toggle),.ct-vung math-field::part(menu-toggle){display:none}
+.ct-thanh{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.ct-thanh button{border:1px solid var(--ke);background:#fff;border-radius:5px;padding:2px 8px;font-size:13px;min-width:30px}
+.ct-thanh button:hover{border-color:var(--bang)}
+.ct-nhac{color:var(--but-do);font-size:13px;margin:4px 0 0;min-height:0}
+.ct-nhac:empty{display:none}
+.sua .nut-sua button.chinh{background:var(--bang);color:#fff}
