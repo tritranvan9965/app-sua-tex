@@ -67,7 +67,7 @@ function dsRibbon() {
         sapCo("Hệ phương trình", "he"), sapCo("Góc", "goc"), sapCo("Tam giác", "tam-giac"), sapCo("Song song", "song-song"), sapCo("Vuông góc", "vuong-goc"),
       ]],
       ["Đối tượng", [
-        sapCo("Ảnh", "anh", true),
+        {ten: "Ảnh", ic: "anh", to: true, goiY: "Chèn ảnh vào câu đang chọn. Cũng dán được bằng Ctrl+V hoặc kéo file thả vào câu", lam: () => anhChenTuHop()},
         sapCo("Bảng", "bang", true),
         sapCo("Hình vẽ", "hinh-ve", true),
         sapCo("Danh sách", "danh-sach"),

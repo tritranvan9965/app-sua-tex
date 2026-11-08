@@ -267,6 +267,7 @@ function nutDong(chu, d, thuTu, nhanRieng) {
   b.lastChild.innerHTML = veDong(chu.slice(d.dau, d.cuoi), d.kieu);
   b.title = "Bấm để sửa dòng này";
   if (thuTu !== null) b.dataset.thuTu = thuTu;
+  anhGan(b, chu, d);
   return b;
 }
 
