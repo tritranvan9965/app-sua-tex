@@ -434,7 +434,7 @@ dialog h2{font-size:17px;margin:0}
 .o-rong::placeholder{color:var(--muc-mo);opacity:1}
 
 /* Theo dòng: mỗi hàng là một dòng đã hiện công thức, bấm vào là sửa */
-#vung-dong{flex:1;min-height:0;overflow:auto;position:relative;padding:12px 14px 40px;font-size:calc(var(--co-soan,14px) + 1px);line-height:1.65}
+#vung-dong{flex:1;min-height:0;overflow:auto;overflow-anchor:none;position:relative;padding:12px 14px 40px;font-size:calc(var(--co-soan,14px) + 1px);line-height:1.65}
 .dau-file{display:block;width:100%;margin-bottom:8px;padding:4px 8px;border:1px dashed var(--ke);border-radius:5px;background:none;color:var(--muc-mo);font-size:12.5px;text-align:left}
 .dau-file:hover{background:var(--le)}
 .khoi{margin:0 0 2px}
@@ -481,6 +481,11 @@ dialog h2{font-size:17px;margin:0}
 .khoi.da-chon .keo-tay{opacity:1;color:var(--bang)}
 .keo-vach{position:absolute;left:10px;right:10px;height:3px;border-radius:2px;background:var(--bang-sang);pointer-events:none;z-index:3}
 .keo-vach::before{content:"";position:absolute;left:-4px;top:-3px;width:9px;height:9px;border-radius:50%;background:var(--bang-sang)}
+.con-tro-chen{position:relative;height:0;z-index:3;pointer-events:none}
+.con-tro-chen::before{content:"";position:absolute;left:10px;right:10px;top:-2px;height:3px;border-radius:2px;background:var(--bang-sang);animation:con-tro-nhay 1.1s steps(1) infinite}
+.con-tro-chen::after{content:"";position:absolute;left:6px;top:-5px;width:9px;height:9px;border-radius:50%;background:var(--bang-sang);animation:con-tro-nhay 1.1s steps(1) infinite}
+@keyframes con-tro-nhay{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.con-tro-chen::before,.con-tro-chen::after{animation:none}}
 .khoi.vua-keo{animation:vua-keo 1.2s ease-out}
 @keyframes vua-keo{from{background:#2b5a4d33}to{background:transparent}}
 #keo-bao{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:var(--muc);color:#fff;padding:8px 10px 8px 14px;border-radius:8px;box-shadow:0 4px 16px #0003;z-index:8;font-size:13px}

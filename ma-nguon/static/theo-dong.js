@@ -293,7 +293,7 @@ function nutDong(chu, d, thuTu, nhanRieng) {
   b.innerHTML = '<span class="so"></span><span class="nd"></span>';
   b.firstChild.textContent = nhanRieng || d.nhan || "";
   b.lastChild.innerHTML = veDong(chu.slice(d.dau, d.cuoi), d.kieu);
-  b.title = "Bấm để sửa dòng này";
+  b.title = "Bấm đúp để sửa dòng này. Bấm một lần để đặt con trỏ chèn gần đó";
   if (thuTu !== null) b.dataset.thuTu = thuTu;
   anhGan(b, chu, d);
   return b;
@@ -305,6 +305,7 @@ const quanKhoi = new IntersectionObserver(muc => muc.forEach(m => {
   const k = tt.khoi[+m.target.dataset.i];
   if (!k || k.o !== m.target) return;
   if (m.isIntersecting) veKhoi(k); else boKhoi(k);
+  tdDatNeo();
 }), {root: $("vung-dong"), rootMargin: "1000px"});
 
 function taoKhoi(k, chu) {
@@ -383,12 +384,38 @@ function boKhoi(k) {
   k.o.style.height = `${cao}px`;
 }
 
+// Neo cuộn: vẽ lại vùng (sau khi sửa ảnh, sửa dòng...) thì giữ khối đang ở đầu khung nhìn đúng chỗ cũ, không giữ scrollTop tuyệt đối,
+// vì chiều cao các khối phía trên đổi theo (khối chưa vẽ chỉ có chiều cao ước, ảnh tải xong mới có chiều cao thật).
+// Neo còn hiệu lực ít giây, mỗi lần chiều cao đổi (ảnh tải xong, khối vừa được vẽ) lại kéo về chỗ cũ; người dùng tự cuộn thì thôi.
+let tdNeo = null;  // {i, lech, het}: khối thứ i cách mép trên khung lech điểm ảnh
+
+function tdLayNeo(o) {
+  const cac = [...o.querySelectorAll(":scope > .khoi")];
+  if (!cac.length || cac.length !== tt.khoi.length) return null;  // số khối đổi (thêm, xóa câu) thì chỉ số cũ không còn đúng
+  const vo = o.getBoundingClientRect().top, k = cac.find(x => x.getBoundingClientRect().bottom > vo + 1);
+  return k ? {i: +k.dataset.i, lech: k.getBoundingClientRect().top - vo, het: 0} : null;
+}
+
+function tdDatNeo() {
+  if (!tdNeo) return;
+  if (Date.now() > tdNeo.het) { tdNeo = null; return; }
+  const o = $("vung-dong"), k = tt.khoi[tdNeo.i];
+  if (!k?.o?.isConnected) return;
+  const lech = k.o.getBoundingClientRect().top - o.getBoundingClientRect().top - tdNeo.lech;
+  if (Math.abs(lech) >= 1) o.scrollTop += lech;
+}
+
+const tdHuyNeo = () => { tdNeo = null; };
+for (const ten of ["wheel", "touchstart", "pointerdown", "keydown"]) $("vung-dong").addEventListener(ten, tdHuyNeo, {capture: true, passive: true});
+$("vung-dong").addEventListener("load", () => tdDatNeo(), true);  // ảnh tải xong làm đổi chiều cao
+
 function veTheoDong(ep = false) {
   if (tt.cheDo !== "dong" || tt.dangSua || $("tim").value.trim()) return;
   const chu = soan.getValue();
   if (!ep && chu === khoaDong) return;
   khoaDong = chu;
   const o = $("vung-dong"), cuon = tt.cuonDen ?? o.scrollTop;
+  tdNeo = tt.cuonDen == null ? tdLayNeo(o) : null;  // đổi file thì cuộn theo cuonDen, còn vẽ lại sau khi sửa thì neo theo khối đang nhìn
   tt.cuonDen = null;
   quanKhoi.disconnect();
   if (!tt.tep?.la_tex) {
@@ -418,15 +445,120 @@ function veTheoDong(ep = false) {
   }
   o.scrollTop = cuon;
   tt.khoi.forEach(k => quanKhoi.observe(k.o));
+  if (tdNeo) tdNeo.het = Date.now() + 2500;
+  tdDatNeo();
+  tdVeConTro();
 }
 
 function khoiCuaDong(thuTu) {
   return tt.khoi.find(k => thuTu >= k.tu && thuTu < k.den) || null;
 }
 
+// ---------- Con trỏ chèn ----------
+// Vạch ngang nhấp nháy nằm giữa hai khối, chỉ vị trí để chèn (câu, hình, dán...). Bấm một lần vào khối thì vạch đứng ở ranh giới gần chỗ bấm nhất
+// (nửa trên: trước khối, nửa dưới: sau khối); bấm đúp vào dòng mới mở ô sửa. Phím mũi tên lên/xuống dời vạch.
+// Phiên khác dùng: tdViTriChen() cho vị trí ký tự trong file, tdChenTai(viTri, chuoi) để chèn.
+let tdConTro = null;  // {tep, g, n}: vạch đứng trước khối thứ g của danh sách khối (g = n là sau khối cuối), n là số khối lúc đặt. {tep, pos} là chờ đổi sang g ở lần vẽ tới.
+let tdVach = null, tdDaBao = false;
+const tdDs = () => tt.khoi.filter(k => k.loai !== "tu-do");
+
+// Chờ pos: tìm lại g theo vị trí trong văn bản hiện tại (các khối nằm hẳn trước pos).
+function tdChotConTro() {
+  if (!tdConTro) return;
+  const ds = tdDs();
+  if (tdConTro.tep !== tt.tep || !ds.length) { tdConTro = null; return; }
+  if (tdConTro.pos !== undefined) tdConTro = {tep: tt.tep, g: ds.filter(k => k.cuoi <= tdConTro.pos).length, n: ds.length};
+  if (tdConTro.n !== ds.length) tdConTro = null;  // số khối đã đổi, chỉ số cũ không còn đúng
+}
+
+function tdVeConTro() {
+  tdVach?.remove();
+  tdChotConTro();
+  if (!tdConTro || tt.cheDo !== "dong") return;
+  const ds = tdDs();
+  if (!ds[0]?.o?.isConnected) return;
+  tdVach ||= Object.assign(document.createElement("div"), {className: "con-tro-chen"});
+  if (tdConTro.g < ds.length) ds[tdConTro.g].o.before(tdVach); else ds[ds.length - 1].o.after(tdVach);
+}
+
+function tdDatConTro(g, cuon = false) {
+  const ds = tdDs();
+  if (!ds.length) return;
+  tdConTro = {tep: tt.tep, g: Math.max(0, Math.min(ds.length, g)), n: ds.length};
+  tdVeConTro();
+  if (cuon && tdVach?.isConnected) {
+    tdNeo = null;
+    const vung = $("vung-dong"), r = tdVach.getBoundingClientRect(), v = vung.getBoundingClientRect();
+    if (r.top < v.top + 40) vung.scrollTop -= v.top + 40 - r.top;  // chừa chỗ cho thấy khối liền kề
+    else if (r.top > v.bottom - 40) vung.scrollTop += r.top - (v.bottom - 40);
+  }
+}
+
+// Vị trí ký tự trong file nơi vạch đứng, hoặc null nếu chưa đặt vạch (hay vạch đã mất vì văn bản đổi). Lấy ngay trước khi chèn.
+// Là đầu dòng của khối đứng sau vạch (kèm dòng ghi chú % ngay trên, vì đó là mã của khối); vạch đứng cuối thì sau khối cuối.
+function tdViTriChen() {
+  if (tt.cheDo !== "dong" || !tt.tep?.la_tex) return null;
+  tdChotConTro();
+  if (!tdConTro) return null;
+  const chu = soan.getValue(), ds = tdDs(), g = tdConTro.g;
+  if (g >= ds.length) return keoDoan(chu, ds[ds.length - 1]).e;
+  let s = keoDoan(chu, ds[g]).s;
+  while (s > 0) {
+    const dongTren = chu.lastIndexOf("\n", s - 2) + 1;
+    if (!/^[ \t]*%/.test(chu.slice(dongTren, s - 1))) break;
+    s = dongTren;
+  }
+  return s;
+}
+
+// Chèn chuoi (một hay nhiều khối) tại viTri, tự xuống dòng và chừa dòng trống; con trỏ chèn nằm ngay sau đoạn vừa chèn.
+// Trả về vị trí ngay sau đoạn vừa chèn, hoặc -1 nếu không chèn được (đang sửa dở một dòng thì xong dòng đó rồi gọi lại tdViTriChen).
+function tdChenTai(viTri, chuoi) {
+  const chu = soan.getValue();
+  if (tt.dangSua || !chuoi || !Number.isInteger(viTri) || viTri < 0 || viTri > chu.length) return -1;
+  let moi = chuoi.replace(/\s+$/, "") + "\n\n";
+  if (viTri > 0 && chu[viTri - 1] !== "\n") moi = "\n" + moi;
+  const p = soan.posFromIndex(viTri);
+  soan.operation(() => soan.replaceRange(moi, p, p));
+  const sau = viTri + moi.length;
+  tdConTro = {tep: tt.tep, pos: sau};
+  khoaDong = null;
+  capNhat();
+  return sau;
+}
+
+// Khối để chèn hình khi chỉ có con trỏ: khối đứng ngay trên vạch (câu vừa xong), không có thì khối đứng dưới. Mục (tiêu đề) không nhận.
+function tdKhoiConTro() {
+  tdChotConTro();
+  if (!tdConTro) return null;
+  const ds = tdDs(), g = tdConTro.g;
+  return [ds[g - 1], ds[g]].find(k => k && k.loai !== "muc") || null;
+}
+
+$("vung-dong").addEventListener("mousedown", e => {
+  if (e.detail > 1 && e.target.closest?.(".dong[data-thu-tu]")) e.preventDefault();  // bấm đúp không bôi đen chữ
+});
+
 $("vung-dong").addEventListener("click", e => {
+  if (e.target.closest?.(".sua, .giai-an, .dau-file, .keo-tay, .keo-xoa")) return;
   const nut = e.target.closest?.(".dong[data-thu-tu]");
-  if (nut) moDong(+nut.dataset.thuTu);
+  if (nut && e.detail >= 2) return moDong(+nut.dataset.thuTu);  // bấm đúp: sửa dòng
+  const o = e.target.closest?.(".khoi"), k = o && tt.khoi[+o.dataset.i];
+  if (!k || k.o !== o || !keoCoThe()) return;
+  const ds = tdDs(), r = o.getBoundingClientRect();
+  tdDatConTro(k.loai === "tu-do" ? ds.filter(x => x.i < k.i).length : ds.indexOf(k) + (e.clientY > r.top + r.height / 2 ? 1 : 0));
+  if (!tdDaBao) { tdDaBao = true; bao("Đã đặt con trỏ chèn. Muốn sửa chữ thì bấm đúp vào dòng đó."); }
+});
+
+document.addEventListener("keydown", e => {
+  if (!tdConTro || tt.cheDo !== "dong" || $("vung-dong").hidden || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+  if (e.target.closest?.("input, textarea, select, dialog, .CodeMirror, #anh-cat") || document.querySelector(".bang-menu") || tt.dangSua || !keoCoThe()) return;
+  if (e.key === "Escape") { tdConTro = null; tdVeConTro(); return; }
+  if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+  tdChotConTro();
+  if (!tdConTro) return;
+  e.preventDefault();
+  tdDatConTro(tdConTro.g + (e.key === "ArrowUp" ? -1 : 1), true);
 });
 
 let henCuonDong = 0;
