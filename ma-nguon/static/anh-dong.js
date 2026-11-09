@@ -137,6 +137,7 @@ async function anhNap(span) {
     if (!span.isConnected) return;
     e.onload = () => span.classList.contains("chon") && anhVeLop();
     span.replaceChildren(e);
+    tdDatNeo();  // ảnh vào chỗ làm dòng cao lên: giữ chỗ đang nhìn (ảnh <img> thì load tự gọi lại khi tải xong)
   } catch {
     if (!span.isConnected) return;
     span.classList.add("thieu");
@@ -398,7 +399,10 @@ async function anhChen(file, i) {
       dich += "\n\\usepackage{graphicx}".length;
     }
     anhGhi(ds, dich);
-    setTimeout(() => $("vung-dong").querySelector(`.anh-dong[data-dau="${dich}"]`)?.scrollIntoView({block: "nearest"}), 60);
+    setTimeout(() => {  // ảnh mới chèn nằm ngoài khung nhìn thì mới cuộn tới; để ảnh tải xong, đo xong rồi mới cuộn, và thôi giữ neo cũ
+      const s = $("vung-dong").querySelector(`.anh-dong[data-dau="${dich}"]`);
+      if (s) { tdHuyNeo(); s.scrollIntoView({block: "nearest"}); }
+    }, 500);
     bao("Đã chèn ảnh vào cuối phần đề của câu.");
   } catch (e) { bao(e.message, true); }
 }
@@ -410,7 +414,7 @@ function anhKhoiDich() {
   const k = (L && khoiCuaDong(tt.dong.indexOf(L.d))) || tt.dangSua?.khoi || (() => {
     const c = typeof keoDaChon === "function" ? keoDaChon() : null;
     return c && c.tap.size === 1 ? tt.khoi[[...c.tap][0]] : null;
-  })();
+  })() || tdKhoiConTro();  // sau cùng: con trỏ chèn, lấy câu đứng ngay trên vạch
   return k && k.loai !== "muc" ? k : null;
 }
 
