@@ -87,7 +87,6 @@ GOC_HIEN = None  # phần tử của DS_GOC ứng với dự án đang mở
 PDF_DAU = None  # file PDF được truyền vào lúc mở app
 GOP_DAU = None  # các file chọn từ menu chuột phải Gộp thành PDF, đã chuyển hết sang PDF
 CHUYEN_DAU = None  # các file chọn từ menu chuột phải Chuyển thành PDF và mở: PDF tạm cùng thư mục gốc để gợi ý lúc lưu
-TOAN_MAN = False  # cửa sổ app đang toàn màn hình
 DM = loi.DanhMuc()
 KHOA = threading.Lock()  # lưu và xuất lần lượt, không chồng lên nhau
 CONG = 8765
@@ -616,13 +615,9 @@ def in_tuy_chon(d: dict) -> dict:
 
 def toan_man(d: dict) -> dict:
     """Trang web tự toàn màn hình chỉ phủ kín cửa sổ, nên cửa sổ app phải tự phóng ra cả màn hình."""
-    global TOAN_MAN
-    if not CUA_SO:
+    if not KHUNG:
         return {"khong_co_cua_so": True}
-    if bool(d.get("bat")) != TOAN_MAN:
-        TOAN_MAN = not TOAN_MAN
-        CUA_SO.toggle_fullscreen()
-        threading.Timer(0.3, KHUNG.ap_dung).start()  # WinForms đặt lại kiểu cửa sổ khi đổi viền, phải thêm lại kiểu đổi cỡ
+    KHUNG.toan_man(bool(d.get("bat")))
     return {}
 
 

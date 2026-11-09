@@ -29,11 +29,15 @@ u.MonitorFromPoint.restype = wintypes.HANDLE
 u.GetMonitorInfoW.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
 u.IsZoomed.argtypes = [wintypes.HWND]
 u.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
+u.GetWindowPlacement.argtypes = [wintypes.HWND, ctypes.c_void_p]
+u.SetWindowPlacement.argtypes = [wintypes.HWND, ctypes.c_void_p]
+u.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, wintypes.UINT]
 
 GWL_STYLE = -16
-WS_THICKFRAME, WS_MINIMIZEBOX, WS_MAXIMIZEBOX = 0x40000, 0x20000, 0x10000
+WS_MAXIMIZE, WS_THICKFRAME, WS_MINIMIZEBOX, WS_MAXIMIZEBOX = 0x1000000, 0x40000, 0x20000, 0x10000
 SWP_NOSIZE, SWP_NOMOVE, SWP_NOZORDER, SWP_NOACTIVATE, SWP_FRAMECHANGED = 0x1, 0x2, 0x4, 0x10, 0x20
-SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE = 3, 6, 9
+SWP_NOOWNERZORDER = 0x200
+SW_SHOWNORMAL, SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE = 1, 3, 6, 9
 MONITOR_NEAREST = 2
 VK_LBUTTON = 1
 CHAM = 0.008  # giây giữa hai lần đọc vị trí chuột
@@ -51,6 +55,11 @@ def _nap_dll():
 
 
 DLL = _nap_dll()
+
+
+class _WindowPlacement(ctypes.Structure):
+    _fields_ = [("length", wintypes.UINT), ("flags", wintypes.UINT), ("showCmd", wintypes.UINT),
+                ("ptMin", wintypes.POINT), ("ptMax", wintypes.POINT), ("rcNormal", wintypes.RECT)]
 
 
 class _MonitorInfo(ctypes.Structure):
@@ -80,6 +89,7 @@ class KhungCuaSo:
         self.nho_nhat = nho_nhat
         self._hwnd = None
         self._dang_keo = threading.Lock()
+        self._truoc_toan_man = None  # (kiểu, vị trí) của cửa sổ trước khi toàn màn hình
 
     @property
     def hwnd(self) -> int:
@@ -119,6 +129,42 @@ class KhungCuaSo:
         h = self.hwnd
         u.ShowWindow(h, SW_RESTORE if u.IsZoomed(h) else SW_MAXIMIZE)
         return self.trang_thai()
+
+    # ---------- Toàn màn hình ----------
+
+    def toan_man(self, bat: bool) -> None:
+        """Phủ khít cả màn hình, che luôn taskbar. Không dùng toggle_fullscreen() của pywebview: hàm đó để cửa sổ ở trạng thái
+        phóng to, khung_cua_so.dll thấy phóng to thì thu vùng làm việc về trừ taskbar, nên chỗ taskbar thành dải trắng."""
+        h = self.hwnd
+        if bat == (self._truoc_toan_man is not None):
+            return
+        if bat:
+            vi_tri = _WindowPlacement()
+            vi_tri.length = ctypes.sizeof(_WindowPlacement)
+            u.GetWindowPlacement(h, ctypes.byref(vi_tri))
+            kieu = u.GetWindowLongW(h, GWL_STYLE) & 0xFFFFFFFF
+            self._truoc_toan_man = (kieu, vi_tri)
+            mi = _MonitorInfo()
+            mi.cb = ctypes.sizeof(_MonitorInfo)
+            u.GetMonitorInfoW(u.MonitorFromWindow(h, MONITOR_NEAREST), ctypes.byref(mi))
+            m = mi.man_hinh
+            if u.IsZoomed(h):
+                # Đang phóng to thì khung_cua_so.dll thu vùng làm việc về trừ taskbar, nên phải về cỡ thường trước.
+                # ShowWindow(SW_RESTORE) từ luồng này không có tác dụng, bỏ cờ WS_MAXIMIZE thì WinForms trả về cỡ cũ.
+                thuong = _WindowPlacement.from_buffer_copy(vi_tri)
+                thuong.showCmd, thuong.rcNormal = SW_SHOWNORMAL, m
+                u.SetWindowPlacement(h, ctypes.byref(thuong))
+            # Bỏ khung đổi cỡ để Windows coi đây là cửa sổ toàn màn hình (taskbar tự lùi xuống dưới).
+            u.SetWindowLongW(h, GWL_STYLE, ctypes.c_long(kieu & ~(WS_MAXIMIZE | WS_THICKFRAME | WS_MAXIMIZEBOX)).value)
+            u.SetWindowPos(h, 0, m.left, m.top, m.right - m.left, m.bottom - m.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED)
+            u.SetForegroundWindow(h)
+        else:
+            kieu, vi_tri = self._truoc_toan_man
+            self._truoc_toan_man = None
+            # Cờ phóng to để SetWindowPlacement tự bật lại, nếu bật sẵn thì nó coi như đã phóng to và không đổi cỡ.
+            u.SetWindowLongW(h, GWL_STYLE, ctypes.c_long(kieu & ~WS_MAXIMIZE).value)
+            u.SetWindowPos(h, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
+            u.SetWindowPlacement(h, ctypes.byref(vi_tri))  # trả lại cỡ cũ, kể cả đang phóng to
 
     # ---------- Kéo, đổi cỡ ----------
 
