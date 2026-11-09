@@ -49,7 +49,20 @@ function dapAnXoaGap() {
   for (const m of soan.getAllMarks()) if (m.dapAn) m.clear();
 }
 
+// Gập hay mở khối làm chiều cao đổi, nên giữ nguyên chỗ đang nhìn: lấy dòng con trỏ (nếu đang trong khung nhìn)
+// hoặc dòng đầu khung nhìn làm mốc, vẽ xong thì cuộn lại cho mốc đứng đúng chỗ cũ.
 function dapAnGap() {
+  const nhin = soan.getScrollInfo(), cao = soan.getScrollerElement().clientHeight;
+  let mocDong = soan.getCursor("head").line;
+  const yCt = soan.heightAtLine(mocDong, "local") - nhin.top;
+  if (yCt < 0 || yCt > cao) mocDong = soan.lineAtHeight(nhin.top, "local");
+  const yMoc = soan.heightAtLine(mocDong, "local") - nhin.top;
+  dapAnGapVe();
+  const lech = soan.heightAtLine(mocDong, "local") - soan.getScrollInfo().top - yMoc;
+  if (lech) soan.scrollTo(null, soan.getScrollInfo().top + lech);
+}
+
+function dapAnGapVe() {
   clearTimeout(henGap);
   dapAnXoaGap();
   if (!anDapAn() || !tt.tep?.la_tex || tt.cheDo !== "code") return;
