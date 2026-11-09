@@ -367,6 +367,16 @@ function baiTaiConTro() {
   return hien;
 }
 
+// Như scrollIntoView({block: "nearest"}) nhưng chỉ cuộn đúng khung chứa danh sách, không kéo các khung khác theo.
+function cuonTrongKhung(el) {
+  let khung = el.parentElement;
+  while (khung && !/auto|scroll/.test(getComputedStyle(khung).overflowY)) khung = khung.parentElement;
+  if (!khung) return;
+  const k = khung.getBoundingClientRect(), r = el.getBoundingClientRect();
+  if (r.top < k.top) khung.scrollTop -= k.top - r.top;
+  else if (r.bottom > k.bottom) khung.scrollTop += Math.min(r.bottom - k.bottom, r.top - k.top);
+}
+
 function danhDauBai() {
   const c = tt.cheDo === "dong" && !tt.dangSua && !$("vung-dong").hidden ? khoiTaiCuon() : baiTaiConTro();
   if (c === tt.hienTai) return;
@@ -374,7 +384,7 @@ function danhDauBai() {
   document.querySelectorAll("#ds-bai button").forEach(b => {
     const dung = c && +b.dataset.i === c.i;
     b.setAttribute("aria-current", dung ? "true" : "false");
-    if (dung) b.scrollIntoView({block: "nearest"});
+    if (dung) cuonTrongKhung(b);
   });
   $("vi-tri-bai").textContent = c ? [c.nhan, c.loai === "muc" ? c.ten : ""].filter(Boolean).join(" ") : "";
 }

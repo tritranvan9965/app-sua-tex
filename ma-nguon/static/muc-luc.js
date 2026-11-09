@@ -130,7 +130,7 @@ function capNhatMucLuc(cuonToi = false) {
     h.el.classList.toggle("da-chon", h.trang.length > 0 && h.trang.every(x => x.chon));
     h.el.classList.toggle("dang-xem", h === dang);
   }
-  if (dang && dang !== ml.dang || cuonToi && dang) dang.el.scrollIntoView({block: "nearest"});
+  if (dang && dang !== ml.dang || cuonToi && dang) cuonTrongKhung(dang.el);
   ml.dang = dang;
 }
 
