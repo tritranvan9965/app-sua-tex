@@ -15,6 +15,7 @@ import re
 import threading
 from pathlib import Path
 
+import anh_dong
 import duong_app
 
 TEP_CAI_DAT = duong_app.DU_LIEU / "ngan-hang.json"  # tách khỏi cai-dat.json vì file đó do trang ghi đè cả tệp
@@ -25,6 +26,7 @@ ID_CUNG_DONG = re.compile(r"^\s*\\begin\{\w+\}(?:\[[^\]\n]*\])?\s*%\s*\[([^\]\n]
 MA_DANG = re.compile(r"^([A-Za-z]*)(\d+)(?:\.(\d+))?(?:\.(\d+))?$")
 SO_LA_MA = {"I": 1, "V": 5, "X": 10, "L": 50}
 TOI_DA_DS = 200
+LENH_ANH = re.compile(r"\\(?:includegraphics|hinhgoc|hinhphai|hinhtrai|hinh)(?![a-zA-Z])\*?\s*(?:\[[^\]]*\]\s*)?\{([^{}]*)\}")
 
 _khoa = threading.RLock()
 _bo_nho = {}   # đường dẫn file -> (mtime_ns, size, ds câu)
@@ -57,7 +59,9 @@ def la_ma(chu: str) -> int:
 
 
 def bam_noi_dung(dong: list[str]) -> str:
-    return hashlib.sha1(re.sub(r"\s+", "", "".join(dong)).encode("utf-8")).hexdigest()[:12]
+    """Bỏ đường dẫn ảnh trước khi băm: chèn sang file khác thì ảnh được chép và đổi tên, câu vẫn là câu đó."""
+    chu = LENH_ANH.sub(lambda m: m.group(0)[:m.start(1) - m.start()] + m.group(0)[m.end(1) - m.start():], "".join(dong))
+    return hashlib.sha1(re.sub(r"\s+", "", chu).encode("utf-8")).hexdigest()[:12]
 
 
 def doc_ghi_chu(dong: str) -> dict:
@@ -296,7 +300,42 @@ def viec_noi_dung(d: dict) -> dict:
     n = int(d.get("so_tt", 0)) - 1
     if not 0 <= n < len(ds):
         raise LoiNganHang("File đã thay đổi, câu này không còn ở vị trí cũ. Bấm làm mới danh sách.")
-    return {"chu": "\n".join(ds[n]["dong"])}
+    chu = "\n".join(ds[n]["dong"])
+    if not d.get("dich"):
+        return {"chu": chu}
+    chu, anh_moi, thieu = chep_anh_sang(chu, p, d["dich"], d.get("chu_dich", ""))
+    return {"chu": chu, "anh_moi": anh_moi, "thieu": thieu}
+
+
+def chep_anh_sang(chu: str, nguon: Path, dich: str, chu_dich: str):
+    """Ảnh trong câu: chép vào hinh/<tên file đích>/h00N như khi người dùng tự chèn ảnh (anh_dong.luu_anh), rồi đổi đường dẫn.
+    Ảnh không tìm thấy hay không chép được thì để nguyên lệnh và báo lại."""
+    tex = Path(dich).resolve()
+    if tex.suffix.lower() != ".tex" or not tex.is_file():
+        raise LoiNganHang("File đích không phải file .tex.")
+    goc = thu_muc_hien() or nguon.parent
+    da_chep, anh_moi, thieu = {}, [], []
+
+    def doi(m):
+        ref = m.group(1).strip()
+        if ref not in da_chep:
+            f = anh_dong.tim_anh(nguon, ref, [], goc)
+            try:
+                if not f:
+                    raise ValueError
+                moi = anh_dong.luu_anh(tex, chu_dich + "\n" + "\n".join(anh_moi), f.read_bytes(), f.suffix)
+                anh_moi.append(moi)
+                da_chep[ref] = moi
+            except (ValueError, OSError):
+                thieu.append(ref)
+                da_chep[ref] = None
+        moi = da_chep[ref]
+        if not moi:
+            return m.group(0)
+        a, b = m.start(1) - m.start(), m.end(1) - m.start()
+        return m.group(0)[:a] + moi + m.group(0)[b:]
+
+    return LENH_ANH.sub(doi, chu), anh_moi, thieu
 
 
 def viec_trong_file(d: dict) -> dict:

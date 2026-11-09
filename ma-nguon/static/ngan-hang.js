@@ -336,12 +336,20 @@ function chenCau(chu, dong) {
   soan.setCursor({line: Math.min(dong + (truoc ? 1 : 0), soan.lineCount() - 1), ch: 0});
 }
 
+// Nội dung câu để chèn; ảnh trong câu được máy chủ chép sang hinh/<tên file>/ của file đang mở như khi tự chèn ảnh.
+async function layCau(c) {
+  const r = await goiNh("noi-dung", {tep: c.tep, so_tt: c.so_tt, dich: tt.tep.duong, chu_dich: soan.getValue()});
+  if (typeof anhDaThem !== "undefined") for (const ref of r.anh_moi || []) anhDaThem.add(ref);  // để Lưu dọn được nếu bỏ câu
+  if (r.thieu?.length) baoTrongKhung(`Không tìm thấy ảnh: ${r.thieu.join(", ")} — giữ nguyên đường dẫn cũ.`, true);
+  return r;
+}
+
 async function tha(e, tinh) {
   anChiDan();
   const goc = JSON.parse(e.dataTransfer.getData(KIEU_KEO));
   const vt = tinh();
   if (vt == null) return baoTrongKhung("Màn hình đang cập nhật, thả lại sau giây lát.");
-  const r = await goiNh("noi-dung", {tep: goc.tep, so_tt: goc.so_tt});
+  const r = await layCau(goc);
   chenCau(r.chu.replace(/\s+$/, ""), vt);
   bao(`Đã chèn ${goc.nhan} vào file.`);
   capNhatTich();
@@ -353,13 +361,13 @@ async function chenTaiConTro(c) {
   if (tt.cheDo === "dong") {
     const vt = typeof tdViTriChen === "function" ? tdViTriChen() : null;
     if (vt == null) return baoTrongKhung("Bấm vào file ở chỗ muốn chèn để đặt vạch chèn, rồi bấm đúp câu.");
-    const r = await goiNh("noi-dung", {tep: c.tep, so_tt: c.so_tt});
+    const r = await layCau(c);
     if (tdChenTai(vt, r.chu) < 0) return baoTrongKhung("Đang sửa dở một dòng, xong dòng đó rồi chèn lại.");
   } else {
     let dong = soan.getCursor().line;
     const cau = tachCau(soan.getValue()).find(k => dong >= k.a && dong <= k.b);
     if (cau) dong = cau.b + 1;
-    const r = await goiNh("noi-dung", {tep: c.tep, so_tt: c.so_tt});
+    const r = await layCau(c);
     chenCau(r.chu.replace(/\s+$/, ""), dong);
   }
   bao(`Đã chèn ${c.nhan} vào file.`);
