@@ -208,13 +208,13 @@ function veDs() {
   }
   const dau = tao("div", "nh-ds-dau");
   o.dem = tao("span", "", "");
-  dau.append(tao("strong", "", `${nh.tong2 ?? 0} câu`), o.dem, tao("em", "", "Kéo câu thả vào file đang mở"));
+  dau.append(tao("strong", "", `${nh.tong2 ?? 0} câu`), o.dem, tao("em", "", "Kéo câu thả vào file, hoặc bấm đúp để chèn vào chỗ con trỏ"));
   const ul = tao("ul");
   for (const c of nh.ds) {
     const li = tao("li", "nh-cau");
     li.draggable = true;
     li.dataset.khoa = c.khoa.join(" ");
-    li.title = "Kéo thả vào file đang mở để chèn câu này";
+    li.title = "Kéo thả vào file đang mở, hoặc bấm đúp để chèn vào chỗ con trỏ";
     const tich = tao("span", "nh-tich");
     tich.setAttribute("aria-hidden", "true");
     const tren = tao("div", "nh-tren");
@@ -228,6 +228,7 @@ function veDs() {
       e.dataTransfer.setData("text/plain", c.nhan);
       e.dataTransfer.effectAllowed = "copy";
     };
+    li.ondblclick = an(() => chenTaiConTro(c));
     ul.append(li);
   }
   o.ds.append(dau, ul);
@@ -343,6 +344,25 @@ async function tha(e, tinh) {
   const r = await goiNh("noi-dung", {tep: goc.tep, so_tt: goc.so_tt});
   chenCau(r.chu.replace(/\s+$/, ""), vt);
   bao(`Đã chèn ${goc.nhan} vào file.`);
+  capNhatTich();
+}
+
+// Bấm đúp một câu: chèn vào chỗ con trỏ. Theo dòng dùng vạch chèn (tdViTriChen của theo-dong.js); Toàn bộ code dùng con trỏ CodeMirror, không chen vào giữa câu.
+async function chenTaiConTro(c) {
+  if (!tt.tep?.la_tex) return baoTrongKhung("Mở một file .tex trước, rồi bấm đúp câu để chèn.");
+  if (tt.cheDo === "dong") {
+    const vt = typeof tdViTriChen === "function" ? tdViTriChen() : null;
+    if (vt == null) return baoTrongKhung("Bấm vào file ở chỗ muốn chèn để đặt vạch chèn, rồi bấm đúp câu.");
+    const r = await goiNh("noi-dung", {tep: c.tep, so_tt: c.so_tt});
+    if (tdChenTai(vt, r.chu) < 0) return baoTrongKhung("Đang sửa dở một dòng, xong dòng đó rồi chèn lại.");
+  } else {
+    let dong = soan.getCursor().line;
+    const cau = tachCau(soan.getValue()).find(k => dong >= k.a && dong <= k.b);
+    if (cau) dong = cau.b + 1;
+    const r = await goiNh("noi-dung", {tep: c.tep, so_tt: c.so_tt});
+    chenCau(r.chu.replace(/\s+$/, ""), dong);
+  }
+  bao(`Đã chèn ${c.nhan} vào file.`);
   capNhatTich();
 }
 
