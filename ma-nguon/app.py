@@ -30,6 +30,11 @@ import bien_dich  # noqa: E402
 import duong_app  # noqa: E402
 import khung_cua_so  # noqa: E402
 import loi  # noqa: E402
+try:  # ngân hàng câu hỏi chạy độc lập: lỗi ở đó không được làm sập app
+    import ngan_hang  # noqa: E402
+    VIEC_NGAN_HANG = ngan_hang.VIEC
+except Exception:
+    VIEC_NGAN_HANG = {}
 
 
 class NapKhiDung:
@@ -1000,7 +1005,7 @@ class XuLy(BaseHTTPRequestHandler):
             raise LoiApp(403, "Yêu cầu không đến từ app.")
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
         viec = {"/api/phan-tich": phan_tich, "/api/luu": luu, "/api/xuat": xuat, "/api/bien-dich": bien_dich_xem, "/api/chua-luu": bao_chua_luu,
-                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/cua-so": cua_so_lenh, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-ds-dong": chu_ds_dong, "/api/dt-ds": dt_ds, "/api/dt-thu": dt_thu, "/api/chu-sua-thu": chu_sua_thu, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/anh-them": anh_them, "/api/anh-chon": anh_chon, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep"))}.get(urlparse(self.path).path)
+                "/api/chon-mo": chon_mo, "/api/cai-dat": ghi_cai_dat, "/api/thoat": thoat, "/api/cua-so": cua_so_lenh, "/api/pdf-chon": pdf_chon, "/api/pdf-ghi": pdf_ghi, "/api/pdf-in": pdf_in, "/api/chu-tim-dong": chu_tim_dong, "/api/chu-ds-dong": chu_ds_dong, "/api/dt-ds": dt_ds, "/api/dt-thu": dt_thu, "/api/chu-sua-thu": chu_sua_thu, "/api/chu-da-them": chu_da_them, "/api/chu-tim-phong": chu_tim_phong, "/api/in-may": lambda _: hoi_may_in(in_pdf.ds_may_in), "/api/in-kha-nang": lambda d: hoi_may_in(lambda: in_pdf.kha_nang(d["may_in"])), "/api/in-khung": in_khung, "/api/in-tuy-chon": in_tuy_chon, "/api/pdf-nhap": pdf_nhap, "/api/pdf-trong": pdf_trong, "/api/chon-thu-muc": chon_thu_muc, "/api/anh-ghi": anh_ghi, "/api/anh-them": anh_them, "/api/anh-chon": anh_chon, "/api/toan-man": toan_man, "/api/them-mau": them_mau, "/api/mo-thu-vien": mo_thu_vien, "/api/dong-goc": dong_goc, "/api/chep-anh": chep_anh, "/api/chep-duong": chep_duong, "/api/chep-tep": chep_tep, "/api/dan-tep": dan_tep, "/api/doi-ten": doi_ten, "/api/xoa-tep": xoa_tep, "/api/hien-tep": hien_tep, "/api/mo-ngoai": mo_ngoai, "/api/mo": lambda d: mo_moi(d.get("duong", ""), d.get("tep")), **VIEC_NGAN_HANG}.get(urlparse(self.path).path)
         if not viec:
             raise LoiApp(404, "Không có việc này.")
         self._json(200, viec(d))
