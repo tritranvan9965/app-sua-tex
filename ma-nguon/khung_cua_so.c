@@ -7,6 +7,20 @@
 static WNDPROC cu;
 
 static LRESULT CALLBACK thu_tuc(HWND h, UINT tin, WPARAM wp, LPARAM lp) {
+    if (tin == WM_GETMINMAXINFO) {
+        // Phóng to đúng bằng vùng làm việc. Mặc định Windows cho cửa sổ phóng to tràn ra mỗi bên một khung dày, khung ngoài
+        // phủ hết màn hình nên Windows coi app là toàn màn hình và hạ taskbar xuống dưới: chỗ taskbar thành dải đen.
+        LRESULT kq = CallWindowProcW(cu, h, tin, wp, lp);
+        MONITORINFO mi = {sizeof mi};
+        if (GetMonitorInfoW(MonitorFromWindow(h, MONITOR_DEFAULTTONEAREST), &mi)) {
+            MINMAXINFO *m = (MINMAXINFO *)lp;
+            m->ptMaxPosition.x = mi.rcWork.left - mi.rcMonitor.left;
+            m->ptMaxPosition.y = mi.rcWork.top - mi.rcMonitor.top;
+            m->ptMaxSize.x = mi.rcWork.right - mi.rcWork.left;
+            m->ptMaxSize.y = mi.rcWork.bottom - mi.rcWork.top;
+        }
+        return kq;
+    }
     if (tin == WM_NCCALCSIZE && wp) {
         // Không có vùng ngoài vùng làm việc. Phóng to thì cửa sổ tràn ra ngoài màn hình một khung dày, nên thu về vùng làm việc.
         if (IsZoomed(h)) {
