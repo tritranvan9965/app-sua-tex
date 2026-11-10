@@ -44,6 +44,7 @@
 \definecolor{xanh}{HTML}{1F4E79}
 \definecolor{xanhnhat}{HTML}{EAF1F8}
 \definecolor{cam}{HTML}{C55A11}
+\definecolor{camnhat}{HTML}{FBEADF}
 \definecolor{xam}{HTML}{6B6B6B}
 
 % ---------- Giá trị file lớp hay ghi đè ----------
@@ -94,20 +95,27 @@
     {\Large\bfseries\color{xanh}\MakeUppercase{#2}}
   \end{center}\vspace{4pt}}
 
-% Phần lớn: A. LÝ THUYẾT / B. VÍ DỤ / C. BÀI TẬP
-\newcommand{\phan}[1]{\par\cophantrue\dautrang{1}{#1}\medskip{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\smallskip}
+% Phần lớn: A. LÝ THUYẾT / B. VÍ DỤ / BÀI TẬP TỰ LUẬN / BÀI TẬP TRẮC NGHIỆM / PHẦN I...
+% Dải nền cam nhạt, vạch cam đậm bên trái: học sinh lướt trang là thấy chỗ bắt đầu từng loại bài.
+\RequirePackage{needspace}% đề mục không nằm trơ cuối trang: thiếu chỗ thì sang trang cùng câu đầu tiên
+\newcommand{\phan}[1]{\par\needspace{6\baselineskip}\cophantrue\dautrang{1}{#1}%
+  \begin{tcolorbox}[enhanced,colback=camnhat,colframe=cam,boxrule=0pt,leftrule=4pt,arc=0pt,outer arc=0pt,
+    left=8pt,right=6pt,top=4pt,bottom=4pt,before skip=10pt,after skip=6pt]
+  {\large\bfseries\color{cam}\MakeUppercase{#1}}\end{tcolorbox}}
 
 % Dạng bài: \dang{Xét tính đúng sai của mệnh đề}
 \newcounter{dang}
-\newcommand{\dang}[1]{\par\medskip\refstepcounter{dang}\ifcophan\dautrang{2}{Dạng \thedang. #1}\else\dautrang{1}{Dạng \thedang. #1}\fi%
+\newcommand{\dang}[1]{\par\needspace{8\baselineskip}\medskip\refstepcounter{dang}\ifcophan\dautrang{2}{Dạng \thedang. #1}\else\dautrang{1}{Dạng \thedang. #1}\fi%
   \begin{tcolorbox}[colback=xanh,colframe=xanh,coltext=white,boxrule=0pt,arc=2pt,
     left=6pt,right=6pt,top=3pt,bottom=3pt,before skip=6pt,after skip=4pt]
   \bfseries Dạng \thedang. #1\end{tcolorbox}}
 
 % Mục nhỏ trong một dạng: loại câu hỏi
 % Có dấu trang PDF, cấp con dưới Dạng.
-\newcommand{\muc}[1]{\par\smallskip\ifcophan\dautrang{3}{#1}\else\dautrang{2}{#1}\fi%
-  {\bfseries\color{cam}\large\textbullet\ #1}\par\smallskip}
+\newcommand{\muc}[1]{\par\needspace{5\baselineskip}\smallskip\ifcophan\dautrang{3}{#1}\else\dautrang{2}{#1}\fi%
+  \begin{tcolorbox}[enhanced,colback=camnhat,colframe=cam,boxrule=0pt,leftrule=2.5pt,arc=0pt,outer arc=0pt,
+    left=6pt,right=6pt,top=2pt,bottom=2pt,before skip=6pt,after skip=4pt]
+  {\bfseries\color{cam}#1}\end{tcolorbox}}
 \newcommand{\muctn}{\muc{Trắc nghiệm nhiều phương án lựa chọn}}
 \newcommand{\mucds}{\muc{Trắc nghiệm đúng sai}}
 \newcommand{\muctln}{\muc{Trắc nghiệm trả lời ngắn}}
