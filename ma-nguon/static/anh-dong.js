@@ -4,7 +4,7 @@
 // soan.operation nên Ctrl+Z hoàn tác trọn vẹn. Ảnh không còn được dùng thì máy chủ đưa vào Thùng rác khi Lưu.
 // Tên cấp ngoài cùng đều có tiền tố "anh" (các file static/*.js dùng chung phạm vi toàn cục).
 
-const ANH_MAC_DINH = {hinh: 0.5, hinhphai: 0.4, hinhtrai: 0.4, hinhgoc: 0.6};
+const ANH_MAC_DINH = {hinh: 0.5, hinhphai: 0.4, hinhtrai: 0.4, hinhgoc: 0.3};
 const ANH_DAU_LENH = /\\(includegraphics|hinhgoc|hinhphai|hinhtrai|hinh)(?![a-zA-Z])/g;
 const ANH_MAU = /\\(?:usepackage|RequirePackage)(?:\[[^\]]*\])?\{[^}]*\b(?:tritoan|toan\d*)\b[^}]*\}/;  // file dùng mẫu tritoan (có \hinh)
 const ANH_MOI_TRUONG = /\\begin\{(center|flushright|flushleft)\}\s*$/;

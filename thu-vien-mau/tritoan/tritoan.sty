@@ -331,8 +331,9 @@
   \textbf{\color{cam}[Hình — trang #1]}\ #2}}\end{center}}
 % Hình gốc cắt từ PDF nguồn: \hinhgoc{duong/dan/hinh.pdf}{mô tả (không in)}
 % Đường dẫn tính từ thư mục ngân hàng của dự án; app (hoặc xuat.py) tự chép file hình khi biên dịch.
+% Rộng tối đa 0.3 bề rộng dòng (trước 1.2.10 là 0.6); hình nhỏ hơn giữ nguyên cỡ.
 \RequirePackage[export]{adjustbox}
-\newcommand{\hinhgoc}[2]{\par\begin{center}\includegraphics[max width=0.6\linewidth]{#1}\end{center}}
+\newcommand{\hinhgoc}[2]{\par\begin{center}\includegraphics[max width=0.3\linewidth]{#1}\end{center}}
 % Ảnh của bài (app TriTeX tự chèn, ảnh nằm ở hinh/<tên file>/h001.png... cạnh file .tex):
 %   \hinh[tỉ lệ]{đường dẫn}               ảnh căn giữa, rộng tỉ lệ x \linewidth (bỏ trống = 0.5)
 %   \hinhphai[tỉ lệ]{đường dẫn}{nội dung}  ảnh nằm bên phải nội dung (bỏ trống = 0.4)
