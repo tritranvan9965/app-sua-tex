@@ -18,7 +18,7 @@ const KHOI_LT = {kienthuc: "Kiến thức", lythuyet: "Lý thuyết", phuongphap
   corollary: "Hệ quả", bode: "Bổ đề", lemma: "Bổ đề", chuy: "Chú ý", remark: "Chú ý", note: "Chú ý", nhanxet: "Nhận xét", proof: "Chứng minh", chungminh: "Chứng minh"};
 const CAP_MUC = {chapter: 0, part: 0, tieude: 0, section: 1, phan: 1, subsection: 2, dang: 2, subsubsection: 3, paragraph: 3, muc: 3};
 // Mục loại câu của mẫu tritoan, không có đối số.
-const MUC_SAN = {muctn: "Trắc nghiệm nhiều phương án lựa chọn", mucds: "Trắc nghiệm đúng sai", muctln: "Trắc nghiệm trả lời ngắn"};
+const MUC_SAN = {muctl: "Bài tập tự luận", muctn: "Trắc nghiệm nhiều phương án", mucds: "Câu hỏi đúng sai", muctln: "Câu hỏi trả lời ngắn"};
 const LENH_LOI_GIAI = ["\\giai{", "\\huongdan{", "\\loigiai{"];
 
 // File không dùng môi trường: nhận theo chữ ở đầu dòng, ví dụ "Câu 1.", "Bài 3:", "Phần II", "Lý thuyết".
@@ -206,7 +206,7 @@ function phanTichFile(chu) {
     them({loai: "tu-do", dau: vt, cuoi: y}, () => quetVung(chu, vt, y, "de", dong));
   };
 
-  const MAU = /\\(?:(chapter|part|section|subsection|subsubsection|paragraph|phan|dang|tieude|baimoi|muc)(?![a-zA-Z])\*?|begin\{([A-Za-z]+)\*?\}|setcounter\{([A-Za-z]+)\}\{(\d+)\}|(phantn|phands|phantln)(?![a-zA-Z])|(muctn|mucds|muctln)(?![a-zA-Z]))/g;
+  const MAU = /\\(?:(chapter|part|section|subsection|subsubsection|paragraph|phan|dang|tieude|baimoi|muc)(?![a-zA-Z])\*?|begin\{([A-Za-z]+)\*?\}|setcounter\{([A-Za-z]+)\}\{(\d+)\}|(phantn|phands|phantln)(?![a-zA-Z])|(muctln|muctn|mucds|muctl)(?![a-zA-Z]))/g;
   MAU.lastIndex = a;
   let vt = a;
   for (let t; (t = MAU.exec(m)) && t.index < b;) {
