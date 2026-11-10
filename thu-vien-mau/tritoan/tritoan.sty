@@ -163,11 +163,12 @@
 \newcommand{\tt@C}{\textbf{C.}~\def\tt@chu{C}}
 \newcommand{\tt@D}{\textbf{D.}~\def\tt@chu{D}}
 \newcommand{\dung}[1]{\tt@ghitn\ifGV\underline{\textbf{#1}}\else#1\fi}
-\newcommand{\pa}[4]{\par\noindent
-  \begin{tabularx}{\linewidth}{@{}XXXX@{}}\tt@A#1&\tt@B#2&\tt@C#3&\tt@D#4\end{tabularx}\par}
-\newcommand{\paa}[4]{\par\noindent
-  \begin{tabularx}{\linewidth}{@{}XX@{}}\tt@A#1&\tt@B#2\\\tt@C#3&\tt@D#4\end{tabularx}\par}
-\newcommand{\paaa}[4]{\par\noindent{\tt@A#1}\par\noindent{\tt@B#2}\par\noindent{\tt@C#3}\par\noindent{\tt@D#4}\par}
+\newlength{\ttlui}\setlength{\ttlui}{0.2in}% các ý (phương án TN, ý đúng sai, ý tự luận, ô đáp số) lùi vào so với chữ "Câu N"
+\newcommand{\pa}[4]{\par\noindent\hspace*{\ttlui}%
+  \begin{tabularx}{\dimexpr\linewidth-\ttlui\relax}{@{}XXXX@{}}\tt@A#1&\tt@B#2&\tt@C#3&\tt@D#4\end{tabularx}\par}
+\newcommand{\paa}[4]{\par\noindent\hspace*{\ttlui}%
+  \begin{tabularx}{\dimexpr\linewidth-\ttlui\relax}{@{}XX@{}}\tt@A#1&\tt@B#2\\\tt@C#3&\tt@D#4\end{tabularx}\par}
+\newcommand{\paaa}[4]{\par{\leftskip=\ttlui\noindent{\tt@A#1}\par\noindent{\tt@B#2}\par\noindent{\tt@C#3}\par\noindent{\tt@D#4}\par}}
 
 % ---------- Đúng sai: 4 ý a), b), c), d) ----------
 % \begin{ds}[TH] Đề ...
@@ -178,7 +179,7 @@
 \newcounter{ydsai}
 \renewcommand{\theydsai}{\alph{ydsai}}
 \newcommand{\tt@y}[2]{\par\refstepcounter{ydsai}\tt@ghids{#1}%
-  \noindent\hangindent=1.6em\hangafter=1\makebox[1.6em][l]{\bfseries\theydsai)}#2%
+  \noindent\hangindent=\dimexpr\ttlui+1.6em\relax\hangafter=1\hspace*{\ttlui}\makebox[1.6em][l]{\bfseries\theydsai)}#2%
   \ifGV\nobreak\hfill\nobreak{\bfseries\color{cam}\ #1}\fi\par}
 \newcommand{\ydung}[1]{\tt@y{Đúng}{#1}}
 \newcommand{\ysai}[1]{\tt@y{Sai}{#1}}
@@ -186,9 +187,10 @@
 
 % ---------- Trả lời ngắn ----------
 % \begin{tln}[VD] Đề ... \traloi{2,5} \loigiai{...} \end{tln}
-% Bản GV in đáp số; bản HS không in gì.
+% Dòng riêng có ô điền đáp số; bản GV điền sẵn đáp số vào ô.
 \newenvironment{tln}[1][]{\tt@daucau{#1}}{\par}
-\newcommand{\traloi}[1]{\tt@ghitln{#1}\ifGV\par{\bfseries\color{cam}Đáp số:}\ #1\par\fi}
+\newcommand{\traloi}[1]{\tt@ghitln{#1}\par\smallskip\noindent\hspace*{\ttlui}{\bfseries Đáp số:}\ %
+  \fbox{\makebox[3.5cm][c]{\rule[-0.3cm]{0pt}{0.9cm}\ifGV{\bfseries\color{cam}#1}\fi}}\par}
 
 % ---------- Ghi đáp án và in bảng ----------
 % \bangdapan: in bảng đáp án các câu đã gặp từ lần gọi trước (chỉ bản GV), rồi xoá để dùng tiếp.
@@ -321,9 +323,12 @@
 
 % ---------- Ý nhỏ a), b), c) xếp theo hàng ngang ----------
 % \begin{cacy}(2) \item ... \item ... \end{cacy}   (số cột trong ngoặc tròn, bỏ trống = 1 cột)
-\RequirePackage{tasks}
+% Các ý lùi vào \ttlui so với chữ "Câu N"/"Bài N", như phương án trắc nghiệm.
+\RequirePackage{tasks,changepage}
 \NewTasksEnvironment[label=\alph*),label-width=1.3em,item-indent=1.6em,
-  before-skip=1pt,after-skip=2pt,after-item-skip=2pt]{cacy}[\item](1)
+  before-skip=1pt,after-skip=2pt,after-item-skip=2pt]{tt@cacy}[\item](1)
+\NewDocumentEnvironment{cacy}{d()+b}
+  {\begin{adjustwidth}{\ttlui}{0pt}\IfValueTF{#1}{\begin{tt@cacy}(#1)#2\end{tt@cacy}}{\begin{tt@cacy}#2\end{tt@cacy}}\end{adjustwidth}}{}
 
 % ---------- Hình ----------
 % Ô giữ chỗ hình vẽ (chờ vẽ lại bằng TikZ): \hinhcho{số trang gốc}{mô tả}
