@@ -52,10 +52,13 @@ function dung() {
   if (!ban) return;
   o.tab = tao("div", "nh-tab");
   o.tab.setAttribute("role", "tablist");
-  o.tabTep = tao("button", "", "Tệp");
-  o.tabNh = tao("button", "", "Ngân hàng");
-  for (const [b, mo] of [[o.tabTep, false], [o.tabNh, true]]) {
+  o.tabTep = tao("button");
+  o.tabNh = tao("button");
+  for (const [b, mo, ic, ten] of [[o.tabTep, false, "thu-muc", "Tệp"], [o.tabNh, true, "ngan-hang", "Ngân hàng câu hỏi"]]) {
     b.type = "button";
+    b.innerHTML = typeof bieuTuong === "function" ? bieuTuong(ic) : ten;
+    b.dataset.ten = ten;
+    b.setAttribute("aria-label", ten);
     b.setAttribute("role", "tab");
     b.onclick = an(() => hienKhung(mo));
     o.tab.append(b);

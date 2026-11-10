@@ -201,12 +201,14 @@ function datCauHinh(da) {
   datDauBan(tt.ban);
 }
 
+const gocHienTen = da => da.goc_mo.length ? `${da.ten} - TriTeX` : "TriTeX";  // chưa mở thư mục nào thì chỉ tên app
+
 // Đọc lại dự án đang hoạt động trên máy chủ. Giữ bản đang chọn nếu dự án mới cũng có bản đó.
 async function napCauHinh() {
   const da = await goi("/api/du-an"), ban = tt.ban;
   datCauHinh(da);
   if (tt.dsBan.includes(ban)) datDauBan(tt.ban = ban);
-  document.title = `${da.ten} - TriTeX`;
+  document.title = gocHienTen(da);
   gocHien = da.goc_mo.find(g => g.dang_mo)?.duong ?? null;
   veCay(da);
   return da;
@@ -251,6 +253,34 @@ function veCay(da) {
 
 // Lưu PDF xong thì file mới hiện ngay trên thanh file.
 const lamMoiCay = () => goi("/api/du-an").then(veCay).catch(() => {});
+
+// Tự đồng bộ cây với ổ đĩa: thêm, xoá, đổi tên file bằng Explorer hay app khác thì cây đổi theo.
+// Quét lại khi cửa sổ được bấm vào và đều đặn khi đang hiện; cây không đổi thì không vẽ lại. Thư mục lớn quét lâu thì giãn nhịp.
+const dbCay = {cu: "", dang: false, nghi: 4000, hen: 0};
+async function dongBoCay() {
+  clearTimeout(dbCay.hen);
+  const cay = $("cay");
+  if (!dbCay.dang && !document.hidden && !cay.contains(document.activeElement?.closest?.("input, textarea, [contenteditable]"))) {
+    dbCay.dang = true;
+    const t0 = performance.now();
+    try {
+      const {goc_mo} = await goi("/api/cay");
+      const moi = JSON.stringify(goc_mo);
+      if (dbCay.cu && moi !== dbCay.cu) {
+        const ban = cay.closest(".ban"), cuon = ban?.scrollTop;
+        veCay({goc_mo});
+        if (ban) ban.scrollTop = cuon;
+      }
+      dbCay.cu = moi;
+    } catch (e) { /* mất kết nối tạm thời: lần sau thử lại */ }
+    dbCay.dang = false;
+    dbCay.nghi = Math.max(4000, Math.min(60000, (performance.now() - t0) * 20));
+  }
+  dbCay.hen = setTimeout(dongBoCay, dbCay.nghi);
+}
+addEventListener("focus", dongBoCay);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) dongBoCay(); });
+setTimeout(dongBoCay, 3000);
 
 // Mở file, thư mục hay dự án khác mà không tải lại trang, để các thẻ đang mở vẫn còn nguyên.
 async function moKhac(kieu) {

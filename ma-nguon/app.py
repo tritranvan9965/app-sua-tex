@@ -300,16 +300,22 @@ def cac_goc() -> list:
 
 def dong_goc(d: dict) -> dict:
     """Chỉ bỏ khỏi danh sách trong app, không đụng đến file trên máy."""
+    global DA, DM, CHUA_LUU, GOC_HIEN
     ds, x = doc_goc(), d.get("duong")
     if x not in ds:
         raise LoiApp(404, "Thư mục này không còn trong danh sách.")
-    if len(ds) == 1:
-        raise LoiApp(400, "Cần giữ lại ít nhất một thư mục.")
     ds.remove(x)
     ghi_goc(ds)
-    if x != GOC_HIEN:
+    if ds and x != GOC_HIEN:
         return {}
-    mo_moi(ds[0])
+    if ds:
+        mo_moi(ds[0])
+    else:  # đóng cả thư mục cuối (dù dự án đang mở là gì): app trống như lần chạy đầu
+        with KHOA:
+            DA, DM, CHUA_LUU, GOC_HIEN = loi.lap_du_an({}, Path.home(), "TriTeX"), loi.DanhMuc(), False, None
+            loi.dat_du_an(DA)
+        if CUA_SO:
+            CUA_SO.set_title("TriTeX")
     return {"doi": True}
 
 
@@ -973,6 +979,8 @@ class XuLy(BaseHTTPRequestHandler):
             self._json(200, phong_viet())
         elif url.path == "/api/du-an":
             self._json(200, thong_tin_du_an())
+        elif url.path == "/api/cay":  # chỉ cây thư mục, để trang tự đồng bộ khi file trên máy đổi
+            self._json(200, {"goc_mo": cac_goc()})
         elif url.path == "/api/tep":
             self._json(200, doc_tep(hoi.get("duong")))
         elif url.path == "/api/anh":

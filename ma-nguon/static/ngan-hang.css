@@ -1,6 +1,6 @@
 /* Ngân hàng câu hỏi (ngan-hang.js): tab trên thanh file và khung ngân hàng. Mọi lớp bắt đầu bằng nh- để không đụng chỗ khác. */
-.nh-tab{display:flex;gap:2px;margin:0 0 8px;padding:2px;border-radius:7px;background:#00000026}
-.nh-tab button{flex:1;padding:5px 6px;border:0;border-radius:5px;background:none;color:var(--phan-phu);font-weight:600;font-size:12px;transition:background-color .12s ease-out}
+.nh-tab{display:inline-flex;gap:2px;margin:0 0 8px;padding:2px;border-radius:7px;background:#00000026}
+.nh-tab button{display:grid;place-items:center;width:34px;height:26px;padding:0;border:0;border-radius:5px;background:none;color:var(--phan-phu);font-weight:600;font-size:12px;transition:background-color .12s ease-out}
 .nh-tab button:hover{background:var(--bang-sang)}
 .nh-tab button[aria-selected=true]{background:var(--phan);color:var(--bang)}
 .ban.nh-mo{display:flex;flex-direction:column;overflow:hidden}
@@ -47,3 +47,4 @@
 .nh-xem{margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--phan-phu);font-size:11.5px}
 .nh-chi-dan{position:fixed;z-index:20;height:3px;border-radius:2px;background:var(--but-do);pointer-events:none;box-shadow:0 0 0 1px #fff8}
 .nh-chi-dan[hidden]{display:none}
+.nh-tab .bt{width:17px;height:17px}
