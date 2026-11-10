@@ -308,14 +308,18 @@ def dong_goc(d: dict) -> dict:
     ghi_goc(ds)
     if ds and x != GOC_HIEN:
         return {}
-    if ds:
-        mo_moi(ds[0])
-    else:  # đóng cả thư mục cuối (dù dự án đang mở là gì): app trống như lần chạy đầu
-        with KHOA:
-            DA, DM, CHUA_LUU, GOC_HIEN = loi.lap_du_an({}, Path.home(), "TriTeX"), loi.DanhMuc(), False, None
-            loi.dat_du_an(DA)
-        if CUA_SO:
-            CUA_SO.set_title("TriTeX")
+    for con in ds:  # sang thư mục còn lại đầu tiên mở được (thư mục đã bị xoá khỏi máy thì bỏ qua)
+        try:
+            mo_moi(con)
+            return {"doi": True}
+        except (ValueError, KeyError, OSError, LoiApp):
+            continue
+    # Đóng cả thư mục cuối, hoặc không còn thư mục nào mở được: app trống như lần chạy đầu.
+    with KHOA:
+        DA, DM, CHUA_LUU, GOC_HIEN = loi.lap_du_an({}, Path.home(), "TriTeX"), loi.DanhMuc(), False, None
+        loi.dat_du_an(DA)
+    if CUA_SO:
+        CUA_SO.set_title("TriTeX")
     return {"doi": True}
 
 
