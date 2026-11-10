@@ -89,7 +89,7 @@
 % và \baimoi trước mỗi bài để đánh số dạng, bài, ví dụ, câu lại từ 1.
 \newcommand{\baimoi}{\setcounter{dang}{0}\setcounter{bt}{0}\setcounter{vd}{0}\setcounter{cau}{0}}
 \newcommand{\tieude}[2]{%
-  \cophanfalse\dautrang{0}{\if\relax\detokenize{#2}\relax#1\else#2\fi}%
+  \tt@xoacho\cophanfalse\dautrang{0}{\if\relax\detokenize{#2}\relax#1\else#2\fi}%
   \begin{center}
     \if\relax\detokenize{#1}\relax\else{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\vspace{2pt}\fi
     {\Large\bfseries\color{xanh}\MakeUppercase{#2}}
@@ -97,25 +97,77 @@
 
 % Phần lớn: A. LÝ THUYẾT / B. PHÂN LOẠI VÀ PHƯƠNG PHÁP GIẢI TOÁN
 \RequirePackage{needspace}% đề mục không nằm trơ cuối trang: thiếu chỗ thì sang trang cùng câu đầu tiên
-\newcommand{\phan}[1]{\par\needspace{6\baselineskip}\cophantrue\dautrang{1}{#1}\medskip{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\smallskip}
+\newcommand{\tt@phancu}[1]{\par\needspace{6\baselineskip}\cophantrue\dautrang{1}{#1}\medskip{\large\bfseries\color{xanh}\MakeUppercase{#1}}\par\smallskip}
 
 % Dạng bài: \dang{Xét tính đúng sai của mệnh đề}
 \newcounter{dang}
-\newcommand{\dang}[1]{\par\needspace{8\baselineskip}\medskip\refstepcounter{dang}\ifcophan\dautrang{2}{Dạng \thedang. #1}\else\dautrang{1}{Dạng \thedang. #1}\fi%
+\newcommand{\dang}[1]{\tt@xoacho\par\needspace{8\baselineskip}\medskip\refstepcounter{dang}\ifcophan\dautrang{2}{Dạng \thedang. #1}\else\dautrang{1}{Dạng \thedang. #1}\fi%
   \begin{tcolorbox}[colback=xanh,colframe=xanh,coltext=white,boxrule=0pt,arc=2pt,
     left=6pt,right=6pt,top=3pt,bottom=3pt,before skip=6pt,after skip=4pt]
   \bfseries Dạng \thedang. #1\end{tcolorbox}}
 
 % Đề mục loại bài trong một dạng: dải nền cam nhạt, vạch cam bên trái, chữ navy.
 % Học sinh lướt trang là thấy chỗ bắt đầu từng loại bài. Có dấu trang PDF, cấp con dưới Dạng.
-\newcommand{\muc}[1]{\par\needspace{5\baselineskip}\smallskip\ifcophan\dautrang{3}{#1}\else\dautrang{2}{#1}\fi%
+\newcommand{\tt@inmuc}[1]{\par\needspace{5\baselineskip}\smallskip\ifcophan\dautrang{3}{#1}\else\dautrang{2}{#1}\fi%
   \begin{tcolorbox}[enhanced,colback=camnhat,colframe=cam,boxrule=0pt,leftrule=4pt,arc=0pt,outer arc=0pt,
     left=8pt,right=6pt,top=3pt,bottom=3pt,before skip=8pt,after skip=5pt]
   {\large\bfseries\color{xanh}#1}\end{tcolorbox}}
-\newcommand{\muctl}{\muc{Bài tập tự luận}}
-\newcommand{\muctn}{\muc{Trắc nghiệm nhiều phương án}}
-\newcommand{\mucds}{\muc{Câu hỏi đúng sai}}
-\newcommand{\muctln}{\muc{Câu hỏi trả lời ngắn}}
+\newcommand{\muctl}{\tt@xoacho\tt@inmuc{Bài tập tự luận}}
+\newcommand{\muctn}{\tt@xoacho\tt@inmuc{Trắc nghiệm nhiều phương án}}
+\newcommand{\mucds}{\tt@xoacho\tt@inmuc{Câu hỏi đúng sai}}
+\newcommand{\muctln}{\tt@xoacho\tt@inmuc{Câu hỏi trả lời ngắn}}
+\newcommand{\tt@chuchung}{}
+\newcommand{\tt@mucchung}{\tt@inmuc{\tt@chuchung}}
+
+% File cũ viết đề mục loại bài bằng \phan hay \muc với nhiều cách gọi (BÀI TẬP TỰ LUẬN, II. BÀI TẬP TỰ LUẬN,
+% PHẦN I. Câu trắc nghiệm nhiều phương án..., Chọn đáp án đúng nhất, Đúng ghi Đ, sai ghi S, Trả lời ngắn...).
+% Mẫu tự nhận ra và in thành dải đề mục như bốn đề mục chuẩn ở trên, GIỮ NGUYÊN chữ người soạn đã viết, nên không phải sửa file nào.
+% "BÀI TẬP TRẮC NGHIỆM" chung: chờ xem; gặp đề mục con thì bỏ, gặp câu hỏi trước thì in "Bài tập trắc nghiệm".
+\ExplSyntaxOn
+\tl_new:N \l__tt_dm_tl
+\tl_new:N \l__tt_dmhoa_tl
+\bool_new:N \g__tt_muccho_bool
+\cs_new_protected:Npn \tt@xoacho { \bool_gset_false:N \g__tt_muccho_bool }
+\cs_new_protected:Npn \tt@cho
+  {
+    \bool_if:NT \g__tt_muccho_bool
+      { \bool_gset_false:N \g__tt_muccho_bool \tt@mucchung }
+  }
+% Chữ đề mục -> \l__tt_dm_tl: tl, tn, ds, tln, chung; rỗng nếu không phải đề mục loại bài.
+\cs_new_protected:Npn \__tt_loai_dm:n #1
+  {
+    \tl_set:Nx \l__tt_dmhoa_tl { \text_uppercase:n {#1} }
+    \regex_replace_all:nnN { \s+ } { \  } \l__tt_dmhoa_tl
+    \regex_replace_once:nnN { \A \s* (?: PHẦN \s+ )? (?: [IVX]+ | [A-Z] ) [\.\)] \s* } { } \l__tt_dmhoa_tl
+    \tl_clear:N \l__tt_dm_tl
+    \regex_match:nVT { \A BÀI\ TẬP\ TRẮC\ NGHIỆM \s* [\.\:]? \s* \Z } \l__tt_dmhoa_tl
+      { \tl_set:Nn \l__tt_dm_tl { chung } }
+    \regex_match:nVT { \A (?: BÀI\ TẬP\ )? TỰ\ LUẬN } \l__tt_dmhoa_tl
+      { \tl_set:Nn \l__tt_dm_tl { tl } }
+    \regex_match:nVT { \A (?: (?: CÂU\ )? TRẮC\ NGHIỆM\ NHIỀU\ PHƯƠNG\ ÁN | CHỌN\ ĐÁP\ ÁN\ ĐÚNG ) } \l__tt_dmhoa_tl
+      { \tl_set:Nn \l__tt_dm_tl { tn } }
+    \regex_match:nVT { \A (?: (?: CÂU\ )? TRẮC\ NGHIỆM\ ĐÚNG\ SAI | CÂU\ HỎI\ ĐÚNG\ SAI | ĐÚNG\ GHI\ Đ ) } \l__tt_dmhoa_tl
+      { \tl_set:Nn \l__tt_dm_tl { ds } }
+    \regex_match:nVT { \A (?: (?: CÂU\ )? TRẮC\ NGHIỆM\ TRẢ\ LỜI\ NGẮN | CÂU\ HỎI\ TRẢ\ LỜI\ NGẮN | TRẢ\ LỜI\ NGẮN ) } \l__tt_dmhoa_tl
+      { \tl_set:Nn \l__tt_dm_tl { tln } }
+  }
+% #2: cách in khi không phải đề mục loại bài
+\cs_new_protected:Npn \__tt_dm_in:nn #1 #2
+  {
+    \__tt_loai_dm:n {#1}
+    \str_case:VnF \l__tt_dm_tl
+      {
+        { tl } { \tt@xoacho \tt@inmuc {#1} }
+        { tn } { \tt@xoacho \tt@inmuc {#1} }
+        { ds } { \tt@xoacho \tt@inmuc {#1} }
+        { tln } { \tt@xoacho \tt@inmuc {#1} }
+        { chung } { \par \def\tt@chuchung{#1} \bool_gset_true:N \g__tt_muccho_bool }
+      }
+      { \tt@xoacho #2 }
+  }
+\cs_new_protected:Npn \phan #1 { \__tt_dm_in:nn {#1} { \tt@phancu {#1} } }
+\cs_new_protected:Npn \muc #1 { \__tt_dm_in:nn {#1} { \tt@inmuc {#1} } }
+\ExplSyntaxOff
 
 % Hộp kiến thức / phương pháp
 \newtcolorbox{kienthuc}{breakable,enhanced,colback=xanhnhat,colframe=xanh,
@@ -129,7 +181,7 @@
 % Nhãn mức độ (tuỳ chọn, chỉ hiện ở bản GV): \begin{bt}[TH]
 \newcommand{\tt@nhanmuc}[1]{\ifGV\if\relax\detokenize{#1}\relax\else\ {\footnotesize\color{xam}[Mức #1]}\fi\fi}
 \newcounter{bt}
-\newenvironment{bt}[1][]{\par\smallskip\refstepcounter{bt}%
+\newenvironment{bt}[1][]{\tt@cho\par\smallskip\refstepcounter{bt}%
   \noindent{\bfseries\color{xanh}Bài \thebt.}\tt@nhanmuc{#1}\ \ignorespaces}%
   {\par}
 
@@ -154,7 +206,7 @@
 %  Đáp án ghi lại tự động để in bảng đáp án bằng \bangdapan (chỉ in ở bản GV).
 % =====================================================================
 \newcounter{cau}
-\newcommand{\tt@daucau}[1]{\par\smallskip\refstepcounter{cau}%
+\newcommand{\tt@daucau}[1]{\tt@cho\par\smallskip\refstepcounter{cau}%
   \noindent{\bfseries\color{xanh}Câu \thecau.}\tt@nhanmuc{#1}\ \ignorespaces}
 
 % ---------- Trắc nghiệm 4 phương án ----------
