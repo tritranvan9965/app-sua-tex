@@ -150,7 +150,24 @@ Giải phương trình $x^2-5x+6=0$.
 \end{bt}
 ```
 
-Đề cũ tự khai khung ở đầu file (`\taodauhn`, `baihn`, `ychinh`, `\hetdehn`) thì xoá phần khung đó, gọi `\usepackage{kiem_tra_thcs}` và khai thông tin bằng `\so`, `\truong`, `\kythi`, `\namhoc`. Tên cũ `\taodauhn`, `\hetdehn` vẫn dùng được.
+**Đổi đề cũ sang mẫu `kiem_tra_thcs`.** Chỉ đổi tên mẫu là chưa đủ, phải làm hai việc:
+
+1. Xoá khối khung từ dòng `% ----- Khung đề kiểm tra kiểu Sở HN` đến dòng `% ----- Hết khung -----` (có `\taodauhn`, `baihn`, `ychinh`, `\hetdehn`, `\phantl`). Mẫu đã có sẵn các lệnh này, khai lại sẽ báo lỗi "already defined".
+2. Khai thông tin đề bằng lệnh của mẫu, ngay sau `\begin{document}` và trước `\taodauhn`. Mấy dòng `\newcommand{\dh@...}` cũ không còn tác dụng.
+
+```latex
+\documentclass[12pt]{article}
+\usepackage{kiem_tra_thcs}      % thay cho \usepackage{toan9}
+\begin{document}
+\mon{TOÁN 9}
+\so{Giỏi Toán cùng Trí Trí}
+\truong{THCS CAO LỘC 25-26}
+\kythi{Kiểm tra giữa học kì II}
+\namhoc{2026 -- 2027}
+\taodauhn                       % hoặc \taodaude, như nhau
+```
+
+Phần còn lại giữ nguyên: `\phantn`, `tn`, `\phantl`, `baihn`, `ychinh`, `\hetdehn` (hoặc `\hetde`), `\bangdapan`. Dòng `\loai{4}\dattentailieu{...}` bỏ được. Muốn đầu trang vẫn hiện tên tài liệu thì giữ `\dattentailieu{Kiểm tra giữa HK2}`. File chưa sửa vẫn dùng `toan9` như cũ, không hỏng.
 
 Ba mẫu đề in đen trắng, không có tên bộ tài liệu ở đầu trang, chân trang là "Trang x/y - Mã đề". Bảng đáp án chỉ in ở bản GV.
 
