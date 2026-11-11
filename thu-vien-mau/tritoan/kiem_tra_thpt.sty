@@ -1,0 +1,27 @@
+% =====================================================================
+%  kiem_tra_thpt.sty — ĐỀ KIỂM TRA CẤP 3 (THPT), có tự luận. In đen trắng.
+%  Dùng:  \usepackage{kiem_tra_thpt}   rồi   \mon{TOÁN 10}
+%  Cấu trúc: \taodaude, \phantn (I), \phands (II), \phantln (III), \phantl (IV tự luận), \hetde
+%  Thông tin đề: \so{..} \truong{..} \kythi{..} \thoigian{..} \made{..}
+%  Đầu đề, ba phần trắc nghiệm dùng lại của tritoan.sty. File này chỉ thêm phần tự luận và đổi sang đen trắng.
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{kiem_tra_thpt}[2026/11/11 De kiem tra THPT]
+\RequirePackage{tritoan}
+
+% In đen trắng (đề thật của trường): màu xanh/cam của tritoan đổi về đen và xám.
+\definecolor{xanh}{HTML}{000000}
+\definecolor{xanhnhat}{HTML}{F2F2F2}
+\definecolor{cam}{HTML}{333333}
+\definecolor{camnhat}{HTML}{F2F2F2}
+\definecolor{xam}{HTML}{555555}
+
+% ---------- Phần tự luận ----------
+% \phantl hoặc \phantl[3,0]  -> "PHẦN IV. TỰ LUẬN (3,0 điểm)" (số La Mã tự nối tiếp các phần trước)
+% Mỗi bài dùng môi trường bt của tritoan; bài đánh số lại từ 1 trong phần tự luận.
+% \diem{2,0} đặt ngay sau \begin{bt}  ->  "Bài 1. (2,0 điểm) ..."
+\newcommand{\diem}[1]{\textbf{(#1 điểm)}\ }
+\NewDocumentCommand{\phantl}{o}{\tt@chotphan\stepcounter{phande}\setcounter{bt}{0}%
+  \par\medskip\noindent{\bfseries PHẦN \Roman{phande}. TỰ LUẬN\IfValueT{#1}{ (#1 điểm)}.}\
+  Thí sinh trình bày lời giải đầy đủ.\par\smallskip}
+\endinput

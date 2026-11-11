@@ -1,12 +1,12 @@
-% toan11.sty — Mẫu Toán 11: gọi lõi chung tritoan.sty, rồi thêm phần riêng của lớp.
-% Sửa giao diện chung thì sửa tritoan.sty. File này chỉ giữ những gì Toán 11 khác các lớp khác.
+% toan11.sty — mẫu con mỏng của thư mục soạn bài: gọi mẫu tài liệu cấp 3, nạp danh mục lớp 11, đặt tên môn.
+% Mẫu cha tritoan.sty và toan_thpt.sty nằm trong thư viện mẫu của TriTeX, không cần chép.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{toan11}[2026/11/07 Mau tai lieu Toan 11]
-\RequirePackage{tritoan}
+\ProvidesPackage{toan11}[2026/11/11 Mau tai lieu Toan 11]
+\RequirePackage{toan_thpt}
 \input{danhmuc11.tex}
-\renewcommand{\tenmon}{TOÁN 11}
+\mon{TOÁN 11}
 
-% Ghi đè khi lớp này cần khác lõi, ví dụ:
+% Ghi đè khi lớp này cần khác, ví dụ:
 % \renewcommand{\chantrang}{Ôn thi Toán 11 - Thầy Trí}
 % \definecolor{xanh}{HTML}{0B5345}
 \endinput

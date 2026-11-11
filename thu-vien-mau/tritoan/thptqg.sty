@@ -1,0 +1,46 @@
+% =====================================================================
+%  thptqg.sty — ĐỀ THI TỐT NGHIỆP THPT (kiểu Bộ GD&ĐT). In đen trắng. KHÔNG có tự luận.
+%  Dùng:  \usepackage{thptqg}
+%  Lệnh riêng:
+%    \namthi{2026}      năm thi (mặc định 2026)
+%    \dechinhthuc       "ĐỀ THI CHÍNH THỨC" (mặc định)
+%    \dethamkhao        "ĐỀ THAM KHẢO"
+%    \mon{TOÁN}  \thoigian{90 phút}  \made{101}  \kythi{...} (đổi cả dòng kỳ thi nếu cần)
+%  Cấu trúc: \taodaude, \phantn (I), \phands (II), \phantln (III), \hetde
+%  File này độc lập với kiem_tra_thpt, sửa riêng thoải mái.
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{thptqg}[2026/11/11 De thi tot nghiep THPT]
+\RequirePackage{tritoan}
+
+% In đen trắng (đề thật): màu xanh/cam của tritoan đổi về đen và xám.
+\definecolor{xanh}{HTML}{000000}
+\definecolor{xanhnhat}{HTML}{F2F2F2}
+\definecolor{cam}{HTML}{333333}
+\definecolor{camnhat}{HTML}{F2F2F2}
+\definecolor{xam}{HTML}{555555}
+
+% ---------- Thông tin đề ----------
+\newcommand{\tt@namthi}{2026}
+\newcommand{\tt@loaide}{ĐỀ THI CHÍNH THỨC}
+\newcommand{\namthi}[1]{\renewcommand{\tt@namthi}{#1}}
+\newcommand{\dechinhthuc}{\renewcommand{\tt@loaide}{ĐỀ THI CHÍNH THỨC}}
+\newcommand{\dethamkhao}{\renewcommand{\tt@loaide}{ĐỀ THAM KHẢO}}
+\renewcommand{\tt@so}{BỘ GIÁO DỤC VÀ ĐÀO TẠO}
+\renewcommand{\tt@kythi}{KỲ THI TỐT NGHIỆP TRUNG HỌC PHỔ THÔNG NĂM \tt@namthi}
+\renewcommand{\tt@thoigian}{90 phút}
+
+% ---------- Đầu đề kiểu Bộ: trái Bộ GD&ĐT và loại đề, phải kỳ thi, môn thi, thời gian ----------
+\renewcommand{\taodaude}{%
+  \pagestyle{de}\thispagestyle{de}%
+  \noindent\begin{tabularx}{\linewidth}{@{}>{\centering\arraybackslash}p{0.38\linewidth}
+      >{\centering\arraybackslash}X@{}}
+    \bfseries\tt@so & \bfseries\MakeUppercase{\tt@kythi}\\[2pt]
+    \fbox{\bfseries\ \tt@loaide\ } & \bfseries Môn thi: \tenmon\\[2pt]
+    \itshape(Đề thi có \pageref*{LastPage} trang) & \itshape Thời gian làm bài: \tt@thoigian, không kể thời gian phát đề\\
+  \end{tabularx}\par\medskip
+  \noindent Họ, tên thí sinh: \makebox[6.3cm]{\dotfill}\quad Số báo danh: \makebox[2.6cm]{\dotfill}%
+  \if\relax\detokenize\expandafter{\tt@made}\relax\else
+    \hfill\fbox{\bfseries Mã đề \tt@made}\fi
+  \par\medskip}
+\endinput

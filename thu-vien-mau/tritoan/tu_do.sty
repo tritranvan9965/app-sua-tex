@@ -1,0 +1,49 @@
+% =====================================================================
+%  tu_do.sty — MẪU TỰ DO, cơ bản nhất. Dùng:  \usepackage{tu_do}
+%  Chỉ có đầu trang, chân trang, tiêu đề, đề mục. Không hộp màu, không dải nền, chữ đen.
+%  Các lệnh của tritoan vẫn dùng như thường: \tieude, \phan, \dang, \muctl, \muctn, \mucds, \muctln,
+%  bt, tn, ds, tln, vd, \loigiai... chỉ khác cách in.
+%  Muốn thêm gì thì tự ghi đè ở cuối file này.
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tu_do}[2026/11/11 Mau tu do]
+\RequirePackage{tritoan}
+
+% Chữ đen và xám, không nền màu
+\definecolor{xanh}{HTML}{000000}
+\definecolor{xanhnhat}{HTML}{FFFFFF}
+\definecolor{cam}{HTML}{000000}
+\definecolor{camnhat}{HTML}{FFFFFF}
+\definecolor{xam}{HTML}{555555}
+
+% Tiêu đề: chữ in hoa đậm, căn giữa
+\renewcommand{\tieude}[2]{%
+  \tt@xoacho\cophanfalse\dautrang{0}{\if\relax\detokenize{#2}\relax#1\else#2\fi}%
+  \begin{center}
+    \if\relax\detokenize{#1}\relax\else{\large\bfseries\MakeUppercase{#1}}\par\vspace{2pt}\fi
+    {\Large\bfseries\MakeUppercase{#2}}
+  \end{center}\vspace{4pt}}
+
+% Phần lớn (\phan A. Lý thuyết): chữ đậm in hoa
+\renewcommand{\tt@phancu}[1]{\par\needspace{6\baselineskip}\cophantrue\dautrang{1}{#1}\medskip{\large\bfseries\MakeUppercase{#1}}\par\smallskip}
+
+% Dạng bài: một dòng chữ đậm
+\renewcommand{\dang}[1]{\tt@xoacho\par\needspace{8\baselineskip}\medskip\refstepcounter{dang}\ifcophan\dautrang{2}{Dạng \thedang. #1}\else\dautrang{1}{Dạng \thedang. #1}\fi%
+  \noindent{\bfseries Dạng \thedang. #1}\par\smallskip}
+
+% Đề mục loại bài (\muctl, \muctn, \mucds, \muctln và \phan/\muc kiểu cũ): chữ đậm nghiêng
+\renewcommand{\tt@inmuc}[1]{\par\needspace{5\baselineskip}\smallskip\ifcophan\dautrang{3}{#1}\else\dautrang{2}{#1}\fi%
+  \noindent{\bfseries\itshape #1}\par\smallskip}
+
+% Hộp kiến thức, phương pháp: không khung, không nền
+\renewtcolorbox{kienthuc}{breakable,enhanced,colback=white,colframe=white,boxrule=0pt,arc=0pt,
+  left=0pt,right=0pt,top=2pt,bottom=2pt}
+\renewtcolorbox{phuongphap}{breakable,enhanced,colback=white,colframe=white,boxrule=0pt,arc=0pt,
+  left=0pt,right=0pt,top=2pt,bottom=2pt,
+  before upper={\textbf{Phương pháp.}\ }}
+% Lời giải: chỉ một vạch xám bên trái
+\renewtcolorbox{hopgiai}{breakable,enhanced,colback=white,colframe=white,boxrule=0pt,
+  borderline west={1pt}{0pt}{xam},arc=0pt,left=8pt,right=0pt,top=1pt,bottom=1pt,
+  before skip=2pt,after skip=4pt,
+  before upper={{\bfseries\itshape Lời giải.}\ }}
+\endinput
