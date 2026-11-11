@@ -1,6 +1,6 @@
-% ĐỀ KIỂM TRA CẤP 2 kiểu Sở HN: các bài baihn (Bài I, II, ...), ý nhỏ ychinh (1), 2), 3)). In đen trắng.
-% Cách dùng (a): gọi thẳng mẫu rồi đặt môn bằng \mon.
-% Đề có trắc nghiệm thì dùng thêm \phantn, tn... (xem Hướng dẫn soạn bài).
+% ĐỀ KIỂM TRA CẤP 2 kiểu Sở HN: PHẦN I trắc nghiệm (tn), PHẦN II tự luận (baihn: Bài I, II, ...; ý nhỏ ychinh 1), 2), 3)).
+% In đen trắng. Cách dùng (a): gọi thẳng mẫu rồi đặt môn bằng \mon.
+% Đề chỉ có tự luận thì bỏ \phantn, các câu tn và \phantl (các bài baihn viết ngay sau \taodaude).
 \documentclass[12pt]{article}
 \usepackage{kiem_tra_thcs}
 \begin{document}
@@ -12,6 +12,18 @@
 \thoigian{90 phút}
 \taodaude
 
+\phantn[3,0]
+\begin{tn}
+Căn bậc hai số học của $9$ là
+\pa{$-3$.}{\dung{$3$.}}{$\pm3$.}{$81$.}
+\loigiai{$\sqrt9=3$.}
+\end{tn}
+\begin{tn}
+Giá trị của biểu thức $\sqrt{(2-\sqrt5)^2}$ bằng
+\paa{$2-\sqrt5$.}{\dung{$\sqrt5-2$.}}{$\sqrt5+2$.}{$-2-\sqrt5$.}
+\end{tn}
+
+\phantl[7,0]
 \begin{baihn}{2}
 Cho hai biểu thức $A=\dfrac{\sqrt{x}-3}{\sqrt{x}+2}$ và $B=\dfrac{5}{\sqrt{x}-3}$ với $x\ge0;\ x\ne9$.
 \begin{ychinh}
@@ -40,4 +52,6 @@ Cho hai biểu thức $A=\dfrac{\sqrt{x}-3}{\sqrt{x}+2}$ và $B=\dfrac{5}{\sqrt{
 \end{baihn}
 
 \hetde
+\newpage
+\bangdapan
 \end{document}

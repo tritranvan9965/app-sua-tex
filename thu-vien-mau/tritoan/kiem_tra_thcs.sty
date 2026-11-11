@@ -76,10 +76,11 @@
 \RenewDocumentCommand{\phantn}{o}{\tt@phande{TRẮC NGHIỆM\IfValueT{#1}{ (#1 điểm)}.}%
   { Mỗi câu chỉ chọn một phương án đúng.}}
 
-% \phantl hoặc \phantl[3,0]  -> "PHẦN II. TỰ LUẬN (3,0 điểm)"; mỗi bài dùng môi trường bt, đánh số lại từ 1.
+% \phantl hoặc \phantl[3,0]  -> "PHẦN II. TỰ LUẬN (3,0 điểm)"; mỗi bài dùng môi trường baihn (Bài I, II...) hoặc bt (Bài 1, 2...),
+% đánh số lại từ đầu. Đề trắc nghiệm + tự luận: \phantn, các câu tn, \phantl, các bài baihn, \hetde, \newpage\bangdapan.
 % \diem{2,0} đặt ngay sau \begin{bt}  ->  "Bài 1. (2,0 điểm) ..."
 \newcommand{\diem}[1]{\textbf{(#1 điểm)}\ }
-\NewDocumentCommand{\phantl}{o}{\tt@chotphan\stepcounter{phande}\setcounter{bt}{0}%
+\NewDocumentCommand{\phantl}{o}{\tt@chotphan\stepcounter{phande}\setcounter{bt}{0}\setcounter{dhbai}{0}%
   \par\medskip\noindent{\bfseries PHẦN \Roman{phande}. TỰ LUẬN\IfValueT{#1}{ (#1 điểm)}.}\
   Thí sinh trình bày lời giải đầy đủ.\par\smallskip}
 \endinput
