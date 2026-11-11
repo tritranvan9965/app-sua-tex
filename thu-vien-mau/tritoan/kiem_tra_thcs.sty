@@ -73,8 +73,8 @@
 
 % ---------- Phần trắc nghiệm / tự luận kiểu bt (tuỳ chọn) ----------
 % \phantn hoặc \phantn[3,0]  -> "PHẦN I. TRẮC NGHIỆM (3,0 điểm)" + lời dặn (câu hỏi dùng môi trường tn)
-\RenewDocumentCommand{\phantn}{o}{\tt@phande{TRẮC NGHIỆM\IfValueT{#1}{ (#1 điểm)}.}%
-  { Mỗi câu chỉ chọn một phương án đúng.}}
+\RenewDocumentCommand{\phantn}{o}{\tt@phande{Câu trắc nghiệm nhiều phương án lựa chọn\IfValueT{#1}{ (#1 điểm)}.}%
+  { Mỗi câu hỏi thí sinh chỉ chọn một phương án.}}
 
 % \phantl hoặc \phantl[3,0]  -> "PHẦN II. TỰ LUẬN (3,0 điểm)"; mỗi bài dùng môi trường baihn (Bài I, II...) hoặc bt (Bài 1, 2...),
 % đánh số lại từ đầu. Đề trắc nghiệm + tự luận: \phantn, các câu tn, \phantl, các bài baihn, \hetde, \newpage\bangdapan.
@@ -82,5 +82,5 @@
 \newcommand{\diem}[1]{\textbf{(#1 điểm)}\ }
 \NewDocumentCommand{\phantl}{o}{\tt@chotphan\stepcounter{phande}\setcounter{bt}{0}\setcounter{dhbai}{0}%
   \par\medskip\noindent{\bfseries PHẦN \Roman{phande}. TỰ LUẬN\IfValueT{#1}{ (#1 điểm)}.}\
-  Thí sinh trình bày lời giải đầy đủ.\par\smallskip}
+  \par\smallskip}
 \endinput
