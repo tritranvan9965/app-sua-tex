@@ -10,7 +10,7 @@ Các mẫu đều nằm trong thư viện mẫu của TriTeX (`%APPDATA%\TriTeX\
 |---|---|---|
 | `toan_thcs` | Tài liệu, bài tập cấp 2 | `\usepackage{toan_thcs}` |
 | `toan_thpt` | Tài liệu, bài tập cấp 3 | `\usepackage{toan_thpt}` |
-| `kiem_tra_thcs` | Đề kiểm tra cấp 2: trắc nghiệm + tự luận, in đen trắng | `\usepackage{kiem_tra_thcs}` |
+| `kiem_tra_thcs` | Đề kiểm tra cấp 2 kiểu Sở HN (các bài `baihn`: Bài I, II, ...), in đen trắng | `\usepackage{kiem_tra_thcs}` |
 | `kiem_tra_thpt` | Đề kiểm tra cấp 3: trắc nghiệm, đúng sai, trả lời ngắn + tự luận, in đen trắng | `\usepackage{kiem_tra_thpt}` |
 | `thptqg` | Đề thi tốt nghiệp THPT kiểu Bộ GD&ĐT, không có tự luận, in đen trắng | `\usepackage{thptqg}` |
 | `tu_do` | Mẫu trơn: chỉ đầu trang, chân trang, tiêu đề, đề mục; không hộp màu | `\usepackage{tu_do}` |
@@ -123,7 +123,7 @@ Cấu trúc đề:
 
 | Mẫu | Các phần |
 |---|---|
-| `kiem_tra_thcs` | `\phantn` (I. Trắc nghiệm), `\phantl` (II. Tự luận), `\hetde` |
+| `kiem_tra_thcs` | `\taodaude`, các bài `baihn`, `\hetde`. Muốn thêm trắc nghiệm: `\phantn` (I), `\phantl` (II. Tự luận kiểu `bt`) |
 | `kiem_tra_thpt` | `\phantn` (I), `\phands` (II), `\phantln` (III), `\phantl` (IV. Tự luận), `\hetde` |
 | `thptqg` | `\phantn` (I), `\phands` (II), `\phantln` (III), `\hetde` |
 
@@ -132,6 +132,8 @@ Lệnh riêng của đề:
 | Lệnh | Tác dụng |
 |---|---|
 | `\phantl` hoặc `\phantl[3,0]` | PHẦN TỰ LUẬN, có thể kèm điểm cả phần. Bài tự luận đánh số lại từ 1 |
+| `\namhoc{2026 -- 2027}`, `\ngaythi{..}` | (`kiem_tra_thcs`) năm học, ngày thi in ở đầu đề (bỏ trống thì không in) |
+| `\begin{baihn}{1,5}` | (`kiem_tra_thcs`) "Bài I. (1,5 điểm)", đánh số La Mã. Ý nhỏ viết trong `\begin{ychinh} \item ... \end{ychinh}` (1), 2), 3)) |
 | `\phantn[3,0]` | (chỉ `kiem_tra_thcs`) PHẦN TRẮC NGHIỆM, có thể kèm điểm cả phần |
 | `\diem{2,0}` | Đặt ngay sau `\begin{bt}`: in "Bài 1. **(2,0 điểm)** ..." |
 | `\mon{TOÁN 10}` | Tên môn in ở đầu đề |
@@ -147,6 +149,8 @@ Giải phương trình $x^2-5x+6=0$.
 \loigiai{$x=2$ hoặc $x=3$.}
 \end{bt}
 ```
+
+Đề cũ tự khai khung ở đầu file (`\taodauhn`, `baihn`, `ychinh`, `\hetdehn`) thì xoá phần khung đó, gọi `\usepackage{kiem_tra_thcs}` và khai thông tin bằng `\so`, `\truong`, `\kythi`, `\namhoc`. Tên cũ `\taodauhn`, `\hetdehn` vẫn dùng được.
 
 Ba mẫu đề in đen trắng, không có tên bộ tài liệu ở đầu trang, chân trang là "Trang x/y - Mã đề". Bảng đáp án chỉ in ở bản GV.
 
