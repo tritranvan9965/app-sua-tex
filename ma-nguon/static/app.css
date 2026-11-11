@@ -649,3 +649,18 @@ dialog h2{font-size:17px;margin:0}
 .ct-nhac{color:var(--but-do);font-size:13px;margin:4px 0 0;min-height:0}
 .ct-nhac:empty{display:none}
 .sua .nut-sua button.chinh{background:var(--bang);color:#fff}
+
+/* Cập nhật */
+#cn-bao{position:fixed;right:16px;bottom:38px;z-index:8;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--ke);
+  border-left:3px solid var(--bang);border-radius:6px;padding:8px 8px 8px 12px;box-shadow:0 6px 22px #0003;font-size:13.5px;zoom:var(--co-ui,1)}
+#cn-bao button{border:1px solid var(--ke);background:#fff;border-radius:5px;padding:4px 10px;white-space:nowrap}
+#cn-bao button.chinh{background:var(--bang);border-color:var(--bang);color:#fff;font-weight:600}
+#cn-bao button.chinh:hover{background:var(--bang-sang)}
+#cn-bao-de{border-color:transparent!important;color:var(--muc-mo);font-size:18px;line-height:1;padding:2px 8px!important}
+#hop-cap-nhat{width:min(480px,92vw)}
+#hop-cap-nhat p{margin:0;line-height:1.45}
+#hop-cap-nhat .nut-hop button{min-width:96px;height:38px;font-size:14.5px}
+#cn-ghi-chu{margin:0;max-height:220px;overflow:auto;white-space:pre-wrap;font:inherit;font-size:13px;line-height:1.5;background:var(--le);border-radius:5px;padding:10px 12px;color:var(--muc)}
+#cn-tien{display:flex;align-items:center;gap:10px}
+#cn-thanh{flex:1;height:8px;accent-color:var(--bang)}
+#cn-so{color:var(--muc-mo);font-size:13px;min-width:92px;text-align:right}

@@ -199,6 +199,7 @@ function dsTep() {
     {ten: "Đóng file", phim: "Ctrl+W", lam: dongTheHien, bat: () => !!the.hien},
     {ten: "Thư viện mẫu", lam: moThuVien},
     {ten: "Phím tắt", lam: moPhimTat},
+    {ten: "Kiểm tra cập nhật", lam: () => cnMo(true)},
     null,
     {ten: "Thoát", lam: thoatApp},
   ];
