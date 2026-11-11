@@ -276,7 +276,27 @@
     <p>Soạn đề LaTeX, xem và sửa PDF</p>
     <p class="gt-tg">Phát triển bởi Trí Trí</p>
     <p class="gt-nam">© <span id="gt-nam"></span></p>
-    <div class="nut-hop"><button value="dong" class="chinh">Đóng</button></div>
+    <div class="nut-hop"><button type="button" id="gt-cap-nhat">Kiểm tra cập nhật</button><button value="dong" class="chinh">Đóng</button></div>
+  </form>
+</dialog>
+
+<div id="cn-bao" role="status" hidden>
+  <span id="cn-bao-chu"></span>
+  <button type="button" class="chinh" id="cn-bao-cap">Cập nhật</button>
+  <button type="button" id="cn-bao-xem">Xem thay đổi</button>
+  <button type="button" id="cn-bao-de" aria-label="Để sau">×</button>
+</div>
+
+<dialog id="hop-cap-nhat">
+  <form method="dialog">
+    <h2 id="cn-tieu">Kiểm tra cập nhật</h2>
+    <p id="cn-noi"></p>
+    <pre id="cn-ghi-chu" hidden></pre>
+    <div id="cn-tien" hidden><progress id="cn-thanh" max="100" value="0"></progress><span id="cn-so"></span></div>
+    <div class="nut-hop">
+      <button value="dong" id="cn-dong">Đóng</button>
+      <button type="button" class="chinh" id="cn-cap" hidden>Cập nhật</button>
+    </div>
   </form>
 </dialog>
 
@@ -331,5 +351,6 @@
 <script src="/static/bo-cuc.js"></script>
 <script src="/static/menu-phai.js"></script>
 <script src="/static/cua-so.js"></script>
+<script src="/static/cap-nhat.js"></script>
 </body>
 </html>

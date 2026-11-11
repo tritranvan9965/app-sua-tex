@@ -1,4 +1,7 @@
-"""Tạo bộ cài: phat-hanh/TriTeX-Setup-<phiên bản>.exe. Chạy: .venv\\Scripts\\python.exe -I phat-hanh\\dong_goi.py"""
+"""Tạo bộ cài: phat-hanh/TriTeX-Setup-<phiên bản>.exe. Chạy: .venv\\Scripts\\python.exe -I phat-hanh\\dong_goi.py
+Thêm --phat-hanh để đăng bộ cài lên GitHub Releases (cần gh đã đăng nhập), ghi chú lấy từ --ghi-chu <file> (mặc định phat-hanh/ghi-chu.md).
+Mặc định chỉ đóng gói, không đăng gì."""
+import argparse
 import shutil
 import subprocess
 import sys
@@ -52,7 +55,21 @@ def bien_dich_khung(dich: Path) -> None:
                     str(MA / "khung_cua_so.c"), "-luser32"], check=True)
 
 
+def phat_hanh(exe: Path, file_ghi_chu: Path) -> None:
+    """Tạo release v<phiên bản> trên GitHub kèm bộ cài. App đã cài hỏi release này để tự cập nhật."""
+    if not file_ghi_chu.is_file():
+        sys.exit(f"Chưa có file ghi chú {file_ghi_chu}. Viết vài dòng về thay đổi rồi chạy lại (bộ cài đã đóng gói xong, chưa đăng).")
+    subprocess.run(["gh", "release", "create", f"v{cai_dat.PHIEN_BAN}", str(exe), "--title", f"{cai_dat.TEN} {cai_dat.PHIEN_BAN}",
+                    "--notes-file", str(file_ghi_chu)], check=True, cwd=GOC)
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--phat-hanh", action="store_true", help="đăng bộ cài lên GitHub Releases sau khi đóng gói")
+    ap.add_argument("--ghi-chu", type=Path, default=PH / "ghi-chu.md", help="file ghi chú cho release")
+    a = ap.parse_args()
+    if a.phat_hanh and not a.ghi_chu.is_file():
+        sys.exit(f"Chưa có file ghi chú {a.ghi_chu}. Viết ghi chú trước rồi chạy lại.")
     shutil.rmtree(TAM, ignore_errors=True)
     TAM.mkdir(parents=True)
     tao_bieu_tuong(TAM / "tritex.ico")
@@ -67,6 +84,8 @@ def main():
     pyinstaller("--onefile", "--name", ten, "--distpath", str(PH), "--add-data", f"{TAM / 'tritex.zip'};.", str(PH / "bo_cai.py"))
     shutil.rmtree(TAM)
     print(PH / f"{ten}.exe")
+    if a.phat_hanh:
+        phat_hanh(PH / f"{ten}.exe", a.ghi_chu)
 
 
 if __name__ == "__main__":
