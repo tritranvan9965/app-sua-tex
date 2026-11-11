@@ -14,7 +14,7 @@ from pathlib import Path
 
 TEN = "TriTeX"
 MA = "TriTeX"
-PHIEN_BAN = "1.2.12"
+PHIEN_BAN = "1.2.13"
 TEN_CU = "Sửa TeX"  # tên trước 1.1.0, chỉ dùng để dọn bản cũ
 MA_CU = "SuaTeX"
 THU_MUC_CAI = Path(os.environ["LOCALAPPDATA"]) / "Programs" / MA
