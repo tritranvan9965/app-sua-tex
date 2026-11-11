@@ -1,9 +1,26 @@
 % =====================================================================
-%  kiem_tra_thcs.sty — ĐỀ KIỂM TRA CẤP 2 (THCS). In đen trắng.
+%  kiem_tra_thcs.sty — ĐỀ KIỂM TRA CẤP 2 (THCS), kiểu Sở HN. In đen trắng.
 %  Dùng:  \usepackage{kiem_tra_thcs}   rồi   \mon{TOÁN 9}
-%  Cấu trúc: \taodaude, \phantn (I. TRẮC NGHIỆM, 4 phương án), \phantl (II. TỰ LUẬN), \hetde
-%  Thông tin đề: \so{..} \truong{..} \kythi{..} \thoigian{..} \made{..}
-%  Điểm mỗi phần: \phantn[3,0]  \phantl[7,0]   |   điểm mỗi bài: \begin{bt}\diem{2,0} ...
+%
+%  Khung đề lấy đúng theo đề gk2-chuong-duong.tex:
+%    \taodaude  (hoặc tên cũ \taodauhn)   đầu đề hai cột
+%    \begin{baihn}{1,5} ... \end{baihn}   "Bài I. (1,5 điểm)", bài đánh số La Mã
+%    \begin{ychinh} \item ... \end{ychinh}  ý nhỏ 1), 2), 3)
+%    \hetde  (hoặc tên cũ \hetdehn)       "HẾT" + "Cán bộ coi thi không giải thích gì thêm."
+%  File cũ đang tự khai khung ở đầu file (\newcommand{\taodauhn}, \newenvironment{baihn}...) thì xoá phần
+%  khung đó đi, đổi \usepackage{toan9} thành \usepackage{kiem_tra_thcs} và khai thông tin bằng các lệnh dưới.
+%
+%  Thông tin đề, ghi trước \taodaude (cái nào không ghi thì lấy mặc định):
+%    \so{..}        trái trên (ví dụ "Giỏi Toán cùng Trí Trí", hoặc "PHÒNG GIÁO DỤC VÀ ĐÀO TẠO ...")
+%    \truong{..}    khung bên dưới (ví dụ "THCS CHƯƠNG DƯƠNG 25-26")
+%    \kythi{..}     phải trên: tên kì thi
+%    \namhoc{..}    phải: năm học (bỏ trống thì không in)
+%    \ngaythi{..}   phải: ngày thi (bỏ trống thì không in)
+%    \thoigian{..}  thời gian làm bài (mặc định 90 phút)
+%    \made{..}      mã đề (bỏ trống thì không in)
+%
+%  Đề có phần trắc nghiệm (tuỳ chọn): \phantn[3,0] (tn, 4 phương án), \phantl[7,0] (tự luận, môi trường bt),
+%  \diem{2,0} đặt ngay sau \begin{bt}. Đề kiểu Sở HN chỉ gồm các bài baihn thì không cần ba lệnh này.
 % =====================================================================
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{kiem_tra_thcs}[2026/11/11 De kiem tra THCS]
@@ -16,35 +33,50 @@
 \definecolor{camnhat}{HTML}{F2F2F2}
 \definecolor{xam}{HTML}{555555}
 
-% ---------- Thông tin đề mặc định cho THCS (ghi đè bằng \so, \truong, \kythi, \thoigian) ----------
+% ---------- Thông tin đề mặc định cho THCS (ghi đè bằng \so, \truong, \kythi, \namhoc, \ngaythi, \thoigian) ----------
 \renewcommand{\tt@so}{PHÒNG GIÁO DỤC VÀ ĐÀO TẠO ...}
-\renewcommand{\tt@truong}{TRƯỜNG THCS ...}
+\renewcommand{\tt@truong}{THCS ...}
 \renewcommand{\tt@kythi}{ĐỀ KIỂM TRA}
 \renewcommand{\tt@thoigian}{90 phút}
+\newcommand{\tt@namhoc}{}
+\newcommand{\tt@ngay}{}
+\newcommand{\namhoc}[1]{\renewcommand{\tt@namhoc}{#1}}
+\newcommand{\ngaythi}[1]{\renewcommand{\tt@ngay}{#1}}
 
-% ---------- Đầu đề hai cột: trái là phòng, trường; phải là kỳ thi, môn, thời gian ----------
+% ---------- Đầu đề hai cột ----------
+% Trái: cơ quan, khung tên trường, số trang. Phải: kì thi, năm học, môn, ngày, thời gian.
 \renewcommand{\taodaude}{%
-  \pagestyle{de}\thispagestyle{de}%
-  \noindent\begin{tabularx}{\linewidth}{@{}>{\centering\arraybackslash}p{0.42\linewidth}
+  \noindent\begin{tabularx}{\linewidth}{@{}>{\centering\arraybackslash}p{0.44\linewidth}
       >{\centering\arraybackslash}X@{}}
-    \small\tt@so & \bfseries\MakeUppercase{\tt@kythi}\\
-    \small\bfseries\tt@truong & \bfseries Môn: \tenmon\\
-    \rule[3pt]{0.42\linewidth}{0.4pt} & \itshape Thời gian làm bài: \tt@thoigian, không kể thời gian phát đề\\
-    \itshape(Đề có \pageref*{LastPage} trang) &
-  \end{tabularx}\par\medskip
-  \noindent Họ, tên học sinh: \makebox[6.3cm]{\dotfill}\quad Số báo danh: \makebox[2.6cm]{\dotfill}%
+    \bfseries\tt@so & \bfseries\MakeUppercase{\tt@kythi}\\
+    \fbox{\ \bfseries\tt@truong\ } &
+      \if\relax\detokenize\expandafter{\tt@namhoc}\relax\else\bfseries NĂM HỌC \tt@namhoc\fi\\[3pt]
+    \itshape(Đề có \pageref*{LastPage} trang) & \bfseries Môn thi: \tenmon\\
+    & \if\relax\detokenize\expandafter{\tt@ngay}\relax\else\itshape Ngày thi: \tt@ngay\\\fi
+      \itshape Thời gian làm bài: \tt@thoigian\\
+    & \itshape(không kể thời gian phát đề)\\
+  \end{tabularx}\par\vspace{4pt}\hrule\vspace{6pt}%
   \if\relax\detokenize\expandafter{\tt@made}\relax\else
-    \hfill\fbox{\bfseries Mã đề \tt@made}\fi
-  \par\medskip}
+    \hfill\fbox{\bfseries Mã đề \tt@made}\par\fi}
+\let\taodauhn\taodaude
 
-% ---------- Phần trắc nghiệm ----------
+% ---------- Bài kiểu Sở HN: "Bài I. (2,0 điểm)"; ý nhỏ đánh 1), 2), 3) ----------
+\newlist{ychinh}{enumerate}{1}
+\setlist[ychinh]{label=\arabic*),leftmargin=1.7em,itemsep=2pt,topsep=2pt,parsep=0pt}
+\newcounter{dhbai}
+\newenvironment{baihn}[1]{\par\medskip\refstepcounter{dhbai}%
+  \noindent{\bfseries Bài \Roman{dhbai}.\if\relax\detokenize{#1}\relax\else\ (#1 điểm)\fi}\ \ignorespaces}{\par}
+
+\renewcommand{\hetde}{\par\medskip\begin{center}\bfseries\rule[0.6ex]{2.5cm}{0.4pt}\quad HẾT\quad\rule[0.6ex]{2.5cm}{0.4pt}\end{center}%
+  {\centering\itshape Cán bộ coi thi không giải thích gì thêm.\par}}
+\let\hetdehn\hetde
+
+% ---------- Phần trắc nghiệm / tự luận kiểu bt (tuỳ chọn) ----------
 % \phantn hoặc \phantn[3,0]  -> "PHẦN I. TRẮC NGHIỆM (3,0 điểm)" + lời dặn (câu hỏi dùng môi trường tn)
 \RenewDocumentCommand{\phantn}{o}{\tt@phande{TRẮC NGHIỆM\IfValueT{#1}{ (#1 điểm)}.}%
   { Mỗi câu chỉ chọn một phương án đúng.}}
 
-% ---------- Phần tự luận ----------
-% \phantl hoặc \phantl[3,0]  -> "PHẦN IV. TỰ LUẬN (3,0 điểm)" (số La Mã tự nối tiếp các phần trước)
-% Mỗi bài dùng môi trường bt của tritoan; bài đánh số lại từ 1 trong phần tự luận.
+% \phantl hoặc \phantl[3,0]  -> "PHẦN II. TỰ LUẬN (3,0 điểm)"; mỗi bài dùng môi trường bt, đánh số lại từ 1.
 % \diem{2,0} đặt ngay sau \begin{bt}  ->  "Bài 1. (2,0 điểm) ..."
 \newcommand{\diem}[1]{\textbf{(#1 điểm)}\ }
 \NewDocumentCommand{\phantl}{o}{\tt@chotphan\stepcounter{phande}\setcounter{bt}{0}%
