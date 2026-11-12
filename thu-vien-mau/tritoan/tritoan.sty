@@ -34,6 +34,8 @@
 \setlength{\parskip}{3pt}
 
 \RequirePackage{enumitem,multicol,array,tabularx,xcolor,graphicx}
+% Gạch đầu dòng, đánh số (itemize, enumerate) sát nhau như sách, không cách một dòng trống giữa các mục
+\setlist[itemize,enumerate]{itemsep=1pt,parsep=0pt,topsep=3pt}
 \RequirePackage{tikz,tkz-euclide}
 \usetikzlibrary{calc,angles,quotes,intersections,patterns,arrows.meta}
 \RequirePackage[most]{tcolorbox}
@@ -355,8 +357,8 @@
       >{\centering\arraybackslash}X@{}}
     \small\tt@so & \bfseries\MakeUppercase{\tt@kythi}\\
     \small\bfseries\tt@truong & \bfseries Môn: \tenmon\\
-    \rule[3pt]{0.5\linewidth}{0.4pt} & \itshape Thời gian làm bài: \tt@thoigian, không kể thời gian phát đề\\
-    \itshape(Đề có \pageref*{LastPage} trang) &
+    \rule[3pt]{0.5\linewidth}{0.4pt} & \itshape Thời gian làm bài: \tt@thoigian\\
+    \itshape(Đề có \pageref*{LastPage} trang) & \itshape(không kể thời gian phát đề)\\
   \end{tabularx}\par\medskip
   \noindent Họ, tên học sinh: \makebox[6.3cm]{\dotfill}\quad Số báo danh: \makebox[2.6cm]{\dotfill}%
   \if\relax\detokenize\expandafter{\tt@made}\relax\else
@@ -385,8 +387,11 @@
 \RequirePackage{tasks,changepage}
 \NewTasksEnvironment[label=\alph*),label-width=1.3em,item-indent=1.6em,
   before-skip=1pt,after-skip=2pt,after-item-skip=2pt]{tt@cacy}[\item](1)
+% Dòng đề ngay trên có phân số, hệ cao (sâu hơn dòng thường) thì đẩy các ý xuống cho khỏi đè chữ:
+% tasks xếp hàng ý đầu tiên không tính phần thò xuống của dòng trước.
+\newcommand{\tt@chongde}{\par\ifdim\prevdepth>\dp\strutbox\vspace{\dimexpr\prevdepth-\dp\strutbox+2pt\relax}\fi}
 \NewDocumentEnvironment{cacy}{d()+b}
-  {\begin{adjustwidth}{\ttlui}{0pt}\IfValueTF{#1}{\begin{tt@cacy}(#1)#2\end{tt@cacy}}{\begin{tt@cacy}#2\end{tt@cacy}}\end{adjustwidth}}{}
+  {\tt@chongde\begin{adjustwidth}{\ttlui}{0pt}\IfValueTF{#1}{\begin{tt@cacy}(#1)#2\end{tt@cacy}}{\begin{tt@cacy}#2\end{tt@cacy}}\end{adjustwidth}}{}
 
 % ---------- Hình ----------
 % Ô giữ chỗ hình vẽ (chờ vẽ lại bằng TikZ): \hinhcho{số trang gốc}{mô tả}

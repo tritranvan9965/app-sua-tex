@@ -11,8 +11,8 @@ Các mẫu đều nằm trong thư viện mẫu của TriTeX (`%APPDATA%\TriTeX\
 | `toan_thcs` | Tài liệu, bài tập cấp 2 | `\usepackage{toan_thcs}` |
 | `toan_thpt` | Tài liệu, bài tập cấp 3 | `\usepackage{toan_thpt}` |
 | `kiem_tra_thcs` | Đề kiểm tra cấp 2 kiểu Sở HN (các bài `baihn`: Bài I, II, ...), in đen trắng | `\usepackage{kiem_tra_thcs}` |
-| `kiem_tra_thpt` | Đề kiểm tra cấp 3: trắc nghiệm, đúng sai, trả lời ngắn + tự luận, in đen trắng | `\usepackage{kiem_tra_thpt}` |
-| `thptqg` | Đề thi tốt nghiệp THPT kiểu Bộ GD&ĐT, không có tự luận, in đen trắng | `\usepackage{thptqg}` |
+| `kiem_tra_thpt` | Đề kiểm tra cấp 3: trắc nghiệm, đúng sai, trả lời ngắn + tự luận, in đen trắng. Câu hỏi giống `toan_thpt`, kéo sang dùng ngay | `\usepackage{kiem_tra_thpt}` |
+| `thptqg` | Đề thi tốt nghiệp THPT: giống `kiem_tra_thpt`, chỉ khác đầu đề (kỳ thi tốt nghiệp, khung tên đề như ĐỀ THI THỬ 01) | `\usepackage{thptqg}` |
 | `tu_do` | Mẫu trơn: chỉ đầu trang, chân trang, tiêu đề, đề mục; không hộp màu | `\usepackage{tu_do}` |
 
 Các lệnh soạn câu hỏi (`tn`, `ds`, `tln`, `bt`, `vd`, `\loigiai`, `\dang`, `\phan`...) giống nhau ở mọi mẫu, chỉ khác cách in.
@@ -112,33 +112,82 @@ Mẹo: chép một câu có sẵn trong file mẫu rồi sửa chữ, khỏi ph�
 
 Chép `de-thcs.tex`, `de-thpt.tex` hoặc `de-thptqg.tex` từ `vi-du`.
 
-Thông tin đề, ghi trước `\taodaude` (cái nào không ghi thì lấy mặc định của mẫu):
+### Đề THPT: `kiem_tra_thpt` và `thptqg`
+
+Hai mẫu này **giống hệt nhau, chỉ khác phần đầu đề**. Cả hai dùng chung lõi với `toan_thpt`, chỉ khác cách trình bày:
+in đen trắng, không có đầu trang, chân trang như tài liệu ("Giỏi Toán cùng Trí Trí - ĐT: …" | "Trang x"),
+trang cuối **tự có chữ "— HẾT —"** (không cần gõ `\hetde`; ở bản GV chữ HẾT nằm sau bảng đáp án).
+Đổi qua lại giữa hai mẫu chỉ cần sửa dòng `\usepackage`.
+
+| | `kiem_tra_thpt` (đề kiểm tra) | `thptqg` (đề thi tốt nghiệp) |
+|---|---|---|
+| Ô trái đầu đề | **GIỎI TOÁN CÙNG TRÍ TRÍ**, dưới là nguồn đề `\nguon{..}` | **GIỎI TOÁN CÙNG TRÍ TRÍ**, dưới là khung tên đề `\tende{..}` (ví dụ **ĐỀ THI THỬ 01**, **ĐỀ MINH HỌA 01**) |
+| Ô phải đầu đề | tên đề `\tende{..}`, **NĂM HỌC …**, Môn, Thời gian | KỲ THI TỐT NGHIỆP THPT NĂM …, Môn thi, Thời gian |
+| Dòng ký tên | Họ, tên học sinh | Họ, tên thí sinh |
 
 ```latex
-\mon{TOÁN 10}  \so{...}  \truong{...}  \kythi{...}  \thoigian{90 phút}  \made{101}
+\documentclass[12pt]{article}
+\usepackage{kiem_tra_thpt}            % hoặc \usepackage{thptqg}
+\begin{document}
+\mon{TOÁN 10}
+\tende{Kiểm tra giữa học kì I}        % (kiem_tra_thpt) tên đề, ô phải
+\nguon{THPT Phan Huy Chú - Đống Đa}   % (kiem_tra_thpt) nguồn đề, ô trái; bỏ trống thì không in
+\made{101}
+\taodaude
+\phantn  ... các câu ...
+\phands  ... các câu ...
+\phantln ... các câu ...
+\phantl[3,0] ... các bài tự luận ...  % nếu có
+\bangdapan
+\end{document}
+```
+
+Lệnh thông tin đề (cái nào không ghi thì lấy mặc định):
+
+| Lệnh | Mẫu | Tác dụng |
+|---|---|---|
+| `\mon{TOÁN 10}` | cả hai | tên môn |
+| `\tende{..}` (hoặc `\kythi{..}`) | `kiem_tra_thpt` | tên đề, dòng đầu ô phải |
+| `\nguon{..}` | `kiem_tra_thpt` | nguồn đề, dưới "GIỎI TOÁN CÙNG TRÍ TRÍ" |
+| `\namhoc{..}` | `kiem_tra_thpt` | năm học; không ghi thì tự tính theo ngày xuất (từ tháng 8 sang năm học mới) |
+| `\so{..}` | cả hai | đổi dòng trên cùng ô trái |
+| `\tende{..}` | `thptqg` | tên đề trong khung ô trái, in chữ hoa: `\tende{Đề thi thử 01}`, `\tende{Đề minh họa 01}`... (không ghi thì "ĐỀ THI THỬ") |
+| `\namthi{2026}` | `thptqg` | năm trong dòng KỲ THI TỐT NGHIỆP TRUNG HỌC PHỔ THÔNG NĂM … |
+| `\thoigian{90 phút}`, `\made{101}` | cả hai | thời gian làm bài, mã đề (bỏ trống thì không in ô mã đề) |
+
+**Kéo câu từ ngân hàng, file bài tập sang đề là dùng được, không phải sửa:**
+
+- Câu `tn`, `ds`, `tln`, `bt`, `\pa`, `\loigiai`, `\dapso`, `cacy`, `\hinh`... giữ nguyên.
+- Câu viết bằng `bt` nằm trong PHẦN I, II, III tự in "Câu n" và đếm chung với `tn`, `ds`, `tln`. Trong phần tự luận vẫn là "Bài n".
+- Trong PHẦN III, `\dapso{..}` có ô Đáp số và vào bảng đáp án như `\traloi{..}`.
+- Lỡ chép theo cả đề mục của tài liệu cũng không lỗi: `\muctn` thành PHẦN I, `\mucds` thành PHẦN II, `\muctln` thành PHẦN III,
+  `\muctl` thành phần tự luận; `\phan{PHẦN I. ...}` của ngân hàng cũng vậy. `\dang`, `\tieude`, `\loai`, `\chuong` không in gì.
+- Bảng đáp án lấy đáp án từ `\dung`, `\ydung`/`\ysai`, `\traloi` và `\dapso` (PHẦN III). Câu đúng sai viết bằng `bt` + `cacy`
+  (đáp án nằm trong lời giải) thì chưa vào bảng.
+
+### Đề THCS: `kiem_tra_thcs`
+
+Thông tin đề, ghi trước `\taodaude`:
+
+```latex
+\mon{TOÁN 9}  \so{...}  \truong{...}  \kythi{...}  \namhoc{2026 -- 2027}  \ngaythi{..}  \thoigian{90 phút}  \made{101}
 \taodaude
 ```
 
-Cấu trúc đề:
+Cấu trúc: các bài `baihn`, `\hetde`. Muốn thêm trắc nghiệm: `\phantn` (I), `\phantl` (II. Tự luận kiểu `bt`).
 
-| Mẫu | Các phần |
+| Lệnh | Tác dụng |
 |---|---|
-| `kiem_tra_thcs` | `\taodaude`, các bài `baihn`, `\hetde`. Muốn thêm trắc nghiệm: `\phantn` (I), `\phantl` (II. Tự luận kiểu `bt`) |
-| `kiem_tra_thpt` | `\phantn` (I), `\phands` (II), `\phantln` (III), `\phantl` (IV. Tự luận), `\hetde` |
-| `thptqg` | `\phantn` (I), `\phands` (II), `\phantln` (III), `\hetde` |
+| `\begin{baihn}{1,5}` | "Bài I. (1,5 điểm)", đánh số La Mã. Ý nhỏ viết trong `\begin{ychinh} \item ... \end{ychinh}` (1), 2), 3)) |
+| `\phantn[3,0]` | PHẦN TRẮC NGHIỆM, có thể kèm điểm cả phần |
+| `\namhoc{..}`, `\ngaythi{..}` | năm học, ngày thi in ở đầu đề (bỏ trống thì không in) |
 
-Lệnh riêng của đề:
+### Lệnh dùng chung cho đề có tự luận
 
 | Lệnh | Tác dụng |
 |---|---|
 | `\phantl` hoặc `\phantl[3,0]` | PHẦN TỰ LUẬN, có thể kèm điểm cả phần. Bài tự luận đánh số lại từ 1 |
-| `\namhoc{2026 -- 2027}`, `\ngaythi{..}` | (`kiem_tra_thcs`) năm học, ngày thi in ở đầu đề (bỏ trống thì không in) |
-| `\begin{baihn}{1,5}` | (`kiem_tra_thcs`) "Bài I. (1,5 điểm)", đánh số La Mã. Ý nhỏ viết trong `\begin{ychinh} \item ... \end{ychinh}` (1), 2), 3)) |
-| `\phantn[3,0]` | (chỉ `kiem_tra_thcs`) PHẦN TRẮC NGHIỆM, có thể kèm điểm cả phần |
 | `\diem{2,0}` | Đặt ngay sau `\begin{bt}`: in "Bài 1. **(2,0 điểm)** ..." |
-| `\mon{TOÁN 10}` | Tên môn in ở đầu đề |
-| `\dechinhthuc`, `\dethamkhao` | (`thptqg`) chọn ĐỀ THI CHÍNH THỨC hoặc ĐỀ THAM KHẢO |
-| `\namthi{2026}` | (`thptqg`) năm thi trong dòng KỲ THI TỐT NGHIỆP TRUNG HỌC PHỔ THÔNG NĂM ... |
 
 Ví dụ một bài tự luận:
 
@@ -169,12 +218,14 @@ Giải phương trình $x^2-5x+6=0$.
 
 Phần còn lại giữ nguyên: `\phantn`, `tn`, `\phantl`, `baihn`, `ychinh`, `\hetdehn` (hoặc `\hetde`), `\bangdapan`. Dòng `\loai{4}\dattentailieu{...}` bỏ được. Muốn đầu trang vẫn hiện tên tài liệu thì giữ `\dattentailieu{Kiểm tra giữa HK2}`. File chưa sửa vẫn dùng `toan9` như cũ, không hỏng.
 
-Ba mẫu đề in đen trắng, không có tên bộ tài liệu ở đầu trang, chân trang là "Trang x/y - Mã đề". Bảng đáp án chỉ in ở bản GV.
+Ba mẫu đề in đen trắng. `kiem_tra_thcs` có chân trang "Trang x/y - Mã đề"; `kiem_tra_thpt`, `thptqg` có chân trang như tài liệu. Bảng đáp án chỉ in ở bản GV.
 
 ## Xuất PDF trong TriTeX
 
 - Mặc định ra **bản GV** (có lời giải, đáp án).
-- Muốn **bản HS**: thêm `\def\BANHS{1}` vào dòng đầu tiên của file (trước `\documentclass`), xuất lại, rồi xoá dòng đó đi.
+- Muốn **bản HS**: bấm nút **Ẩn đáp án** (Ctrl+Shift+H) rồi Chạy thử hoặc Lưu ra PDF. Bấm lại là về bản GV. File `.tex` không phải sửa gì.
+- Bản HS tự bỏ: `\loigiai{..}`, `\dapso{..}`, gạch chân `\dung{..}`, chữ Đúng/Sai của `\ydung`/`\ysai`, số trong ô `\traloi{..}`, nhãn mức độ, `\bangdapan`. Ví dụ `vd` + `\giai{..}` vẫn in ở cả hai bản.
+- Ngoài TriTeX (tự chạy xelatex): thêm `\def\BANHS{1}` vào dòng đầu tiên của file, trước `\documentclass`.
 
 ## Ảnh
 

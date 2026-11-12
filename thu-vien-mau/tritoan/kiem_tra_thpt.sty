@@ -1,27 +1,119 @@
 % =====================================================================
-%  kiem_tra_thpt.sty — ĐỀ KIỂM TRA CẤP 3 (THPT), có tự luận. In đen trắng.
+%  kiem_tra_thpt.sty — ĐỀ KIỂM TRA CẤP 3 (THPT). In đen trắng.
+%  Giống toan_thpt (cùng lõi tritoan.sty, cùng các lệnh câu hỏi), chỉ khác phần đầu đề và kiểu trình bày,
+%  nên kéo một câu từ ngân hàng hay file bài tập sang đề là dùng được ngay, không phải sửa.
+%
 %  Dùng:  \usepackage{kiem_tra_thpt}   rồi   \mon{TOÁN 10}
-%  Cấu trúc: \taodaude, \phantn (I), \phands (II), \phantln (III), \phantl (IV tự luận), \hetde
-%  Thông tin đề: \so{..} \truong{..} \kythi{..} \thoigian{..} \made{..}
-%  Đầu đề, ba phần trắc nghiệm dùng lại của tritoan.sty. File này chỉ thêm phần tự luận và đổi sang đen trắng.
+%  Thông tin đề (ghi trước \taodaude, cái nào không ghi thì lấy mặc định):
+%    \so{..}        dòng trên ô trái (mặc định "GIỎI TOÁN CÙNG TRÍ TRÍ")
+%    \nguon{..}     nguồn của đề, dòng dưới ô trái (bỏ trống thì không in)
+%    \tende{..}     tên đề, dòng đầu bên phải (tên cũ \kythi vẫn dùng được)
+%    \namhoc{..}    năm học bên phải, dưới tên đề (mặc định tự tính theo ngày biên dịch, ví dụ 2026 - 2027)
+%    \thoigian{..}  mặc định 90 phút
+%    \made{..}      mã đề (bỏ trống thì không in)
+%  Cấu trúc: \taodaude, \phantn (I), \phands (II), \phantln (III), \phantl[3,0] (tự luận), \bangdapan
+%  Chân trang như tài liệu (Giỏi Toán cùng Trí Trí ... | Trang x). Trang cuối tự có "--- HẾT ---" (không cần gõ \hetde).
+%
+%  Câu hỏi: tn, ds, tln, bt, \pa, \loigiai, \dapso, cacy, \hinh... y như toan_thpt.
+%  Lệnh chỉ có nghĩa trong tài liệu thì không in gì: \dang, \tieude, \loai, \chuong.
+%  Đề mục kiểu tài liệu/ngân hàng tự đổi sang phần đề: \muctn, \phan{PHẦN I. ...trắc nghiệm...} -> \phantn;
+%  \mucds -> \phands; \muctln -> \phantln; \muctl, \phan{...TỰ LUẬN...} -> \phantl.
+%  Trong PHẦN I, II, III câu viết bằng bt in "Câu n" (đếm chung với tn, ds, tln); phần tự luận in "Bài n".
+%  Trong PHẦN III, \dapso{..} chạy như \traloi{..}: có ô Đáp số và vào bảng đáp án.
 % =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{kiem_tra_thpt}[2026/11/11 De kiem tra THPT]
+\ProvidesPackage{kiem_tra_thpt}[2026/11/12 De kiem tra THPT]
 \RequirePackage{tritoan}
 
-% In đen trắng (đề thật của trường): màu xanh/cam của tritoan đổi về đen và xám.
+% In đen trắng: màu xanh/cam của tritoan đổi về đen và xám.
 \definecolor{xanh}{HTML}{000000}
 \definecolor{xanhnhat}{HTML}{F2F2F2}
 \definecolor{cam}{HTML}{333333}
 \definecolor{camnhat}{HTML}{F2F2F2}
 \definecolor{xam}{HTML}{555555}
 
+% ---------- Đầu trang, chân trang ----------
+% Không có đầu trang; chân trang giữ như tài liệu.
+\fancyhead{}
+\renewcommand{\headrulewidth}{0pt}
+
+% ---------- Thông tin đề ----------
+\renewcommand{\tt@so}{Giỏi Toán cùng Trí Trí}
+\renewcommand{\tt@kythi}{Đề kiểm tra}
+\newcommand{\tende}[1]{\kythi{#1}}
+% Nguồn của đề (dòng dưới ô trái), ví dụ "THPT Phan Huy Chú - Đống Đa"; bỏ trống thì không in.
+\newcommand{\tt@nguon}{}
+\newcommand{\nguon}[1]{\renewcommand{\tt@nguon}{#1}}
+% Năm học mặc định: từ tháng 8 là năm nay - năm sau, trước tháng 8 là năm trước - năm nay.
+\newcommand{\tt@namhoc}{\ifnum\month<8 \the\numexpr\year-1\relax\ - \the\year
+  \else\the\year\ - \the\numexpr\year+1\relax\fi}
+\newcommand{\namhoc}[1]{\renewcommand{\tt@namhoc}{#1}}
+
+\renewcommand{\taodaude}{%
+  \noindent\begin{tabularx}{\linewidth}{@{}>{\centering\arraybackslash}p{0.48\linewidth}
+      >{\centering\arraybackslash}X@{}}
+    \bfseries\MakeUppercase{\tt@so} & \bfseries\MakeUppercase{\tt@kythi}\\
+    \if\relax\detokenize\expandafter{\tt@nguon}\relax\else\bfseries\tt@nguon\fi & \bfseries NĂM HỌC \tt@namhoc\\
+    \rule[3pt]{0.4\linewidth}{0.4pt} & \bfseries Môn: \tenmon\\
+    \itshape(Đề có \pageref*{LastPage} trang) & \itshape Thời gian làm bài: \tt@thoigian\\
+    & \itshape(không kể thời gian phát đề)\\
+  \end{tabularx}\par\medskip
+  \noindent Họ, tên học sinh: \makebox[6.3cm]{\dotfill}\quad Số báo danh: \makebox[2.6cm]{\dotfill}%
+  \if\relax\detokenize\expandafter{\tt@made}\relax\else
+    \hfill\fbox{\bfseries Mã đề \tt@made}\fi
+  \par\medskip}
+
+% ---------- HẾT: tự in ở cuối đề ----------
+\newif\iftt@dahet
+\renewcommand{\hetde}{\par\medskip\begin{center}\bfseries --- HẾT ---\end{center}\global\tt@dahettrue}
+% Móc env/document/end chạy ngay khi gặp \end{document}, trước khi lastpage ngắt trang (\AtEndDocument thì đã muộn).
+\AddToHook{env/document/end}{\iftt@dahet\else\hetde\fi}
+
 % ---------- Phần tự luận ----------
-% \phantl hoặc \phantl[3,0]  -> "PHẦN IV. TỰ LUẬN (3,0 điểm)" (số La Mã tự nối tiếp các phần trước)
-% Mỗi bài dùng môi trường bt của tritoan; bài đánh số lại từ 1 trong phần tự luận.
-% \diem{2,0} đặt ngay sau \begin{bt}  ->  "Bài 1. (2,0 điểm) ..."
+% \phantl hoặc \phantl[3,0]  -> "PHẦN IV. TỰ LUẬN (3,0 điểm)" (số La Mã nối tiếp các phần trước)
+% Mỗi bài dùng bt, đánh số lại từ 1. \diem{1,0} ngay sau \begin{bt}  ->  "Bài 1. (1,0 điểm) ..."
+\newif\iftt@tuluan
 \newcommand{\diem}[1]{\textbf{(#1 điểm)}\ }
-\NewDocumentCommand{\phantl}{o}{\tt@chotphan\stepcounter{phande}\setcounter{bt}{0}%
+\NewDocumentCommand{\phantl}{o}{\tt@chotphan\stepcounter{phande}\setcounter{bt}{0}\tt@tuluantrue
+  \let\dapso\tt@dapsocu
   \par\medskip\noindent{\bfseries PHẦN \Roman{phande}. TỰ LUẬN\IfValueT{#1}{ (#1 điểm)}.}\
   Thí sinh trình bày lời giải đầy đủ.\par\smallskip}
+
+% ---------- PHẦN I, II, III: ghi nhớ đang ở phần nào ----------
+\let\tt@dapsocu\dapso
+\let\tt@phantncu\phantn \let\tt@phandscu\phands \let\tt@phantlncu\phantln
+\renewcommand{\phantn}{\tt@tuluanfalse\let\dapso\tt@dapsocu\tt@phantncu}
+\renewcommand{\phands}{\tt@tuluanfalse\let\dapso\tt@dapsocu\tt@phandscu}
+\renewcommand{\phantln}{\tt@tuluanfalse\let\dapso\traloi\tt@phantlncu}
+
+% bt: trong PHẦN I, II, III in "Câu n" như tn/ds/tln; ngoài ra (tự luận, đề không chia phần) giữ "Bài n".
+% Giữ phần thân của bt cũ (lệnh \\bt nhận [#1]); \let thẳng \bt sẽ gọi lại chính bt mới, lặp vô hạn.
+\expandafter\let\expandafter\tt@btcu\csname\string\bt\endcsname
+\renewenvironment{bt}[1][]{\ifnum\value{phande}>0 \iftt@tuluan\tt@btcu[#1]\else\tt@daucau{#1}\fi
+  \else\tt@btcu[#1]\fi}{\par}
+
+% ---------- Lệnh của tài liệu: kéo sang đề không lỗi ----------
+\renewcommand{\dang}[1]{}
+\renewcommand{\tieude}[2]{}
+\renewcommand{\loai}[1]{}
+\renewcommand{\chuong}[1]{}
+\renewcommand{\muctn}{\phantn}
+\renewcommand{\mucds}{\phands}
+\renewcommand{\muctln}{\phantln}
+\renewcommand{\muctl}{\phantl}
+\ExplSyntaxOn
+\cs_set_protected:Npn \phan #1
+  {
+    \__tt_loai_dm:n {#1}
+    \str_case:VnF \l__tt_dm_tl
+      {
+        { tn }  { \phantn }
+        { ds }  { \phands }
+        { tln } { \phantln }
+        { tl }  { \phantl }
+      }
+      { \tt@phancu {#1} }
+  }
+\cs_set_eq:NN \muc \phan
+\ExplSyntaxOff
 \endinput
