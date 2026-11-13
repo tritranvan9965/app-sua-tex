@@ -198,18 +198,29 @@ def mo_duong(p: Path) -> dict:
 THU_MUC_PHU = re.compile(r"_?(sao-luu(-app)?|log|logs|tmp|temp|cache|build|__pycache__)", re.I)  # sao lưu, nhật ký, file tạm: không cần hiện
 
 
+def la_tep(p: Path) -> bool:
+    try:
+        return p.is_file()
+    except OSError:
+        return True
+
+
 def quet_thu_muc(thu_muc: Path, duoi=DUOI_SUA) -> dict:
     con = []
     try:
-        ds = sorted(thu_muc.iterdir(), key=lambda v: (v.is_file(), v.name.lower()))
-    except PermissionError:  # mở nhanh có thể gặp thư mục hệ thống không được đọc
+        ds = sorted(thu_muc.iterdir(), key=lambda v: (la_tep(v), v.name.lower()))
+    except OSError:  # mở nhanh có thể gặp thư mục hệ thống không được đọc
         ds = []
     for x in ds:
         if x.name.startswith((".", "~")) or x.name.endswith("_hinh"):  # thư mục ẩn, file tạm của Word; thư mục "_..." của người dùng vẫn hiện
             continue
-        if x.is_dir() and THU_MUC_PHU.fullmatch(x.name):
+        try:
+            la_tm = x.is_dir()
+        except OSError:  # file giữ chỗ OneDrive hỏng (WinError 4393): bỏ qua file đó, không làm hỏng cả cây
             continue
-        if x.is_dir():
+        if la_tm and THU_MUC_PHU.fullmatch(x.name):
+            continue
+        if la_tm:
             nut = quet_thu_muc(x, duoi)
             if nut["con"]:
                 con.append(nut)
